@@ -1,7 +1,9 @@
 <?xml version="1.0" encoding="UTF-8" standalone="no"?>
-<document type="com.apple.InterfaceBuilder3.CocoaTouch.Storyboard.XIB" version="3.0" toolsVersion="8150" systemVersion="15A204g" targetRuntime="iOS.CocoaTouch" propertyAccessControl="none" useAutolayout="YES" launchScreen="YES" useTraitCollections="YES" initialViewController="01J-lp-oVM">
+<document type="com.apple.InterfaceBuilder3.CocoaTouch.Storyboard.XIB" version="3.0" toolsVersion="10117" systemVersion="15F34" targetRuntime="iOS.CocoaTouch" propertyAccessControl="none" useAutolayout="YES" launchScreen="YES" useTraitCollections="YES" initialViewController="01J-lp-oVM">
     <dependencies>
-        <plugIn identifier="com.apple.InterfaceBuilder.IBCocoaTouchPlugin" version="8122"/>
+        <deployment identifier="iOS"/>
+        <plugIn identifier="com.apple.InterfaceBuilder.IBCocoaTouchPlugin" version="10085"/>
+        <capability name="Constraints to layout margins" minToolsVersion="6.0"/>
     </dependencies>
     <scenes>
         <!--View Controller-->
@@ -15,13 +17,121 @@
                     <view key="view" contentMode="scaleToFill" id="Ze5-6b-2t3">
                         <rect key="frame" x="0.0" y="0.0" width="600" height="600"/>
                         <autoresizingMask key="autoresizingMask" widthSizable="YES" heightSizable="YES"/>
-                        <animations/>
+                        <subviews>
+                            <imageView userInteractionEnabled="NO" contentMode="scaleToFill" horizontalHuggingPriority="251" verticalHuggingPriority="251" image="metal-bg" translatesAutoresizingMaskIntoConstraints="NO" id="agO-lU-9kU">
+                                <rect key="frame" x="0.0" y="0.0" width="600" height="600"/>
+                            </imageView>
+                            <imageView userInteractionEnabled="NO" contentMode="scaleAspectFit" horizontalHuggingPriority="251" verticalHuggingPriority="251" misplaced="YES" image="Infobomb_logo" translatesAutoresizingMaskIntoConstraints="NO" id="TVH-1o-rU3">
+                                <rect key="frame" x="161" y="122" width="277" height="58"/>
+                                <constraints>
+                                    <constraint firstAttribute="height" constant="58" id="AiX-TB-rke"/>
+                                    <constraint firstAttribute="height" constant="83" id="IZg-RO-JlN"/>
+                                    <constraint firstAttribute="width" constant="390" id="Sve-GO-Beq"/>
+                                    <constraint firstAttribute="width" constant="277" id="i0l-hW-06U"/>
+                                </constraints>
+                                <variation key="default">
+                                    <mask key="constraints">
+                                        <exclude reference="IZg-RO-JlN"/>
+                                        <exclude reference="Sve-GO-Beq"/>
+                                    </mask>
+                                </variation>
+                            </imageView>
+                            <imageView userInteractionEnabled="NO" contentMode="scaleAspectFill" horizontalHuggingPriority="251" verticalHuggingPriority="251" misplaced="YES" image="exploding-sun" translatesAutoresizingMaskIntoConstraints="NO" id="0ep-uN-wvT">
+                                <rect key="frame" x="177" y="235" width="245" height="246"/>
+                                <constraints>
+                                    <constraint firstAttribute="height" constant="314" id="2MA-hZ-6u0"/>
+                                    <constraint firstAttribute="height" constant="110" id="H1a-iS-8XI"/>
+                                    <constraint firstAttribute="width" constant="301" id="HiQ-VB-cHA"/>
+                                    <constraint firstAttribute="height" constant="293" id="K1O-WP-0vW"/>
+                                    <constraint firstAttribute="width" constant="247" id="ScS-Ru-kc6"/>
+                                    <constraint firstAttribute="height" constant="301" id="cWB-aP-9sO"/>
+                                    <constraint firstAttribute="height" constant="280" id="g6Z-CT-Mx0"/>
+                                    <constraint firstAttribute="height" constant="247" id="j08-So-J9l"/>
+                                    <constraint firstAttribute="width" constant="280" id="uv1-Uq-c5y"/>
+                                    <constraint firstAttribute="width" constant="601" id="vHB-uW-Tvr"/>
+                                    <constraint firstAttribute="height" constant="341" id="vJA-d7-Uo6"/>
+                                    <constraint firstAttribute="width" constant="138" id="wRC-qd-otG"/>
+                                </constraints>
+                                <variation key="default">
+                                    <mask key="constraints">
+                                        <exclude reference="2MA-hZ-6u0"/>
+                                        <exclude reference="H1a-iS-8XI"/>
+                                        <exclude reference="HiQ-VB-cHA"/>
+                                        <exclude reference="K1O-WP-0vW"/>
+                                        <exclude reference="cWB-aP-9sO"/>
+                                        <exclude reference="g6Z-CT-Mx0"/>
+                                        <exclude reference="uv1-Uq-c5y"/>
+                                        <exclude reference="vHB-uW-Tvr"/>
+                                        <exclude reference="vJA-d7-Uo6"/>
+                                        <exclude reference="wRC-qd-otG"/>
+                                    </mask>
+                                </variation>
+                            </imageView>
+                        </subviews>
                         <color key="backgroundColor" white="1" alpha="1" colorSpace="custom" customColorSpace="calibratedWhite"/>
+                        <constraints>
+                            <constraint firstItem="0ep-uN-wvT" firstAttribute="centerX" secondItem="Ze5-6b-2t3" secondAttribute="centerX" id="3LU-3J-2tz"/>
+                            <constraint firstItem="0ep-uN-wvT" firstAttribute="leading" secondItem="Ze5-6b-2t3" secondAttribute="leading" id="6il-kP-eJu"/>
+                            <constraint firstItem="xb3-aO-Qok" firstAttribute="top" secondItem="agO-lU-9kU" secondAttribute="bottom" id="6y4-yc-uTI"/>
+                            <constraint firstAttribute="trailing" secondItem="0ep-uN-wvT" secondAttribute="trailing" id="7im-gx-LlB"/>
+                            <constraint firstItem="xb3-aO-Qok" firstAttribute="top" secondItem="0ep-uN-wvT" secondAttribute="bottom" constant="70" id="9pD-0t-IN5"/>
+                            <constraint firstAttribute="trailing" secondItem="agO-lU-9kU" secondAttribute="trailing" id="9xi-Ls-cWR"/>
+                            <constraint firstItem="xb3-aO-Qok" firstAttribute="top" secondItem="0ep-uN-wvT" secondAttribute="bottom" constant="70" id="JLr-4X-gGU"/>
+                            <constraint firstItem="TVH-1o-rU3" firstAttribute="top" secondItem="Llm-lL-Icb" secondAttribute="bottom" constant="100" id="Oyg-fb-uhv"/>
+                            <constraint firstItem="0ep-uN-wvT" firstAttribute="centerX" secondItem="Ze5-6b-2t3" secondAttribute="centerX" id="PDT-NV-l8e"/>
+                            <constraint firstItem="0ep-uN-wvT" firstAttribute="centerX" secondItem="Ze5-6b-2t3" secondAttribute="centerX" id="PQf-7Y-iAn"/>
+                            <constraint firstAttribute="trailingMargin" secondItem="0ep-uN-wvT" secondAttribute="trailing" constant="158" id="QYa-95-LRS"/>
+                            <constraint firstItem="xb3-aO-Qok" firstAttribute="top" secondItem="0ep-uN-wvT" secondAttribute="bottom" constant="-10" id="Y7e-dJ-xPn"/>
+                            <constraint firstItem="0ep-uN-wvT" firstAttribute="top" secondItem="TVH-1o-rU3" secondAttribute="bottom" constant="49" id="bNR-VJ-9Zk"/>
+                            <constraint firstItem="xb3-aO-Qok" firstAttribute="top" secondItem="0ep-uN-wvT" secondAttribute="bottom" id="eGU-W7-WFg"/>
+                            <constraint firstItem="TVH-1o-rU3" firstAttribute="centerX" secondItem="Ze5-6b-2t3" secondAttribute="centerX" id="eTh-8n-BJ7"/>
+                            <constraint firstItem="0ep-uN-wvT" firstAttribute="centerX" secondItem="Ze5-6b-2t3" secondAttribute="centerX" id="k1e-UI-cva"/>
+                            <constraint firstItem="0ep-uN-wvT" firstAttribute="centerX" secondItem="Ze5-6b-2t3" secondAttribute="centerX" id="kSy-EM-Nhm"/>
+                            <constraint firstItem="0ep-uN-wvT" firstAttribute="leading" secondItem="Ze5-6b-2t3" secondAttribute="leadingMargin" id="mAa-po-plO"/>
+                            <constraint firstItem="0ep-uN-wvT" firstAttribute="leading" secondItem="Ze5-6b-2t3" secondAttribute="leadingMargin" constant="157" id="nv0-o3-Aze"/>
+                            <constraint firstItem="agO-lU-9kU" firstAttribute="leading" secondItem="Ze5-6b-2t3" secondAttribute="leading" id="oRK-jb-2XN"/>
+                            <constraint firstItem="agO-lU-9kU" firstAttribute="top" secondItem="Ze5-6b-2t3" secondAttribute="top" id="oZx-We-Uwh"/>
+                            <constraint firstItem="0ep-uN-wvT" firstAttribute="top" secondItem="TVH-1o-rU3" secondAttribute="bottom" constant="45" id="phb-H7-4Ns"/>
+                            <constraint firstItem="xb3-aO-Qok" firstAttribute="top" secondItem="0ep-uN-wvT" secondAttribute="bottom" constant="119" id="qEe-ck-cag"/>
+                            <constraint firstItem="0ep-uN-wvT" firstAttribute="top" secondItem="TVH-1o-rU3" secondAttribute="bottom" constant="55" id="sSd-OW-Pxm"/>
+                            <constraint firstAttribute="trailingMargin" secondItem="0ep-uN-wvT" secondAttribute="trailing" id="uit-K1-kao"/>
+                            <constraint firstAttribute="trailing" secondItem="0ep-uN-wvT" secondAttribute="trailing" id="uuI-qb-NbA"/>
+                            <constraint firstItem="0ep-uN-wvT" firstAttribute="leading" secondItem="Ze5-6b-2t3" secondAttribute="leading" id="vuj-Wd-kjv"/>
+                            <constraint firstItem="xb3-aO-Qok" firstAttribute="top" secondItem="0ep-uN-wvT" secondAttribute="bottom" id="ybH-u6-MSe"/>
+                        </constraints>
+                        <variation key="default">
+                            <mask key="constraints">
+                                <exclude reference="3LU-3J-2tz"/>
+                                <exclude reference="6il-kP-eJu"/>
+                                <exclude reference="7im-gx-LlB"/>
+                                <exclude reference="PDT-NV-l8e"/>
+                                <exclude reference="QYa-95-LRS"/>
+                                <exclude reference="bNR-VJ-9Zk"/>
+                                <exclude reference="k1e-UI-cva"/>
+                                <exclude reference="kSy-EM-Nhm"/>
+                                <exclude reference="mAa-po-plO"/>
+                                <exclude reference="nv0-o3-Aze"/>
+                                <exclude reference="phb-H7-4Ns"/>
+                                <exclude reference="uit-K1-kao"/>
+                                <exclude reference="uuI-qb-NbA"/>
+                                <exclude reference="vuj-Wd-kjv"/>
+                                <exclude reference="9pD-0t-IN5"/>
+                                <exclude reference="JLr-4X-gGU"/>
+                                <exclude reference="Y7e-dJ-xPn"/>
+                                <exclude reference="eGU-W7-WFg"/>
+                                <exclude reference="ybH-u6-MSe"/>
+                            </mask>
+                        </variation>
                     </view>
                 </viewController>
                 <placeholder placeholderIdentifier="IBFirstResponder" id="iYj-Kq-Ea1" userLabel="First Responder" sceneMemberID="firstResponder"/>
             </objects>
-            <point key="canvasLocation" x="53" y="375"/>
+            <point key="canvasLocation" x="-490" y="297"/>
         </scene>
     </scenes>
+    <resources>
+        <image name="Infobomb_logo" width="1350" height="275"/>
+        <image name="exploding-sun" width="388" height="379"/>
+        <image name="metal-bg" width="500" height="500"/>
+    </resources>
 </document>
