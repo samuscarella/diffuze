@@ -6,4 +6,5 @@ target ‘infobomb’ do
  pod 'Firebase/Auth'
  pod 'Firebase/Storage'
  pod ‘Alamofire’, '~> 3.4’
+ pod "Pulsator"
 end

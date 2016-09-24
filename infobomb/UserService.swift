@@ -24,6 +24,7 @@ class UserService {
     var REF_USERS: FIRDatabaseReference {
         return _REF_USERS
     }
+   
     
     var REF_USER_CURRENT: FIRDatabaseReference {
         let uid = NSUserDefaults.standardUserDefaults().valueForKey(KEY_UID) as! String

@@ -161,17 +161,15 @@ class CategoryVC: UIViewController, UITableViewDataSource, UITableViewDelegate, 
 //                let distance = two.distanceFromLocation(one)
 //                print(finalDistance)
                 let userID = UserService.ds.currentUserID
-
+                let username = UserService.ds.currentUserUsername
                 
-                if message != nil {
+                if let msg = message where msg != "" {
                     
                     let firebasePost = PostService.ds.REF_POSTS.childByAutoId()
                     let key = firebasePost.key
                     let activeFirebasePost = PostService.ds.REF_ACTIVE_POSTS.child(key)
-//                    let activePostCategoryRef = PostService.ds.REF_ACTIVE_POSTS.child(key).child("categories")
-//
+
                     var selectedCategories: [[String:AnyObject]] = []
-                    
                     for(_, value) in checked.enumerate() {
                         for (_, val) in value {
                             let selectedCategory = [
@@ -180,13 +178,15 @@ class CategoryVC: UIViewController, UITableViewDataSource, UITableViewDelegate, 
                             selectedCategories.append(selectedCategory)
                         }
                     }
+//                    let msg = message!
 
                         post = [
                             "user_id": userID,
+                            "username": username,
                             "post_ref": key,
                             "categories": selectedCategories,
                             "type": "text",
-                            "message": message!,
+                            "message": msg,
                             "active": true,
                             "likes": 0,
                             "dislikes": 0,
@@ -204,7 +204,7 @@ class CategoryVC: UIViewController, UITableViewDataSource, UITableViewDelegate, 
                 
                     let userPostsRef = UserService.ds.REF_USER_CURRENT.child("posts")
                     let userPost = [
-                        key:true
+                        key: true
                     ]
                     userPostsRef.updateChildValues(userPost)
                 
@@ -221,6 +221,7 @@ class CategoryVC: UIViewController, UITableViewDataSource, UITableViewDelegate, 
                     }
                     playExplosion()
                 }
+                //End of if message != nil
             }
         } else {
             print("Please pick at least one category!")
@@ -231,6 +232,7 @@ class CategoryVC: UIViewController, UITableViewDataSource, UITableViewDelegate, 
     @IBAction func backBtnPressed(sender: AnyObject) {
         
         if previousVC == "TextPostVC" {
+            
             self.performSegueWithIdentifier("unwindToTextPost", sender: self)
         }
         

@@ -10,6 +10,7 @@
 		86D3BC5D18AC710A3DB3834D /* Pods_infobomb.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = F6F8457C302CBD008B41FF0C /* Pods_infobomb.framework */; };
 		931479D01D88D34600F5E366 /* PostService.swift in Sources */ = {isa = PBXBuildFile; fileRef = 931479CF1D88D34600F5E366 /* PostService.swift */; };
 		9315C06E1D8376130051BFCD /* FirebaseStorage.swift in Sources */ = {isa = PBXBuildFile; fileRef = 9315C06D1D8376130051BFCD /* FirebaseStorage.swift */; };
+		931EC27C1D8E05A40072BAF1 /* Pulse.swift in Sources */ = {isa = PBXBuildFile; fileRef = 931EC27B1D8E05A40072BAF1 /* Pulse.swift */; };
 		933C2C201D803C4100DB89AE /* TopNav.swift in Sources */ = {isa = PBXBuildFile; fileRef = 933C2C1F1D803C4100DB89AE /* TopNav.swift */; };
 		933C2C221D8087F400DB89AE /* SubscriptionCell.swift in Sources */ = {isa = PBXBuildFile; fileRef = 933C2C211D8087F400DB89AE /* SubscriptionCell.swift */; };
 		9340CA751D7DB10800AE1231 /* AppDelegate.swift in Sources */ = {isa = PBXBuildFile; fileRef = 9340CA741D7DB10800AE1231 /* AppDelegate.swift */; };
@@ -45,6 +46,10 @@
 		93AA25F61D859561002344D3 /* intro.mp3 in Resources */ = {isa = PBXBuildFile; fileRef = 93AA25F41D859561002344D3 /* intro.mp3 */; };
 		93AA25F81D85ACF4002344D3 /* TextPostVC.swift in Sources */ = {isa = PBXBuildFile; fileRef = 93AA25F71D85ACF4002344D3 /* TextPostVC.swift */; };
 		93B8E7B31D7EE055005ACC48 /* SWRevealViewController.m in Sources */ = {isa = PBXBuildFile; fileRef = 93B8E7B21D7EE055005ACC48 /* SWRevealViewController.m */; };
+		93C164591D8E447A004B0432 /* Post.swift in Sources */ = {isa = PBXBuildFile; fileRef = 93C164581D8E447A004B0432 /* Post.swift */; };
+		93C1645B1D8EBD24004B0432 /* PostCell.swift in Sources */ = {isa = PBXBuildFile; fileRef = 93C1645A1D8EBD24004B0432 /* PostCell.swift */; };
+		93C1645D1D8F299A004B0432 /* PostTextView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 93C1645C1D8F299A004B0432 /* PostTextView.swift */; };
+		93C1645F1D8F3A4B004B0432 /* MaterialUIView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 93C1645E1D8F3A4B004B0432 /* MaterialUIView.swift */; };
 		93C893021D80F0D4008B792D /* Category.swift in Sources */ = {isa = PBXBuildFile; fileRef = 93C893011D80F0D4008B792D /* Category.swift */; };
 		93C893041D81811E008B792D /* CategoryService.swift in Sources */ = {isa = PBXBuildFile; fileRef = 93C893031D81811E008B792D /* CategoryService.swift */; };
 		93C893101D823800008B792D /* Sdk in Resources */ = {isa = PBXBuildFile; fileRef = 93C8930F1D823800008B792D /* Sdk */; };
@@ -58,6 +63,7 @@
 /* Begin PBXFileReference section */
 		931479CF1D88D34600F5E366 /* PostService.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = PostService.swift; sourceTree = "<group>"; };
 		9315C06D1D8376130051BFCD /* FirebaseStorage.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = FirebaseStorage.swift; sourceTree = "<group>"; };
+		931EC27B1D8E05A40072BAF1 /* Pulse.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = Pulse.swift; sourceTree = "<group>"; };
 		933C2C1F1D803C4100DB89AE /* TopNav.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = TopNav.swift; sourceTree = "<group>"; };
 		933C2C211D8087F400DB89AE /* SubscriptionCell.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = SubscriptionCell.swift; sourceTree = "<group>"; };
 		9340CA711D7DB10800AE1231 /* infobomb.app */ = {isa = PBXFileReference; explicitFileType = wrapper.application; includeInIndex = 0; path = infobomb.app; sourceTree = BUILT_PRODUCTS_DIR; };
@@ -97,6 +103,10 @@
 		93B8E7B01D7ED935005ACC48 /* infobomb-Bridging-Header.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = "infobomb-Bridging-Header.h"; sourceTree = "<group>"; };
 		93B8E7B11D7EE055005ACC48 /* SWRevealViewController.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = SWRevealViewController.h; sourceTree = "<group>"; };
 		93B8E7B21D7EE055005ACC48 /* SWRevealViewController.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = SWRevealViewController.m; sourceTree = "<group>"; };
+		93C164581D8E447A004B0432 /* Post.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = Post.swift; sourceTree = "<group>"; };
+		93C1645A1D8EBD24004B0432 /* PostCell.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = PostCell.swift; sourceTree = "<group>"; };
+		93C1645C1D8F299A004B0432 /* PostTextView.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = PostTextView.swift; sourceTree = "<group>"; };
+		93C1645E1D8F3A4B004B0432 /* MaterialUIView.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = MaterialUIView.swift; sourceTree = "<group>"; };
 		93C893011D80F0D4008B792D /* Category.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = Category.swift; sourceTree = "<group>"; };
 		93C893031D81811E008B792D /* CategoryService.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = CategoryService.swift; sourceTree = "<group>"; };
 		93C8930F1D823800008B792D /* Sdk */ = {isa = PBXFileReference; lastKnownFileType = folder; path = Sdk; sourceTree = "<group>"; };
@@ -179,6 +189,7 @@
 				9340CA801D7DB10800AE1231 /* Info.plist */,
 				9340CA9C1D7E2BC200AE1231 /* GoogleService-Info.plist */,
 				93B8E7B01D7ED935005ACC48 /* infobomb-Bridging-Header.h */,
+				931EC27B1D8E05A40072BAF1 /* Pulse.swift */,
 			);
 			path = infobomb;
 			sourceTree = "<group>";
@@ -212,6 +223,9 @@
 				937E3AE41D85BBD400BB7C01 /* MaterialTextView.swift */,
 				937E3AEE1D8615A600BB7C01 /* CategoryCell.swift */,
 				933C2C211D8087F400DB89AE /* SubscriptionCell.swift */,
+				93C1645A1D8EBD24004B0432 /* PostCell.swift */,
+				93C1645C1D8F299A004B0432 /* PostTextView.swift */,
+				93C1645E1D8F3A4B004B0432 /* MaterialUIView.swift */,
 			);
 			name = View;
 			sourceTree = "<group>";
@@ -221,6 +235,7 @@
 			children = (
 				93C893011D80F0D4008B792D /* Category.swift */,
 				93AA25EB1D846509002344D3 /* User.swift */,
+				93C164581D8E447A004B0432 /* Post.swift */,
 			);
 			name = Model;
 			sourceTree = "<group>";
@@ -305,6 +320,7 @@
 				TargetAttributes = {
 					9340CA701D7DB10800AE1231 = {
 						CreatedOnToolsVersion = 7.3.1;
+						DevelopmentTeam = 34PXKGACJV;
 					};
 				};
 			};
@@ -412,16 +428,21 @@
 				939BEEEF1D7E484200F1C954 /* ActivityVC.swift in Sources */,
 				9340CA931D7DDFC800AE1231 /* TransparentPasswordField.swift in Sources */,
 				93AA25EE1D84C4BF002344D3 /* NewPostVC.swift in Sources */,
+				931EC27C1D8E05A40072BAF1 /* Pulse.swift in Sources */,
 				9340CA9F1D7E2E4700AE1231 /* UserService.swift in Sources */,
 				93C893021D80F0D4008B792D /* Category.swift in Sources */,
 				933C2C221D8087F400DB89AE /* SubscriptionCell.swift in Sources */,
 				9340CA751D7DB10800AE1231 /* AppDelegate.swift in Sources */,
 				93EFD5791D7FAD2000455DF0 /* PremiumVC.swift in Sources */,
+				93C1645B1D8EBD24004B0432 /* PostCell.swift in Sources */,
 				93AA25EA1D844CB1002344D3 /* TransparentEmailField.swift in Sources */,
 				9340CA951D7DE0D500AE1231 /* MaterialButton.swift in Sources */,
+				93C1645D1D8F299A004B0432 /* PostTextView.swift in Sources */,
 				93AA25F81D85ACF4002344D3 /* TextPostVC.swift in Sources */,
 				93EFD5771D7F9EDE00455DF0 /* SubscriptionsVC.swift in Sources */,
 				935C20F91D7F36C200C41A47 /* LeftNavVC.swift in Sources */,
+				93C164591D8E447A004B0432 /* Post.swift in Sources */,
+				93C1645F1D8F3A4B004B0432 /* MaterialUIView.swift in Sources */,
 				93C893041D81811E008B792D /* CategoryService.swift in Sources */,
 				937E3AEB1D85F64B00BB7C01 /* CategoryVC.swift in Sources */,
 				9340CA971D7DE10400AE1231 /* Constants.swift in Sources */,
@@ -547,10 +568,13 @@
 			baseConfigurationReference = FFD2AE8019A0A7458BEC0084 /* Pods-infobomb.debug.xcconfig */;
 			buildSettings = {
 				ASSETCATALOG_COMPILER_APPICON_NAME = AppIcon;
+				CODE_SIGN_IDENTITY = "iPhone Developer";
+				"CODE_SIGN_IDENTITY[sdk=iphoneos*]" = "iPhone Developer";
 				INFOPLIST_FILE = infobomb/Info.plist;
 				LD_RUNPATH_SEARCH_PATHS = "$(inherited) @executable_path/Frameworks";
 				PRODUCT_BUNDLE_IDENTIFIER = com.samuscarella.infobomb;
 				PRODUCT_NAME = "$(TARGET_NAME)";
+				PROVISIONING_PROFILE = "";
 				SWIFT_OBJC_BRIDGING_HEADER = "infobomb/infobomb-Bridging-Header.h";
 			};
 			name = Debug;
@@ -560,10 +584,13 @@
 			baseConfigurationReference = C0FF00DE2CB60F82ECBCC1CC /* Pods-infobomb.release.xcconfig */;
 			buildSettings = {
 				ASSETCATALOG_COMPILER_APPICON_NAME = AppIcon;
+				CODE_SIGN_IDENTITY = "iPhone Developer";
+				"CODE_SIGN_IDENTITY[sdk=iphoneos*]" = "iPhone Developer";
 				INFOPLIST_FILE = infobomb/Info.plist;
 				LD_RUNPATH_SEARCH_PATHS = "$(inherited) @executable_path/Frameworks";
 				PRODUCT_BUNDLE_IDENTIFIER = com.samuscarella.infobomb;
 				PRODUCT_NAME = "$(TARGET_NAME)";
+				PROVISIONING_PROFILE = "";
 				SWIFT_OBJC_BRIDGING_HEADER = "infobomb/infobomb-Bridging-Header.h";
 			};
 			name = Release;

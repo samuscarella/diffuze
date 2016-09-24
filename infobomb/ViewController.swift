@@ -14,9 +14,9 @@ class ViewController: UIViewController {
     
     
     
-    @IBOutlet weak var emailField: TransparentEmailField!
-    @IBOutlet weak var usernameField: TransparentUsernameField!
-    @IBOutlet weak var passwordField: TransparentPasswordField!
+    @IBOutlet weak var emailField: TransparentEmailField?
+    @IBOutlet weak var usernameField: TransparentUsernameField?
+    @IBOutlet weak var passwordField: TransparentPasswordField?
     
     var introMusic: AVAudioPlayer!
     
@@ -24,22 +24,30 @@ class ViewController: UIViewController {
     override func viewDidLoad() {
         super.viewDidLoad()
         
+    print("Sign In View Did Load...")
 
     }
     
     override func viewDidAppear(animated: Bool) {
         super.viewDidAppear(animated)
         
-        if NSUserDefaults.standardUserDefaults().valueForKey(KEY_UID) != nil && NSUserDefaults.standardUserDefaults().valueForKey(KEY_USERNAME) != nil {
-            playIntroSound()
+        print("Sign In View Did Appear...")
+        if let user = FIRAuth.auth()?.currentUser {
+            print("User is signed in: \(user)")
+            NSUserDefaults.standardUserDefaults().setValue(user.uid, forKey: KEY_UID)
+            NSUserDefaults.standardUserDefaults().setValue(user.displayName, forKey: KEY_USERNAME)
+            self.playIntroSound()
             self.performSegueWithIdentifier(SEGUE_LOGGED_IN, sender: nil)
+        } else {
+            print("User is not signed in.")
         }
+
     }
     
     
     @IBAction func loginUserBtnPressed(sender: AnyObject) {
         
-        if let email = emailField.text where email != "", let username = usernameField.text where username != "", let pwd = passwordField.text where pwd != "" {
+        if let email = emailField!.text where email != "", let username = usernameField!.text where username != "", let pwd = passwordField!.text where pwd != "" {
             
             FIRAuth.auth()?.signInWithEmail(email, password: pwd) { (user, error) in
                 
@@ -59,25 +67,21 @@ class ViewController: UIViewController {
                                 self.showErrorAlert("Could not create account", msg: "Problem creating account. Try something else")
                             } else {
                                 
-                                NSUserDefaults.standardUserDefaults().setValue(user!.uid, forKey: KEY_UID)
-                                NSUserDefaults.standardUserDefaults().setValue(username, forKey: KEY_USERNAME)
-                                
                                 FIRAuth.auth()?.signInWithEmail(email, password: pwd) { (user, error) in
-                                    
-                                    
+                                    print("\(error)...here")
+                                    NSUserDefaults.standardUserDefaults().setValue(user!.uid, forKey: KEY_UID)
+                                    NSUserDefaults.standardUserDefaults().setValue(username, forKey: KEY_USERNAME)
+
                                     let userData = [
                                         "email": email,
                                         "username": username,
                                         "provider": FIREBASE,
                                         "user_ref": user!.uid
                                     ]
-                                    print("B4FIR")
                                     UserService.ds.createFirebaseUser(user!.uid, user: userData)
-                                    
+                                    self.playIntroSound()
+                                    self.performSegueWithIdentifier(SEGUE_LOGGED_IN, sender: nil)
                                 }
-                                
-                                self.playIntroSound()
-                                self.performSegueWithIdentifier(SEGUE_LOGGED_IN, sender: nil)
                             }
                         }
                     } else if error!.code == PASSWORD_NOT_FOUND {
@@ -85,15 +89,10 @@ class ViewController: UIViewController {
                     }
                 } else {
                     
-                    if NSUserDefaults.standardUserDefaults().valueForKey(KEY_UID) != nil && NSUserDefaults.standardUserDefaults().valueForKey(KEY_USERNAME) != nil {
-                        self.playIntroSound()
-                        self.performSegueWithIdentifier(SEGUE_LOGGED_IN, sender: nil)
-                    } else {
-                        NSUserDefaults.standardUserDefaults().setValue(user!.uid, forKey: KEY_UID)
-                        NSUserDefaults.standardUserDefaults().setValue(username, forKey: KEY_USERNAME)
-                        self.playIntroSound()
-                        self.performSegueWithIdentifier(SEGUE_LOGGED_IN, sender: nil)
-                    }
+                    NSUserDefaults.standardUserDefaults().setValue(user!.uid, forKey: KEY_UID)
+                    NSUserDefaults.standardUserDefaults().setValue(username, forKey: KEY_USERNAME)
+                    self.playIntroSound()
+                    self.performSegueWithIdentifier(SEGUE_LOGGED_IN, sender: nil)
                 }
             }
         

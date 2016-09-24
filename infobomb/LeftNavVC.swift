@@ -7,6 +7,8 @@
 //
 
 import UIKit
+import Firebase
+import CoreLocation
 
 class LeftNavVC: UITableViewController {
     
@@ -15,6 +17,8 @@ class LeftNavVC: UITableViewController {
     
     @IBOutlet var navButtons: [UIButton]!
     @IBOutlet weak var activityBtn: UIButton!
+    
+    var locationManager: CLLocationManager!
     
     override func viewDidLoad() {
         super.viewDidLoad()
@@ -56,6 +60,17 @@ class LeftNavVC: UITableViewController {
             sender.setTitleColor(CRIMSON, forState: .Normal)
         } else if(sender.tag == 12) {
             sender.setTitleColor(CRIMSON, forState: .Normal)
+            
+                do {
+                    try FIRAuth.auth()!.signOut()
+                    NSNotificationCenter.defaultCenter().postNotificationName("userSignedOut", object: nil)
+                    NSUserDefaults.standardUserDefaults().removeObjectForKey(KEY_UID)
+                    NSUserDefaults.standardUserDefaults().removeObjectForKey(KEY_USERNAME)
+                    self.navigationController?.popToRootViewControllerAnimated(true)
+                } catch let err as NSError {
+                    print(err)
+                }            
+
         }
         
     }

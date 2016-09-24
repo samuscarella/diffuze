@@ -16,6 +16,7 @@ class PostService {
     private var _REF_BASE = URL_BASE
     private var _REF_POSTS = URL_BASE.child("posts")
     private var _REF_ACTIVE_POSTS = URL_BASE.child("active-posts")
+    private var _REF_ACTIVITY_FEED = URL_BASE.child("user-activity-feed")
     
     var REF_BASE: FIRDatabaseReference {
         return _REF_BASE
@@ -27,6 +28,10 @@ class PostService {
     
     var REF_ACTIVE_POSTS: FIRDatabaseReference {
         return _REF_ACTIVE_POSTS
+    }
+    
+    var REF_ACTIVITY_FEED: FIRDatabaseReference {
+        return _REF_ACTIVITY_FEED
     }
     
 }

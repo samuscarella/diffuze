@@ -14,9 +14,21 @@ var database = secondaryApp.database()
 var activePostsRef = firebase.database().ref("active-posts");
 var usersRef = firebase.database().ref("users");
 
+function isThereAnyActivePosts(callback) {
+  var activePostsRef = firebase.database().ref().child("active-posts")
+  activePostsRef.once('value').then(function(snapshot) {
+    var post = snapshot.val()
+    if(post) {
+      callback(true)
+    } else {
+      callback(false)
+    }
+  })
+}
+
 function getAllUsers(callback) {
 
-  var usersArray = []
+    var usersArray = []
     usersRef.once('value', function(snapshot) {
         // later implement a wait for the post added below until all users are in the array
         var users = snapshot
@@ -27,7 +39,7 @@ function getAllUsers(callback) {
           var userLongitude = user.val().longitude
           var userSubscriptions = user.val().subscriptions
           usersArray.push({
-            "user_id": user_id,
+            "user_ref": user_id,
             "latitude": userLatitude,
             "longitude": userLongitude,
             "subscriptions": userSubscriptions
@@ -41,17 +53,21 @@ var newItems = false
 activePostsRef.on('child_added', function(snapshot) {
     if(!newItems) return;
     var post = snapshot.val()
-    console.log("WTF")
+
     getAllUsers(function(users) {
-      console.log("Got all users! There are " + users.length + " users.")
+      console.log("Got all users! There are " + users.length + " users.\n")
+
+      //Get number of users subscribed to post categoriesOfPost
+      //Use above number as check if its under 500
 
       var counter = 0
-      addPostToUsersWithinDistance(users, post, function checkUsers(usersThatGotPost) {
-          console.log(usersThatGotPost)
+      var usersThatGotPost = 0
+      addPostToUsersWithinDistance(users, post, function checkUsers(usersTGPost) {
+          counter++
+          usersThatGotPost += usersTGPost
           if(counter < 4) {
-            post["distance"] += 50
-            console.log(post["distance"])
-            counter++
+            post["distance"] += 100
+            console.log("Distance: " + post["distance"])
             addPostToUsersWithinDistance(users, post, checkUsers)
           }
       })
@@ -64,17 +80,14 @@ activePostsRef.once("child_added", function(messages) {
 })
 
 function addPostToUsersWithinDistance(users, post, callback) {
+      console.log("Adding Post To Users In Range...")
 
-      console.log("eekie bookie doo")
       var postCategoriesArray = post["categories"]
-      // var postLikes = post.val().likes
-      // var postDislikes = post.val().dislikes
       var postDistance = post["distance"]
       var postLatitude = post["latitude"]
       var postLongitude = post["longitude"]
       var createdAt = post["created_at"]
       var currentTime = new Date().getTime()
-      // var userInteraction = postLikes + postDislikes
       var usersInRadius = 0
       var usersThatGotPost = 0
       var categoriesOfPost = []
@@ -98,60 +111,36 @@ function addPostToUsersWithinDistance(users, post, callback) {
           usersInRadius++
 
           doesUserAlreadyHavePost(user, post, function(boolean) {
-            console.log(boolean + "user has the post")
 
-            var userSubscriptions = Object.keys(user["subscriptions"])
-            var isUserSubscribed = false
+            if(!boolean) {
+                console.log("User does not have post in activity feed")
+                var userSubscriptions = Object.keys(user["subscriptions"])
+                var isUserSubscribed = false
 
-            for(var i = 0;i < userSubscriptions.length; i++) {
-              for(var j = 0;j < categoriesOfPost.length; j++) {
-                if(userSubscriptions[i] == categoriesOfPost[j]) {
-                  isUserSubscribed = true
+                for(var i = 0;i < userSubscriptions.length; i++) {
+                  for(var j = 0;j < categoriesOfPost.length; j++) {
+                    if(userSubscriptions[i] == categoriesOfPost[j]){
+                      isUserSubscribed = true
+                    }
+                  }
                 }
-              }
-            }
-            // var userActivityRef = usersRef.child(user["user_id"]).child("activity")
-            // console.log(isUserSubscribed)
-            if(isUserSubscribed) {
-              var key = firebase.database().ref().child("user-activity-feed").child(user["user_id"]).push().key
-              console.log(key)
-              var updates = {}
-              updates["/user-activity-feed/" + user["user_id"] + "/" + key] = post
-              firebase.database().ref().update(updates)
-              usersThatGotPost++
-            }
-            callback(usersThatGotPost)
+
+                if(isUserSubscribed) {
+                  var updates = {}
+                  updates["/user-activity-feed/" + user["user_ref"] + "/" + post["post_ref"]] = post
+                  firebase.database().ref().update(updates)
+                  usersThatGotPost++
+                }
+             } else {
+               console.log("User already has post in activity-feed")
+             }
           })
-          // if(doesUserAlreadyHavePost) {
-          //   return
-          // }
-          // var userSubscriptions = Object.keys(user["subscriptions"])
-          // var isUserSubscribed = false
-          //
-          // for(var i = 0;i < userSubscriptions.length; i++) {
-          //   for(var j = 0;j < categoriesOfPost.length; j++) {
-          //     if(userSubscriptions[i] == categoriesOfPost[j]) {
-          //       isUserSubscribed = true
-          //     }
-          //   }
-          // }
-          // // var userActivityRef = usersRef.child(user["user_id"]).child("activity")
-          // // console.log(isUserSubscribed)
-          // if(isUserSubscribed) {
-          //   var key = firebase.database().ref().child("user-activity-feed").child(user["user_id"]).push().key
-          //   console.log(key)
-          //   var updates = {}
-          //   updates["/user-activity-feed/" + user["user_id"] + "/" + key] = post
-          //   firebase.database().ref().update(updates)
-          //   usersThatGotPost++
-          // }
-          // callback(usersThatGotPost)
-      })
-        console.log
+        })
+        callback(usersThatGotPost)
 }
 
 function doesUserAlreadyHavePost(user, post, callback) {
-  var doesUserAlreadyHavePost = firebase.database().ref().child("user-activity-feed").child(user["user_id"]).child(post["post_ref"])
+  var doesUserAlreadyHavePost = firebase.database().ref().child("user-activity-feed").child(user["user_ref"]).child(post["post_ref"])
   doesUserAlreadyHavePost.once('value').then(function(snapshot) {
     var post = snapshot.val()
     if(post) {

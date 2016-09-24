@@ -19,9 +19,6 @@ class NewPostVC: UIViewController, CLLocationManagerDelegate {
     @IBOutlet weak var audioView: MaterialView!
     @IBOutlet weak var premiumView: MaterialView!
     
-    var locationManager: CLLocationManager!
-    var currentLocation: CLLocation!
-
     
     override func viewDidLoad() {
         super.viewDidLoad()
@@ -46,12 +43,6 @@ class NewPostVC: UIViewController, CLLocationManagerDelegate {
         audioView.separatorColor = UIColor.clearColor()
         premiumView.separatorColor = UIColor.clearColor()
         
-        locationManager = CLLocationManager()
-        locationManager.delegate = self
-        locationManager.desiredAccuracy = kCLLocationAccuracyBest
-        locationManager.requestWhenInUseAuthorization()
-        locationManager.distanceFilter = kCLDistanceFilterNone
-        locationManager.startUpdatingLocation()
 
         //Burger side menu
         if revealViewController() != nil {
@@ -63,38 +54,6 @@ class NewPostVC: UIViewController, CLLocationManagerDelegate {
     
     @IBAction func unwindToNewPost(segue: UIStoryboardSegue) {
         
-    }
-    
-    
-    func locationManager(manager: CLLocationManager, didChangeAuthorizationStatus status: CLAuthorizationStatus) {
-        switch status {
-        case .NotDetermined:
-            locationManager.requestAlwaysAuthorization()
-            print("Access NotDetermined")
-            break
-        case .AuthorizedWhenInUse:
-            locationManager.startUpdatingLocation()
-            print("Access WhenInUse")
-            break
-        case .AuthorizedAlways:
-            locationManager.startUpdatingLocation()
-            break
-        case .Restricted:
-            // restricted by e.g. parental controls. User can't enable Location Services
-            print("Access Restricted")
-            break
-        case .Denied:
-            // user denied your app access to Location Services, but can grant access from Settings.app
-            locationManager.requestWhenInUseAuthorization()
-            print("Access Denied")
-            break
-        }
-    }
-    
-    func locationManager(manager: CLLocationManager, didUpdateLocations locations: [CLLocation]) {
-        
-        currentLocation = locations.last! as CLLocation
-        print("NewPostVC: \(currentLocation.coordinate.latitude)...NewPostVC: \(currentLocation.coordinate.longitude)")
     }
     
     @IBAction func cancelNewPostBtn(sender: AnyObject) {
