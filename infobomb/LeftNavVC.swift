@@ -63,7 +63,7 @@ class LeftNavVC: UITableViewController {
             
                 do {
                     try FIRAuth.auth()!.signOut()
-                    NSNotificationCenter.defaultCenter().postNotificationName("userSignedOut", object: nil)
+//                    NSNotificationCenter.defaultCenter().postNotificationName("userSignedOut", object: nil)
                     NSUserDefaults.standardUserDefaults().removeObjectForKey(KEY_UID)
                     NSUserDefaults.standardUserDefaults().removeObjectForKey(KEY_USERNAME)
                     self.navigationController?.popToRootViewControllerAnimated(true)

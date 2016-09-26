@@ -20,7 +20,8 @@ class TextPostVC: UIViewController, UITextViewDelegate {
     
     override func viewDidLoad() {
         super.viewDidLoad()
-
+        NSUserDefaults.standardUserDefaults().setValue(false, forKey: "_UIConstraintBasedLayoutLogUnsatisfiable")
+        print("TextPostVC")
         //Subclass navigation bar after app is finished and all other non DRY
         let image = UIImage(named: "metal-bg.jpg")
         self.navigationController?.navigationBar.setBackgroundImage(image, forBarMetrics: .Default)
@@ -36,6 +37,10 @@ class TextPostVC: UIViewController, UITextViewDelegate {
         let tap: UITapGestureRecognizer = UITapGestureRecognizer(target: self, action: #selector(TextPostVC.dismissKeyboard))
         view.addGestureRecognizer(tap)
 
+    }
+    
+    override func viewDidAppear(animated: Bool) {
+        print("TextPostVC")
     }
     
     //Calls this function when the tap is recognized.

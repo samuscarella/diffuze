@@ -14,15 +14,15 @@ import Firebase
 
 //db
 let URL_BASE = FIRDatabase.database().reference()
-
 let storage = FIRStorage.storage()
 let storageRef = storage.referenceForURL("gs://infobomb-9b66c.appspot.com")
-
-
 let REF_IMAGES_BUCKET = storageRef.child("images")
 let REF_VIDEO_BUCKET = storageRef.child("video")
 let REF_AUDIO_BUCKET = storageRef.child("audio")
 
+//development
+let DALLAS_LATITUDE = 32.85477263390352
+let DALLAS_LONGITUDE = -96.74635749319265
 //Keys
 let KEY_UID = "uid"
 let KEY_USERNAME = "username"

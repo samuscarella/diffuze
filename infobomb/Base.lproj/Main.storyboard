@@ -228,6 +228,13 @@
                                 <rect key="frame" x="0.0" y="0.0" width="600" height="600"/>
                                 <color key="backgroundColor" white="0.33333333333333331" alpha="1" colorSpace="calibratedWhite"/>
                             </imageView>
+                            <imageView userInteractionEnabled="NO" contentMode="scaleToFill" horizontalHuggingPriority="251" verticalHuggingPriority="251" image="user" translatesAutoresizingMaskIntoConstraints="NO" id="eRh-vb-MwF" customClass="ShakeImage" customModule="infobomb" customModuleProvider="target">
+                                <rect key="frame" x="250" y="250" width="100" height="100"/>
+                                <constraints>
+                                    <constraint firstAttribute="height" constant="100" id="ExP-DW-hTR"/>
+                                    <constraint firstAttribute="width" constant="100" id="RJR-Km-iqi"/>
+                                </constraints>
+                            </imageView>
                             <tableView clipsSubviews="YES" contentMode="scaleToFill" alwaysBounceVertical="YES" dataMode="prototypes" style="plain" separatorStyle="none" rowHeight="488" sectionHeaderHeight="28" sectionFooterHeight="28" translatesAutoresizingMaskIntoConstraints="NO" id="uGG-Hf-aIV">
                                 <rect key="frame" x="20" y="72" width="560" height="528"/>
                                 <color key="backgroundColor" white="1" alpha="0.0" colorSpace="calibratedWhite"/>
@@ -236,7 +243,7 @@
                                         <rect key="frame" x="0.0" y="28" width="560" height="488"/>
                                         <autoresizingMask key="autoresizingMask"/>
                                         <tableViewCellContentView key="contentView" opaque="NO" clipsSubviews="YES" multipleTouchEnabled="YES" contentMode="center" tableViewCell="yGL-JC-q9Y" id="eRN-wd-cSs">
-                                            <rect key="frame" x="0.0" y="0.0" width="560" height="487.5"/>
+                                            <rect key="frame" x="0.0" y="0.0" width="560" height="488"/>
                                             <autoresizingMask key="autoresizingMask"/>
                                             <subviews>
                                                 <view contentMode="scaleToFill" translatesAutoresizingMaskIntoConstraints="NO" id="tur-O9-nNf" customClass="MaterialUIView" customModule="infobomb" customModuleProvider="target">
@@ -439,6 +446,8 @@
                             <constraint firstItem="8xk-4m-vma" firstAttribute="top" secondItem="Uzd-6U-fiO" secondAttribute="top" id="UDS-R3-ngo"/>
                             <constraint firstItem="uGG-Hf-aIV" firstAttribute="top" secondItem="Hip-1L-ywA" secondAttribute="bottom" id="UfX-pi-MRf"/>
                             <constraint firstItem="NNY-Wu-ffE" firstAttribute="top" secondItem="8xk-4m-vma" secondAttribute="bottom" id="XIu-Zb-6Pk"/>
+                            <constraint firstItem="eRh-vb-MwF" firstAttribute="centerX" secondItem="Uzd-6U-fiO" secondAttribute="centerX" id="ZK4-H1-2n9"/>
+                            <constraint firstItem="eRh-vb-MwF" firstAttribute="centerY" secondItem="Uzd-6U-fiO" secondAttribute="centerY" id="dDs-r0-nTo"/>
                             <constraint firstItem="uGG-Hf-aIV" firstAttribute="top" secondItem="Hip-1L-ywA" secondAttribute="bottom" constant="8" id="jos-ol-1LH"/>
                             <constraint firstAttribute="trailing" secondItem="8xk-4m-vma" secondAttribute="trailing" id="lmo-VZ-Vpd"/>
                             <constraint firstItem="uGG-Hf-aIV" firstAttribute="top" secondItem="Hip-1L-ywA" secondAttribute="bottom" constant="8" id="uRN-3O-reJ"/>
@@ -463,6 +472,7 @@
                     <connections>
                         <outlet property="burgerBtn" destination="xeH-Q1-je6" id="Ak1-i1-HaA"/>
                         <outlet property="notificationBtn" destination="Sdt-zJ-Q0x" id="nO7-SZ-teJ"/>
+                        <outlet property="pulseImg" destination="eRh-vb-MwF" id="7BN-Az-DKe"/>
                         <outlet property="tableView" destination="uGG-Hf-aIV" id="hXy-H3-h1J"/>
                     </connections>
                 </viewController>
@@ -2205,6 +2215,7 @@
         <image name="shutdown" width="64" height="64"/>
         <image name="space" width="7251" height="4018"/>
         <image name="stephenmuscarella" width="377" height="377"/>
+        <image name="user" width="128" height="128"/>
         <image name="video-large" width="256" height="256"/>
         <image name="viral-marketing" width="64" height="64"/>
     </resources>

@@ -44,7 +44,7 @@ class PostCell: UITableViewCell {
 //        showcaseImg.clipsToBounds = true
     }
     
-    func configureCell(post: Post, currentLocation: CLLocation?) {
+    func configureCell(post: Post, currentLocation: Dictionary<String, AnyObject>?) {
 
         self.post = post
         self.username.text = post.username

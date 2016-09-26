@@ -16,6 +16,8 @@ class UserService {
     
         private var _REF_BASE = URL_BASE
         private var _REF_USERS = URL_BASE.child("users")
+        private var _REF_USER_POSTS = URL_BASE.child("user-posts")
+
     
     var REF_BASE: FIRDatabaseReference {
         return _REF_BASE
@@ -24,7 +26,10 @@ class UserService {
     var REF_USERS: FIRDatabaseReference {
         return _REF_USERS
     }
-   
+    
+    var REF_USER_POSTS: FIRDatabaseReference {
+        return _REF_USER_POSTS
+    }
     
     var REF_USER_CURRENT: FIRDatabaseReference {
         let uid = NSUserDefaults.standardUserDefaults().valueForKey(KEY_UID) as! String

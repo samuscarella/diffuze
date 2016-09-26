@@ -32,12 +32,17 @@ class ViewController: UIViewController {
         super.viewDidAppear(animated)
         
         print("Sign In View Did Appear...")
-        if let user = FIRAuth.auth()?.currentUser {
-            print("User is signed in: \(user)")
-            NSUserDefaults.standardUserDefaults().setValue(user.uid, forKey: KEY_UID)
-            NSUserDefaults.standardUserDefaults().setValue(user.displayName, forKey: KEY_USERNAME)
-            self.playIntroSound()
-            self.performSegueWithIdentifier(SEGUE_LOGGED_IN, sender: nil)
+        
+        if NSUserDefaults.standardUserDefaults().valueForKey(KEY_UID) != nil && NSUserDefaults.standardUserDefaults().valueForKey(KEY_USERNAME) != nil {
+            if let user = FIRAuth.auth()?.currentUser {
+                print("User is signed in: \(user.displayName!)")
+                NSUserDefaults.standardUserDefaults().setValue(user.uid, forKey: KEY_UID)
+                NSUserDefaults.standardUserDefaults().setValue(user.displayName, forKey: KEY_USERNAME)
+                self.playIntroSound()
+                self.performSegueWithIdentifier(SEGUE_LOGGED_IN, sender: nil)
+            } else {
+                print("User is not signed in.")
+            }
         } else {
             print("User is not signed in.")
         }
@@ -68,7 +73,22 @@ class ViewController: UIViewController {
                             } else {
                                 
                                 FIRAuth.auth()?.signInWithEmail(email, password: pwd) { (user, error) in
-                                    print("\(error)...here")
+                                    
+                                    let user = FIRAuth.auth()?.currentUser
+                                    if let user = user {
+                                        let changeRequest = user.profileChangeRequest()
+                                        
+                                        changeRequest.displayName = username
+                                        
+                                        changeRequest.commitChangesWithCompletion { error in
+                                            if error != nil {
+                                                print("Could not update user display name.")
+                                            } else {
+                                                print("User display name updated!")
+                                            }
+                                        }
+                                    }
+
                                     NSUserDefaults.standardUserDefaults().setValue(user!.uid, forKey: KEY_UID)
                                     NSUserDefaults.standardUserDefaults().setValue(username, forKey: KEY_USERNAME)
 

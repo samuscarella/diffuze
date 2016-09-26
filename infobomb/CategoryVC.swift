@@ -10,6 +10,10 @@ import UIKit
 import Firebase
 import CoreLocation
 import AVFoundation
+import Alamofire
+
+private var latitude = 0.0
+private var longitude = 0.0
 
 class CategoryVC: UIViewController, UITableViewDataSource, UITableViewDelegate, CLLocationManagerDelegate {
 
@@ -17,18 +21,20 @@ class CategoryVC: UIViewController, UITableViewDataSource, UITableViewDelegate, 
     @IBOutlet weak var tableView: UITableView!
     
     var explosionPlayer: AVAudioPlayer!
-    
     var categories = [Category]()
     var checked: [[String:String]] = []
-
     var message: String?
     var previousVC: String!
-    
-    var locationManager: CLLocationManager!
-    var currentLocation: CLLocation!
+    var locationService: LocationService!
+
+//    var locationManager: CLLocationManager!
+//    var currentLocation: CLLocation!
     
     override func viewDidLoad() {
         super.viewDidLoad()
+        NSUserDefaults.standardUserDefaults().setValue(false, forKey: "_UIConstraintBasedLayoutLogUnsatisfiable")
+
+        print("CategoryVC")
         print("\(message)\(previousVC)")
         
         //Subclass navigation bar after app is finished and all other non DRY
@@ -39,11 +45,12 @@ class CategoryVC: UIViewController, UITableViewDataSource, UITableViewDelegate, 
         
         tableView.delegate = self
         tableView.dataSource = self
-        locationManager = CLLocationManager()
-        locationManager.delegate = self
-        locationManager.desiredAccuracy = kCLLocationAccuracyBest
-        locationManager.distanceFilter = kCLDistanceFilterNone
-        locationManager.startUpdatingLocation()
+        
+        locationService = LocationService()
+//        locationService.startTracking()
+//        locationService.addObserver(self, forKeyPath: "latitude", options: .New, context: &latitude)
+//        locationService.addObserver(self, forKeyPath: "longitude", options: .New, context: &longitude)
+
         
         CategoryService.ds.REF_CATEGORIES.queryOrderedByChild("name").observeEventType(FIRDataEventType.Value, withBlock: { (snapshot) in
             
@@ -66,6 +73,19 @@ class CategoryVC: UIViewController, UITableViewDataSource, UITableViewDelegate, 
 
     }
     
+//    override func observeValueForKeyPath(keyPath: String?, ofObject object: AnyObject?, change: [String : AnyObject]?, context: UnsafeMutablePointer<Void>) {
+//        
+//        if context == &latitude {
+//            latitude = Double(change![NSKeyValueChangeNewKey]! as! NSNumber)
+//            print("LatitudeOfUser: \(latitude)")
+//        }
+//        if context == &longitude {
+//            longitude = Double(change![NSKeyValueChangeNewKey]! as! NSNumber)
+//            print("LongitudeOfUser: \(longitude)")
+//        }
+//    }
+
+    
     func tableView(tableView: UITableView, heightForRowAtIndexPath indexPath: NSIndexPath) -> CGFloat {
         return 50.0
     }
@@ -86,11 +106,6 @@ class CategoryVC: UIViewController, UITableViewDataSource, UITableViewDelegate, 
             
             cell.configureCell(category, img: img)
             
-//            if checked.contains(category.name) {
-//                cell.accessoryType = .Checkmark
-//            } else {
-//                cell.accessoryType = .None
-//            }
             return cell
             
             
@@ -133,7 +148,7 @@ class CategoryVC: UIViewController, UITableViewDataSource, UITableViewDelegate, 
                 }
 
             }
-//            print(checked)
+            print(checked)
         }
     }
     
@@ -147,81 +162,115 @@ class CategoryVC: UIViewController, UITableViewDataSource, UITableViewDelegate, 
     
     
     @IBAction func createPostBtnPressed(sender: AnyObject) {
-        
         if checked.count > 0 {
 
             var post = [String:AnyObject]()
             
             if CLLocationManager.authorizationStatus() == CLAuthorizationStatus.Denied {
                 print("You have to allow location to make a post!")
-            } else if CLLocationManager.authorizationStatus() == CLAuthorizationStatus.AuthorizedWhenInUse || CLLocationManager.authorizationStatus() == CLAuthorizationStatus.AuthorizedAlways {
+            } else if CLLocationManager.authorizationStatus() == CLAuthorizationStatus.AuthorizedWhenInUse || CLLocationManager.authorizationStatus() == CLAuthorizationStatus.NotDetermined {
                 
-//                let one = currentLocation
-//                let two = CLLocation(latitude: 37.774929, longitude: -122.419416)
-//                let distance = two.distanceFromLocation(one)
-//                print(finalDistance)
                 let userID = UserService.ds.currentUserID
                 let username = UserService.ds.currentUserUsername
                 
-                if let msg = message where msg != "" {
+                if previousVC == "TextPostVC" {
                     
-                    let firebasePost = PostService.ds.REF_POSTS.childByAutoId()
-                    let key = firebasePost.key
-                    let activeFirebasePost = PostService.ds.REF_ACTIVE_POSTS.child(key)
+                    if let msg = message where msg != "" {
+                    
+                        let firebasePost = PostService.ds.REF_POSTS.childByAutoId()
+                        let key = firebasePost.key
+                        let activeFirebasePost = PostService.ds.REF_ACTIVE_POSTS.child(key)
+                        let userPosts = UserService.ds.REF_USER_POSTS.child(userID).child(key)
+                        let postCategoryRef = PostService.ds.REF_POSTS.child(key).child("categories")
 
-                    var selectedCategories: [[String:AnyObject]] = []
-                    for(_, value) in checked.enumerate() {
-                        for (_, val) in value {
-                            let selectedCategory = [
-                                val: true
-                            ]
-                            selectedCategories.append(selectedCategory)
+                        var selectedCategories: [String:AnyObject] = [:]
+                        for(_, value) in checked.enumerate() {
+                            for (_, val) in value {
+//                                let selectedCategory = [
+//                                    val: true
+//                                ]
+                                selectedCategories[val] = true
+                            }
                         }
-                    }
-//                    let msg = message!
+                        let msg = message!
 
-                        post = [
-                            "user_id": userID,
-                            "username": username,
-                            "post_ref": key,
-                            "categories": selectedCategories,
-                            "type": "text",
-                            "message": msg,
-                            "active": true,
-                            "likes": 0,
-                            "dislikes": 0,
-                            "shares": 0,
-                            "latitude": currentLocation.coordinate.latitude,
-                            "longitude": currentLocation.coordinate.longitude,
-                            "distance": 10.0,
-                            "created_at": FIRServerValue.timestamp()
+                            post = [
+                                "user_id": userID,
+                                "username": username,
+                                "post_ref": key,
+                                "categories": selectedCategories,
+                                "type": "text",
+                                "message": msg,
+                                "active": true,
+                                "likes": 0,
+                                "dislikes": 0,
+                                "shares": 0,
+                                "latitude": DALLAS_LATITUDE,
+                                "longitude": DALLAS_LONGITUDE,
+                                "distance": 1000.0,
+                                "usersInRadius": 0,
+                                "created_at": FIRServerValue.timestamp()
+                            ]
+                
+                        activeFirebasePost.setValue(post)
+                        firebasePost.setValue(post)
+                        userPosts.setValue(post)
+
+                        
+                        for(_, value) in checked.enumerate() {
+                            for (_, val) in value {
+                                let selectedCategory = [
+                                    val: true
+                                ]
+                                postCategoryRef.updateChildValues(selectedCategory)
+                                userPosts.child("categories").updateChildValues(selectedCategory)
+                                activeFirebasePost.child("categories").updateChildValues(selectedCategory)
+                                //activePostCategoryRef.updateChildValues(selectedCategory)
+                            }
+                        }
+                        
+                        let userPostsRef = UserService.ds.REF_USER_CURRENT.child("posts")
+                        let userPost = [
+                            key: true
                         ]
-                
-                    activeFirebasePost.setValue(post)
-                    
-                    post["categories"] = nil
-                    firebasePost.setValue(post)
-                
-                    let userPostsRef = UserService.ds.REF_USER_CURRENT.child("posts")
-                    let userPost = [
-                        key: true
-                    ]
-                    userPostsRef.updateChildValues(userPost)
-                
-                    let postCategoryRef = PostService.ds.REF_POSTS.child(key).child("categories")
+                        userPostsRef.updateChildValues(userPost)
 
-                    for(_, value) in checked.enumerate() {
-                        for (_, val) in value {
-                            let selectedCategory = [
-                                val: true
-                            ]
-                            postCategoryRef.updateChildValues(selectedCategory)
-//                            activePostCategoryRef.updateChildValues(selectedCategory)
+                        
+                        let url = NSURL(string: "https://nameless-chamber-44579.herokuapp.com/post")!
+                        Alamofire.request(.POST, url, parameters: post).validate().responseString { response in
+                            switch response.result {
+                            case .Success( _):
+                                print(response.result.value!)
+                                print("Validation Successful")
+                            case .Failure(let error):
+                                print(error)
+                            }
                         }
+//                        Alamofire.request(.GET, url).validate().responseJSON { response in
+//                            switch response.result {
+//                            case .Success:
+//                                print(response.result.value!)
+////                                print(response.data)
+////                                print(response.response)
+////                                print(response.request)
+//
+//                                print("Validation Successful")
+//                            case .Failure(let error):
+//                                print("ERROR:\n")
+//                                print(error)
+//                            }
+//                        }
+
+//                        post["categories"] = nil
+                
+                
+
+//                        print(post)
+                        playExplosion()
+                        self.navigationController?.popToRootViewControllerAnimated(true)
                     }
-                    playExplosion()
+                    //End of if message != nil
                 }
-                //End of if message != nil
             }
         } else {
             print("Please pick at least one category!")
@@ -232,43 +281,34 @@ class CategoryVC: UIViewController, UITableViewDataSource, UITableViewDelegate, 
     @IBAction func backBtnPressed(sender: AnyObject) {
         
         if previousVC == "TextPostVC" {
-            
+//            locationService.stopUpdatingLocation()
             self.performSegueWithIdentifier("unwindToTextPost", sender: self)
         }
         
     }
     
-    
-    func locationManager(manager: CLLocationManager, didChangeAuthorizationStatus status: CLAuthorizationStatus) {
-        switch status {
-        case .NotDetermined:
-            locationManager.requestAlwaysAuthorization()
-            print("Access NotDetermined")
-            break
-        case .AuthorizedWhenInUse:
-            locationManager.startUpdatingLocation()
-            print("Access WhenInUse")
-            break
-        case .AuthorizedAlways:
-            locationManager.startUpdatingLocation()
-            break
-        case .Restricted:
-            // restricted by e.g. parental controls. User can't enable Location Services
-            print("Access Restricted")
-            break
-        case .Denied:
-            // user denied your app access to Location Services, but can grant access from Settings.app
-            locationManager.requestWhenInUseAuthorization()
-            print("Access Denied")
-            break
-        }
-    }
-    
-    func locationManager(manager: CLLocationManager, didUpdateLocations locations: [CLLocation]) {
-        
-        currentLocation = locations.last! as CLLocation
-        print("CategoryVC: \(currentLocation.coordinate.latitude)...CategoryVC: \(currentLocation.coordinate.longitude)")
-    }
+//    func bypassAuthentication() {
+//        let manager = Alamofire.Manager.sharedInstance
+//        manager.delegate.sessionDidReceiveChallenge = { session, challenge in
+//            var disposition: NSURLSessionAuthChallengeDisposition = .PerformDefaultHandling
+//            var credential: NSURLCredential?
+//            if challenge.protectionSpace.authenticationMethod == NSURLAuthenticationMethodServerTrust {
+//                disposition = NSURLSessionAuthChallengeDisposition.UseCredential
+//                credential = NSURLCredential(forTrust: challenge.protectionSpace.serverTrust!)
+//            } else {
+//                if challenge.previousFailureCount > 0 {
+//                    disposition = .CancelAuthenticationChallenge
+//                } else {
+//                    credential = manager.session.configuration.URLCredentialStorage?.defaultCredentialForProtectionSpace(challenge.protectionSpace)
+//                    if credential != nil {
+//                        disposition = .UseCredential
+//                    }
+//                }
+//            }
+//            return (disposition, credential)
+//        }
+//    }
+
 
     func playExplosion() {
         

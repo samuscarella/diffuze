@@ -41,8 +41,16 @@ class SubscriptionsVC: UIViewController, UITableViewDataSource, UITableViewDeleg
         button.frame = CGRectMake(0, 0, 27, 27)
         let barButton = UIBarButtonItem(customView: button)
         self.navigationItem.rightBarButtonItem = barButton
-
         
+        let menuButton: UIButton = UIButton(type: UIButtonType.Custom)
+        menuButton.setImage(UIImage(named: "menu-btn.png"), forState: UIControlState.Normal)
+        menuButton.frame = CGRectMake(0, 0, 60, 30)
+        let leftBarButton = UIBarButtonItem(customView: menuButton)
+        self.navigationItem.leftBarButtonItem = leftBarButton
+
+
+        NSNotificationCenter.defaultCenter().addObserver(LocationService(), selector: #selector(LocationService.stopUpdatingLocation), name: "userSignedOut", object: nil)
+
         tableView.delegate = self
         tableView.dataSource = self
 
@@ -67,8 +75,8 @@ class SubscriptionsVC: UIViewController, UITableViewDataSource, UITableViewDeleg
         
         //Burger side menu
         if revealViewController() != nil {
-            menuBtn.target = revealViewController()
-            menuBtn.action = #selector(SWRevealViewController.revealToggle(_:))
+            
+            menuButton.addTarget(revealViewController(), action: #selector(SWRevealViewController.revealToggle(_:)), forControlEvents: UIControlEvents.TouchUpInside)
         }
 
     }

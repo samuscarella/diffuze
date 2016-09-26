@@ -10,9 +10,9 @@ import UIKit
 import CoreLocation
 import Pulsator
 import Firebase
-
-private var latitude = 0.0
-private var longitude = 0.0
+//
+//private var latitude: Double = 0.0
+//private var longitude: Double = 0.0
 
 class ActivityVC: UIViewController, CLLocationManagerDelegate, UITableViewDelegate, UITableViewDataSource {
     
@@ -22,16 +22,17 @@ class ActivityVC: UIViewController, CLLocationManagerDelegate, UITableViewDelega
     @IBOutlet weak var tableView: UITableView!
     
     let pulsator = Pulsator()
+    
     var locationService: LocationService!
-    
-    
-    var currentLocation: CLLocation?
-
+    var currentLocation: [String:AnyObject] = [:]
     var posts = [Post]()
+    
+    var latitude: Double = 0.0
+    var longitude: Double = 0.0
     
     override func viewDidLoad() {
         super.viewDidLoad()
-        
+        NSUserDefaults.standardUserDefaults().setValue(false, forKey: "_UIConstraintBasedLayoutLogUnsatisfiable")
         //Subclass navigation bar after app is finished and all other non DRY
         let image = UIImage(named: "metal-bg.jpg")
         self.navigationController!.navigationBar.setBackgroundImage(image, forBarMetrics: .Default)
@@ -42,21 +43,37 @@ class ActivityVC: UIViewController, CLLocationManagerDelegate, UITableViewDelega
         button.setImage(UIImage(named: "notification.png"), forState: UIControlState.Normal)
         button.addTarget(self, action: #selector(ActivityVC.notificationBtnPressed), forControlEvents: UIControlEvents.TouchUpInside)
         button.frame = CGRectMake(0, 0, 27, 27)
-        let barButton = UIBarButtonItem(customView: button)
-        self.navigationItem.rightBarButtonItem = barButton
+        let rightBarButton = UIBarButtonItem(customView: button)
+        self.navigationItem.rightBarButtonItem = rightBarButton
+        
+        let menuButton: UIButton = UIButton(type: UIButtonType.Custom)
+        menuButton.setImage(UIImage(named: "menu-btn.png"), forState: UIControlState.Normal)
+        menuButton.frame = CGRectMake(0, 0, 60, 30)
+        let leftBarButton = UIBarButtonItem(customView: menuButton)
+        self.navigationItem.leftBarButtonItem = leftBarButton
         
         locationService = LocationService()
-        locationService.startTracking()
-        locationService.addObserver(self, forKeyPath: "latitude", options: .New, context: &latitude)
-        locationService.addObserver(self, forKeyPath: "longitude", options: .New, context: &longitude)
+////        locationService.startTracking()
+//        locationService.addObserver(self, forKeyPath: "latitude", options: .New, context: &latitude)
+//        locationService.addObserver(self, forKeyPath: "longitude", options: .New, context: &longitude)
+        
+        UserService.ds.REF_USER_CURRENT.observeSingleEventOfType(FIRDataEventType.Value, withBlock: { (snapshot) in
+                let value = snapshot.value as? NSDictionary
+                let latitude = value!["latitude"]
+                let longitude = value!["longitude"]
+                self.currentLocation["latitude"] = latitude
+                self.currentLocation["longitude"] = longitude
+                self.tableView.reloadData()
+        })
 
 //        NSNotificationCenter.defaultCenter().addObserver(self, selector: #selector(ActivityVC.refreshTableView), name: "userUpdatedLocation", object: nil)
         NSNotificationCenter.defaultCenter().addObserver(locationService, selector: #selector(locationService.stopUpdatingLocation), name: "userSignedOut", object: nil)
-//        pulsator.radius = 240.0
-//        pulsator.backgroundColor = UIColor(red: 255.0, green: 0, blue: 0, alpha: 1).CGColor
-//        pulsator.animationDuration = 1
-//        pulseImg.layer.superlayer?.insertSublayer(pulsator, below: pulseImg.layer)
-//        pulsator.start()
+        pulsator.radius = 300.0
+        pulsator.backgroundColor = UIColor(red: 255.0, green: 0, blue: 0, alpha: 1).CGColor
+        pulsator.animationDuration = 0.9
+        pulsator.pulseInterval = 0.1
+        pulseImg.layer.superlayer?.insertSublayer(pulsator, below: pulseImg.layer)
+        pulsator.start()
         
         tableView.delegate = self
         tableView.dataSource = self
@@ -64,56 +81,102 @@ class ActivityVC: UIViewController, CLLocationManagerDelegate, UITableViewDelega
         tableView.tableFooterView = UIView()
         tableView.estimatedRowHeight = 300 // for example. Set your average height
         
-        let userID = UserService.ds.currentUserID
-        PostService.ds.REF_ACTIVE_POSTS.child(userID).observeEventType(FIRDataEventType.Value, withBlock: { (snapshot) in
+
+        let userID = FIRAuth.auth()?.currentUser?.uid
+        var currentUser: NSDictionary = [:]
+        UserService.ds.REF_USERS.child(userID!).observeSingleEventOfType(FIRDataEventType.Value, withBlock: { (snapshot) in
+            // Get user value
             
-            if let snapshots = snapshot.children.allObjects as? [FIRDataSnapshot] {
+            currentUser = (snapshot.value as? NSDictionary)!
+            
+            PostService.ds.REF_ACTIVE_POSTS.observeSingleEventOfType(FIRDataEventType.Value, withBlock: { snapshot in
                 
-                self.posts = []
-                for snap in snapshots {
-//                    print("SNAP: \(snap)")
+                if let activePosts = snapshot.children.allObjects as? [FIRDataSnapshot] {
                     
-                    if let postDict = snap.value as?  Dictionary<String, AnyObject> {
-                        let key = snap.key
-                        print(postDict)
-                        let post = Post(postKey: key, dictionary: postDict)
-                        self.posts.append(post)
+                    //self.posts = []
+                    for post in activePosts {
+                        
+                        if let postDict = post.value as?  Dictionary<String, AnyObject> {
+                            //let key = snap.key
+                            //print(currentUser)
+                            if let userSubscriptions = currentUser["subscriptions"] as? NSDictionary {
+                                
+                                let postCategories = postDict["categories"] as! NSDictionary
+                                var isUserSubscribed = false
+                                for(postCategory, _) in postCategories {
+                                    for(userSubscription, _) in userSubscriptions {
+                                        if postCategory as! String == userSubscription as! String {
+                                            isUserSubscribed = true
+                                            break
+                                        }
+                                    }
+                                    if isUserSubscribed { break }
+                                }
+                                if isUserSubscribed && currentUser["user_ref"] as? String != postDict["user_id"] as? String {
+                                    let postLat = Double((postDict["latitude"] as? Double)!)
+                                    let postLong = Double((postDict["longitude"] as? Double)!)
+                                    let userLat = Double((currentUser["latitude"] as? Double)!)
+                                    let userLong = Double((currentUser["longitude"] as? Double)!)
+                                    
+                                    let postDistance = postDict["distance"] as? Int
+                                    let postLocation = CLLocation(latitude: postLat, longitude: postLong)
+                                    let userLocation = CLLocation(latitude: userLat, longitude: userLong)
+                                    
+                                    print(postDistance!)
+                                    print(postLocation.coordinate)
+                                    print(userLocation.coordinate)
+                                    
+                                }
+                                continue
+                            } else {
+                                print("User is not subscribed to anything!")
+                            }
+                            //                        let post = Post(postKey: key, dictionary: postDict)
+                            //                        self.posts.append(post)
+                        }
                     }
                 }
-            }
-            self.tableView.reloadData()
-        })
+                //            self.tableView.reloadData()
+            })
+        }) { (error) in
+            print("CurrentUserError: \(error.localizedDescription)")
+        }
+
+
 
         //Burger side menu
         if revealViewController() != nil {
             
-            burgerBtn.target = revealViewController()
-            burgerBtn.action = #selector(SWRevealViewController.revealToggle(_:))
-            
+            menuButton.addTarget(revealViewController(), action: #selector(SWRevealViewController.revealToggle(_:)), forControlEvents: UIControlEvents.TouchUpInside)
         }
     }
     
-    override func observeValueForKeyPath(keyPath: String?, ofObject object: AnyObject?, change: [String : AnyObject]?, context: UnsafeMutablePointer<Void>) {
-        
-        if context == &latitude {
-            latitude = Double(change![NSKeyValueChangeNewKey]! as! NSNumber)
-            print("LatitudeOfUser: \(latitude)")
-            tableView.reloadData()
-        }
-        if context == &longitude {
-            longitude = Double(change![NSKeyValueChangeNewKey]! as! NSNumber)
-            print("LongitudeOfUser: \(longitude)")
-            tableView.reloadData()
-        }
-    }
+//    override func observeValueForKeyPath(keyPath: String?, ofObject object: AnyObject?, change: [String : AnyObject]?, context: UnsafeMutablePointer<Void>) {
+//        
+//        if context == &latitude {
+//            latitude = Double(change![NSKeyValueChangeNewKey]! as! NSNumber)
+////            print("LatitudeOfUser: \(latitude)")
+//            currentLocation["latitude"] = latitude
+//            tableView.reloadData()
+//        }
+//        if context == &longitude {
+//            longitude = Double(change![NSKeyValueChangeNewKey]! as! NSNumber)
+////            print("LongitudeOfUser: \(longitude)")
+//            currentLocation["longitude"] = longitude
+//            tableView.reloadData()
+//        }
+//    }
 
     
     
     override func viewDidLayoutSubviews() {
         super.viewDidLayoutSubviews()
         
-//        pulseImg.layer.layoutIfNeeded()
-//        pulsator.position = pulseImg.layer.position
+        pulseImg.layer.layoutIfNeeded()
+        pulseImg.layer.cornerRadius = pulseImg.frame.size.width / 2
+        pulseImg.clipsToBounds = true
+        pulsator.position = pulseImg.layer.position
+        shake()
     }
     
     
@@ -126,22 +189,30 @@ class ActivityVC: UIViewController, CLLocationManagerDelegate, UITableViewDelega
     }
     
     func tableView(tableView: UITableView, numberOfRowsInSection section: Int) -> Int {
+        
+        if posts.count > 0 {
+            pulseImg.hidden = true
+            pulsator.stop()
+        }
         return posts.count
     }
     
     func tableView(tableView: UITableView, cellForRowAtIndexPath indexPath: NSIndexPath) -> UITableViewCell {
 
         let post = posts[indexPath.row]
+        var didUpdateLocation = false
         
         if let cell = tableView.dequeueReusableCellWithIdentifier("PostCell") as? PostCell {
-
-            if let cl = currentLocation {
-                cell.configureCell(post, currentLocation: cl)
-            } else {
-                cell.configureCell(post, currentLocation: nil)
-            }
-        
             
+            let userLat = currentLocation["latitude"] as? Double
+            let userLong = currentLocation["longitude"] as? Double
+
+            if userLat != nil && userLong != nil {
+                didUpdateLocation = true
+            }
+            if didUpdateLocation {
+                cell.configureCell(post, currentLocation: currentLocation)
+            }
             return cell
         } else {
             return PostCell()
@@ -159,12 +230,21 @@ class ActivityVC: UIViewController, CLLocationManagerDelegate, UITableViewDelega
         
     }
     
-//    func refreshTableView() {
-//        tableView.reloadData()
-//    }
+    
+    func shake() {
+        let animation = CABasicAnimation(keyPath: "position")
+        animation.duration = 0.1
+        animation.repeatCount = Float.infinity
+        animation.autoreverses = true
+        animation.fromValue = NSValue(CGPoint: CGPointMake(pulseImg.center.x - 5, pulseImg.center.y))
+        animation.toValue = NSValue(CGPoint: CGPointMake(pulseImg.center.x + 5, pulseImg.center.y))
+        pulseImg.layer.addAnimation(animation, forKey: "position")
+    }
 
-
+    
+    
     func notificationBtnPressed() {
+        
     }
     
     @IBAction func unwindToActivityVC(segue: UIStoryboardSegue) {

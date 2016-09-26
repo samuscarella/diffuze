@@ -11,6 +11,7 @@
 		931479D01D88D34600F5E366 /* PostService.swift in Sources */ = {isa = PBXBuildFile; fileRef = 931479CF1D88D34600F5E366 /* PostService.swift */; };
 		9315C06E1D8376130051BFCD /* FirebaseStorage.swift in Sources */ = {isa = PBXBuildFile; fileRef = 9315C06D1D8376130051BFCD /* FirebaseStorage.swift */; };
 		931EC27C1D8E05A40072BAF1 /* Pulse.swift in Sources */ = {isa = PBXBuildFile; fileRef = 931EC27B1D8E05A40072BAF1 /* Pulse.swift */; };
+		9324326E1D98B73000D5C3DA /* ShakeImage.swift in Sources */ = {isa = PBXBuildFile; fileRef = 9324326D1D98B73000D5C3DA /* ShakeImage.swift */; };
 		933C2C201D803C4100DB89AE /* TopNav.swift in Sources */ = {isa = PBXBuildFile; fileRef = 933C2C1F1D803C4100DB89AE /* TopNav.swift */; };
 		933C2C221D8087F400DB89AE /* SubscriptionCell.swift in Sources */ = {isa = PBXBuildFile; fileRef = 933C2C211D8087F400DB89AE /* SubscriptionCell.swift */; };
 		9340CA751D7DB10800AE1231 /* AppDelegate.swift in Sources */ = {isa = PBXBuildFile; fileRef = 9340CA741D7DB10800AE1231 /* AppDelegate.swift */; };
@@ -64,6 +65,7 @@
 		931479CF1D88D34600F5E366 /* PostService.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = PostService.swift; sourceTree = "<group>"; };
 		9315C06D1D8376130051BFCD /* FirebaseStorage.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = FirebaseStorage.swift; sourceTree = "<group>"; };
 		931EC27B1D8E05A40072BAF1 /* Pulse.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = Pulse.swift; sourceTree = "<group>"; };
+		9324326D1D98B73000D5C3DA /* ShakeImage.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = ShakeImage.swift; sourceTree = "<group>"; };
 		933C2C1F1D803C4100DB89AE /* TopNav.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = TopNav.swift; sourceTree = "<group>"; };
 		933C2C211D8087F400DB89AE /* SubscriptionCell.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = SubscriptionCell.swift; sourceTree = "<group>"; };
 		9340CA711D7DB10800AE1231 /* infobomb.app */ = {isa = PBXFileReference; explicitFileType = wrapper.application; includeInIndex = 0; path = infobomb.app; sourceTree = BUILT_PRODUCTS_DIR; };
@@ -226,6 +228,7 @@
 				93C1645A1D8EBD24004B0432 /* PostCell.swift */,
 				93C1645C1D8F299A004B0432 /* PostTextView.swift */,
 				93C1645E1D8F3A4B004B0432 /* MaterialUIView.swift */,
+				9324326D1D98B73000D5C3DA /* ShakeImage.swift */,
 			);
 			name = View;
 			sourceTree = "<group>";
@@ -421,6 +424,7 @@
 			files = (
 				9340CA911D7DD41C00AE1231 /* TransparentUsernameField.swift in Sources */,
 				9393A1CC1D83AC3B0078503C /* MaterialView.swift in Sources */,
+				9324326E1D98B73000D5C3DA /* ShakeImage.swift in Sources */,
 				9340CA771D7DB10800AE1231 /* ViewController.swift in Sources */,
 				93B8E7B31D7EE055005ACC48 /* SWRevealViewController.m in Sources */,
 				9340CA991D7DE3CA00AE1231 /* LoginButton.swift in Sources */,

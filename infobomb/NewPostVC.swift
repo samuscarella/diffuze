@@ -22,7 +22,8 @@ class NewPostVC: UIViewController, CLLocationManagerDelegate {
     
     override func viewDidLoad() {
         super.viewDidLoad()
-
+        NSUserDefaults.standardUserDefaults().setValue(false, forKey: "_UIConstraintBasedLayoutLogUnsatisfiable")
+        print("NewPostVC")
         //Subclass navigation bar after app is finished and all other non DRY
         let image = UIImage(named: "metal-bg.jpg")
         self.navigationController?.navigationBar.setBackgroundImage(image, forBarMetrics: .Default)
@@ -36,6 +37,13 @@ class NewPostVC: UIViewController, CLLocationManagerDelegate {
         let barButton = UIBarButtonItem(customView: button)
         self.navigationItem.rightBarButtonItem = barButton
         
+        let menuButton: UIButton = UIButton(type: UIButtonType.Custom)
+        menuButton.setImage(UIImage(named: "menu-btn.png"), forState: UIControlState.Normal)
+        menuButton.frame = CGRectMake(0, 0, 60, 30)
+        let leftBarButton = UIBarButtonItem(customView: menuButton)
+        self.navigationItem.leftBarButtonItem = leftBarButton
+
+        
         textView.separatorColor = UIColor.clearColor()
         linkView.separatorColor = UIColor.clearColor()
         imageView.separatorColor = UIColor.clearColor()
@@ -43,11 +51,11 @@ class NewPostVC: UIViewController, CLLocationManagerDelegate {
         audioView.separatorColor = UIColor.clearColor()
         premiumView.separatorColor = UIColor.clearColor()
         
+        NSNotificationCenter.defaultCenter().addObserver(LocationService(), selector: #selector(LocationService.stopUpdatingLocation), name: "userSignedOut", object: nil)
 
         //Burger side menu
         if revealViewController() != nil {
-            menuBtn.target = revealViewController()
-            menuBtn.action = #selector(SWRevealViewController.revealToggle(_:))
+            menuButton.addTarget(revealViewController(), action: #selector(SWRevealViewController.revealToggle(_:)), forControlEvents: UIControlEvents.TouchUpInside)
         }
 
     }

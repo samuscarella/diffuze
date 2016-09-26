@@ -25,7 +25,7 @@ class LocationService: NSObject, CLLocationManagerDelegate {
         locationManager = CLLocationManager()
         locationManager.delegate = self
         locationManager.desiredAccuracy = kCLLocationAccuracyBest
-        locationManager.requestAlwaysAuthorization()
+        locationManager.requestWhenInUseAuthorization()
         locationManager.startUpdatingLocation()
     }
     
@@ -60,7 +60,7 @@ class LocationService: NSObject, CLLocationManagerDelegate {
     func locationManager(manager: CLLocationManager, didChangeAuthorizationStatus status: CLAuthorizationStatus) {
         switch status {
         case .NotDetermined:
-            locationManager.requestAlwaysAuthorization()
+            locationManager.requestWhenInUseAuthorization()
             print("Access NotDetermined")
             break
         case .AuthorizedWhenInUse:
@@ -84,12 +84,12 @@ class LocationService: NSObject, CLLocationManagerDelegate {
     }
 
 
-    func getDistanceBetweenUserAndPost(userLocation: CLLocation, post: Post) -> Int {
+    func getDistanceBetweenUserAndPost(userLocation: Dictionary<String, AnyObject>, post: Post) -> Int {
         
-        let postLatitude = post.latitude
-        let postLongitude = post.longitude
-        let postLocation = CLLocation(latitude: postLatitude, longitude: postLongitude)
-        let meters = userLocation.distanceFromLocation(postLocation)
+        let postLocation = CLLocation(latitude: post.latitude, longitude: post.longitude)
+        let userLoc = CLLocation(latitude: Double(userLocation["latitude"]! as! NSNumber), longitude: Double(userLocation["longitude"]! as! NSNumber))
+        
+        let meters = userLoc.distanceFromLocation(postLocation)
         let miles = meters * 0.000621371
         
         var finalDistance: Double
