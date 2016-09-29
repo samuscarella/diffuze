@@ -17,15 +17,22 @@ class MyInfoVC: UIViewController {
         super.viewDidLoad()
         
         //Subclass navigation bar after app is finished and all other non DRY
-        let image = UIImage(named: "metal-bg.jpg")
+        let image = UIImage(named: "metal-bg.jpg")?.resizableImageWithCapInsets(UIEdgeInsetsMake(0, 15, 0, 15), resizingMode: UIImageResizingMode.Stretch)
+
         self.navigationController?.navigationBar.setBackgroundImage(image, forBarMetrics: .Default)
         self.title = "My Info"
         self.navigationController?.navigationBar.titleTextAttributes = [NSFontAttributeName: UIFont(name: "TOSCA ZERO", size: 30)!, NSForegroundColorAttributeName: LIGHT_GREY]
         
+        let menuButton: UIButton = UIButton(type: UIButtonType.Custom)
+        menuButton.setImage(UIImage(named: "menu-btn.png"), forState: UIControlState.Normal)
+        menuButton.frame = CGRectMake(0, 0, 60, 30)
+        let leftBarButton = UIBarButtonItem(customView: menuButton)
+        self.navigationItem.leftBarButtonItem = leftBarButton
+
+        
         //Burger side menu
         if revealViewController() != nil {
-            menuBtn.target = revealViewController()
-            menuBtn.action = #selector(SWRevealViewController.revealToggle(_:))
+            menuButton.addTarget(revealViewController(), action: #selector(SWRevealViewController.revealToggle(_:)), forControlEvents: UIControlEvents.TouchUpInside)
         }
 
     }

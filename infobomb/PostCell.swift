@@ -88,6 +88,6 @@ class PostCell: UITableViewCell {
         
     }
     
-    
+
 
 }

@@ -10,6 +10,8 @@ import UIKit
 
 class TransparentUsernameField: UITextField {
 
+    
+    
     override func awakeFromNib() {
         
         makeTextFieldBottomBorderOnly()
@@ -23,6 +25,7 @@ class TransparentUsernameField: UITextField {
     
     //For editable text
     override func editingRectForBounds(bounds: CGRect) -> CGRect {
+        
         return CGRectInset(bounds, 5, 0)
     }
     
@@ -34,7 +37,7 @@ class TransparentUsernameField: UITextField {
         borderStyle = UITextBorderStyle.None
         layer.addSublayer(bottomLine)
         attributedPlaceholder = NSAttributedString(string: "Username", attributes:[NSForegroundColorAttributeName: UIColor.whiteColor()])
-
+        
     }
 
 

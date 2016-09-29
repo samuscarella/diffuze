@@ -34,7 +34,7 @@ class ActivityVC: UIViewController, CLLocationManagerDelegate, UITableViewDelega
         super.viewDidLoad()
         NSUserDefaults.standardUserDefaults().setValue(false, forKey: "_UIConstraintBasedLayoutLogUnsatisfiable")
         //Subclass navigation bar after app is finished and all other non DRY
-        let image = UIImage(named: "metal-bg.jpg")
+        let image = UIImage(named: "metal-bg.jpg")?.resizableImageWithCapInsets(UIEdgeInsetsMake(0, 15, 0, 15), resizingMode: UIImageResizingMode.Stretch)
         self.navigationController!.navigationBar.setBackgroundImage(image, forBarMetrics: .Default)
         self.title = "Activity"
         self.navigationController!.navigationBar.titleTextAttributes = [NSFontAttributeName: UIFont(name: "TOSCA ZERO", size:36)!, NSForegroundColorAttributeName: LIGHT_GREY]
@@ -79,25 +79,26 @@ class ActivityVC: UIViewController, CLLocationManagerDelegate, UITableViewDelega
         tableView.dataSource = self
         tableView.rowHeight = UITableViewAutomaticDimension
         tableView.tableFooterView = UIView()
-        tableView.estimatedRowHeight = 300 // for example. Set your average height
+        tableView.estimatedRowHeight = 300
         
 
         let userID = FIRAuth.auth()?.currentUser?.uid
         var currentUser: NSDictionary = [:]
-        UserService.ds.REF_USERS.child(userID!).observeSingleEventOfType(FIRDataEventType.Value, withBlock: { (snapshot) in
+        let iD = UserService.ds.currentUserID
+        UserService.ds.REF_USERS.child(iD).observeSingleEventOfType(FIRDataEventType.Value, withBlock: { (snapshot) in
             // Get user value
             
             currentUser = (snapshot.value as? NSDictionary)!
             
             PostService.ds.REF_ACTIVE_POSTS.observeSingleEventOfType(FIRDataEventType.Value, withBlock: { snapshot in
-                
+                print("Got snapshot...")
                 if let activePosts = snapshot.children.allObjects as? [FIRDataSnapshot] {
                     
-                    //self.posts = []
+                    self.posts = []
                     for post in activePosts {
                         
                         if let postDict = post.value as?  Dictionary<String, AnyObject> {
-                            //let key = snap.key
+                            let key = post.key
                             //print(currentUser)
                             if let userSubscriptions = currentUser["subscriptions"] as? NSDictionary {
                                 
@@ -113,6 +114,7 @@ class ActivityVC: UIViewController, CLLocationManagerDelegate, UITableViewDelega
                                     if isUserSubscribed { break }
                                 }
                                 if isUserSubscribed && currentUser["user_ref"] as? String != postDict["user_id"] as? String {
+                                    
                                     let postLat = Double((postDict["latitude"] as? Double)!)
                                     let postLong = Double((postDict["longitude"] as? Double)!)
                                     let userLat = Double((currentUser["latitude"] as? Double)!)
@@ -122,21 +124,27 @@ class ActivityVC: UIViewController, CLLocationManagerDelegate, UITableViewDelega
                                     let postLocation = CLLocation(latitude: postLat, longitude: postLong)
                                     let userLocation = CLLocation(latitude: userLat, longitude: userLong)
                                     
-                                    print(postDistance!)
-                                    print(postLocation.coordinate)
-                                    print(userLocation.coordinate)
+                                    let distanceBetweenUserAndPost = userLocation.distanceFromLocation(postLocation)
+                                    let isUserInRadius = distanceBetweenUserAndPost - Double(postDistance!)
+                                    
+                                    if(isUserInRadius < 0) {
+                                        print("User is in radius. Adding Post...")
+                                        
+                                        let post = Post(postKey: key, dictionary: postDict)
+                                        self.posts.append(post)
+                                    } else {
+                                        print("User is not in radius.")
+                                        continue
+                                    }
                                     
                                 }
-                                continue
                             } else {
                                 print("User is not subscribed to anything!")
                             }
-                            //                        let post = Post(postKey: key, dictionary: postDict)
-                            //                        self.posts.append(post)
                         }
                     }
                 }
-                //            self.tableView.reloadData()
+                            self.tableView.reloadData()
             })
         }) { (error) in
             print("CurrentUserError: \(error.localizedDescription)")
@@ -180,8 +188,17 @@ class ActivityVC: UIViewController, CLLocationManagerDelegate, UITableViewDelega
     }
     
     
-    func tableView(tableView: UITableView, didSelectRowAtIndexPath indexPath: NSIndexPath) {
+    
+    func collectionView(collectionView: UICollectionView, didSelectItemAtIndexPath indexPath: NSIndexPath) {
+        
+        var post: Post!
+        
+        post = posts[indexPath.row]
+        
+        performSegueWithIdentifier("PostDetailVC", sender: post)
+        
     }
+
     
     
     func numberOfSectionsInTableView(tableView: UITableView) -> Int {
@@ -242,10 +259,15 @@ class ActivityVC: UIViewController, CLLocationManagerDelegate, UITableViewDelega
     }
 
     
-    
+
     func notificationBtnPressed() {
         
     }
+    
+    @IBAction func unwindToActivityPost(segue: UIStoryboardSegue) {
+        
+    }
+
     
     @IBAction func unwindToActivityVC(segue: UIStoryboardSegue) {
         
