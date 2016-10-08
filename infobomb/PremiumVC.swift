@@ -18,7 +18,7 @@ class PremiumVC: UIViewController {
         
         //Subclass navigation bar after app is finished and all other non DRY
         let image = UIImage(named: "metal-bg.jpg")
-        self.navigationController?.navigationBar.setBackgroundImage(image, forBarMetrics: .Default)
+        self.navigationController?.navigationBar.setBackgroundImage(image, for: .default)
         self.title = "Premium"
         self.navigationController?.navigationBar.titleTextAttributes = [NSFontAttributeName: UIFont(name: "TOSCA ZERO", size: 30)!, NSForegroundColorAttributeName: LIGHT_GREY]
         

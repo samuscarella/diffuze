@@ -16,24 +16,24 @@ class TransparentEmailField: UITextField {
     }
     
     //For placeholder
-    override func textRectForBounds(bounds: CGRect) -> CGRect {
+    override func textRect(forBounds bounds: CGRect) -> CGRect {
         
-        return CGRectInset(bounds, 5, 0)
+        return bounds.insetBy(dx: 5, dy: 0)
     }
     
     //For editable text
-    override func editingRectForBounds(bounds: CGRect) -> CGRect {
-        return CGRectInset(bounds, 5, 0)
+    override func editingRect(forBounds bounds: CGRect) -> CGRect {
+        return bounds.insetBy(dx: 5, dy: 0)
     }
     
     func makeTextFieldBottomBorderOnly() {
         
         let bottomLine = CALayer()
-        bottomLine.frame = CGRectMake(0.0, frame.height - 1, frame.width, 1.0)
-        bottomLine.backgroundColor = UIColor.whiteColor().CGColor
-        borderStyle = UITextBorderStyle.None
+        bottomLine.frame = CGRect(x: 0.0, y: frame.height - 1, width: frame.width, height: 1.0)
+        bottomLine.backgroundColor = UIColor.white.cgColor
+        borderStyle = UITextBorderStyle.none
         layer.addSublayer(bottomLine)
-        attributedPlaceholder = NSAttributedString(string: "Email", attributes:[NSForegroundColorAttributeName: UIColor.whiteColor()])
+        attributedPlaceholder = NSAttributedString(string: "Email", attributes:[NSForegroundColorAttributeName: UIColor.white])
         
     }
 

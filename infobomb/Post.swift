@@ -11,19 +11,19 @@ import Firebase
 
 class Post {
     
-    private var _message: String?
-    private var _type: String!
-    private var _categories: [String]!
-    private var _postKey: String!
-    private var _postRef: FIRDatabaseReference!
-    private var _user_id: String!
-    private var _username: String!
-    private var _shares: Int!
-    private var _longitude: Double!
-    private var _latitude: Double!
-    private var _likes: Int!
-    private var _dislikes: Int!
-    private var _distance: Int!
+    fileprivate var _message: String?
+    fileprivate var _type: String!
+    fileprivate var _categories: [String]!
+    fileprivate var _postKey: String!
+    fileprivate var _postRef: FIRDatabaseReference!
+    fileprivate var _user_id: String!
+    fileprivate var _username: String!
+    fileprivate var _shares: Int!
+    fileprivate var _longitude: Double!
+    fileprivate var _latitude: Double!
+    fileprivate var _likes: Int!
+    fileprivate var _dislikes: Int!
+    fileprivate var _distance: Int!
 
     
     var message: String? {

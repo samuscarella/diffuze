@@ -22,23 +22,23 @@ class CategoryCell: UITableViewCell {
     var request: Request?
     var checked: [[String:String]] = []
 
-    override func drawRect(rect: CGRect) {
+    override func draw(_ rect: CGRect) {
         
         categoryImage.layer.cornerRadius = categoryImage.frame.size.width / 2
         categoryImage.clipsToBounds = true
     }
     
-    override func setSelected(selected: Bool, animated: Bool) {
+    override func setSelected(_ selected: Bool, animated: Bool) {
         super.setSelected(selected, animated: animated)
         
         // Configure the view for the selected state
     }
     
-    func configureCell(category: Category, img: UIImage?) {
+    func configureCell(_ category: Category, img: UIImage?) {
         
         self.category = category
         self.categoryTxt.text = category.name
-        self.categoryCheckmark.hidden = true
+        self.categoryCheckmark.isHidden = true
         
         //subscriptionRef = UserService.ds.REF_USER_CURRENT.child("subscriptions").child(category.name)
         
@@ -46,14 +46,14 @@ class CategoryCell: UITableViewCell {
             self.categoryImage.image = img
         } else {
             
-            request = Alamofire.request(.GET, category.image_path!).validate(contentType: ["image/*"]).response(completionHandler: { request, response, data, err in
+            request = Alamofire.request(category.image_path!).validate(contentType: ["image/*"]).response { response in
                 
-                if err == nil {
-                    let img = UIImage(data: data!)!
+                if response.error == nil {
+                    let img = UIImage(data: response.data!)!
                     self.categoryImage.image = img
-                    SubscriptionsVC.imageCache.setObject(img, forKey: self.category.image_path!)
+                    SubscriptionsVC.imageCache.setObject(img, forKey: self.category.image_path! as AnyObject)
                 }
-            })
+            }
         }
         
 //        subscriptionRef.child(category.name).observeSingleEventOfType(.Value, withBlock: { (snapshot) in

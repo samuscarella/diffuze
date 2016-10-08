@@ -25,48 +25,48 @@ class LeftNavVC: UITableViewController {
         
         //Subclass navigation bar after app is finished and all other non DRY
         table.allowsSelection = false
-        table.scrollEnabled = false;
-        activityBtn.setTitleColor(CRIMSON, forState: .Normal)
+        table.isScrollEnabled = false;
+        activityBtn.setTitleColor(CRIMSON, for: UIControlState())
     }
     
     
-    @IBAction func navBtnPressed(sender: AnyObject) {
+    @IBAction func navBtnPressed(_ sender: AnyObject) {
         
         for button in navButtons {
-            button.setTitleColor(UIColor.whiteColor(), forState: .Normal)
+            button.setTitleColor(UIColor.white, for: UIControlState())
         }
         
         if(sender.tag == 1) {
-            sender.setTitleColor(CRIMSON, forState: .Normal)
+            sender.setTitleColor(CRIMSON, for: UIControlState())
         } else if(sender.tag == 2) {
-            sender.setTitleColor(CRIMSON, forState: .Normal)
+            sender.setTitleColor(CRIMSON, for: UIControlState())
         } else if(sender.tag == 3) {
-            sender.setTitleColor(CRIMSON, forState: .Normal)
+            sender.setTitleColor(CRIMSON, for: UIControlState())
         } else if(sender.tag == 4) {
-            sender.setTitleColor(CRIMSON, forState: .Normal)
+            sender.setTitleColor(CRIMSON, for: UIControlState())
         } else if(sender.tag == 5) {
-            sender.setTitleColor(CRIMSON, forState: .Normal)
+            sender.setTitleColor(CRIMSON, for: UIControlState())
         } else if(sender.tag == 6) {
-            sender.setTitleColor(CRIMSON, forState: .Normal)
+            sender.setTitleColor(CRIMSON, for: UIControlState())
         } else if(sender.tag == 7) {
-            sender.setTitleColor(CRIMSON, forState: .Normal)
+            sender.setTitleColor(CRIMSON, for: UIControlState())
         } else if(sender.tag == 8) {
-            sender.setTitleColor(CRIMSON, forState: .Normal)
+            sender.setTitleColor(CRIMSON, for: UIControlState())
         } else if(sender.tag == 9) {
-            sender.setTitleColor(CRIMSON, forState: .Normal)
+            sender.setTitleColor(CRIMSON, for: UIControlState())
         } else if(sender.tag == 10) {
-            sender.setTitleColor(CRIMSON, forState: .Normal)
+            sender.setTitleColor(CRIMSON, for: UIControlState())
         } else if(sender.tag == 11) {
-            sender.setTitleColor(CRIMSON, forState: .Normal)
+            sender.setTitleColor(CRIMSON, for: UIControlState())
         } else if(sender.tag == 12) {
-            sender.setTitleColor(CRIMSON, forState: .Normal)
+            sender.setTitleColor(CRIMSON, for: UIControlState())
             
                 do {
                     try FIRAuth.auth()!.signOut()
 //                    NSNotificationCenter.defaultCenter().postNotificationName("userSignedOut", object: nil)
-                    NSUserDefaults.standardUserDefaults().removeObjectForKey(KEY_UID)
-                    NSUserDefaults.standardUserDefaults().removeObjectForKey(KEY_USERNAME)
-                    self.navigationController?.popToRootViewControllerAnimated(true)
+                    UserDefaults.standard.removeObject(forKey: KEY_UID)
+                    UserDefaults.standard.removeObject(forKey: KEY_USERNAME)
+                    self.navigationController?.popToRootViewController(animated: true)
                 } catch let err as NSError {
                     print(err)
                 }            

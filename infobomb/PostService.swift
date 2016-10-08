@@ -13,10 +13,10 @@ class PostService {
     
     static let ds = PostService()
     
-    private var _REF_BASE = URL_BASE
-    private var _REF_POSTS = URL_BASE.child("posts")
-    private var _REF_ACTIVE_POSTS = URL_BASE.child("active-posts")
-    private var _REF_ACTIVITY_FEED = URL_BASE.child("user-activity-feed")
+    fileprivate var _REF_BASE = URL_BASE
+    fileprivate var _REF_POSTS = URL_BASE.child("posts")
+    fileprivate var _REF_ACTIVE_POSTS = URL_BASE.child("active-posts")
+    fileprivate var _REF_ACTIVITY_FEED = URL_BASE.child("user-activity-feed")
     
     var REF_BASE: FIRDatabaseReference {
         return _REF_BASE

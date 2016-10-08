@@ -19,29 +19,52 @@ class CategoryVC: UIViewController, UITableViewDataSource, UITableViewDelegate, 
 
     @IBOutlet weak var backBtn: UIBarButtonItem!
     @IBOutlet weak var tableView: UITableView!
+    @IBOutlet weak var createBtn: MaterialButton!
     
+    let storage = FIRStorage.storage()
+    let firebasePost = PostService.ds.REF_POSTS.childByAutoId()
+    var key: String! = nil
+
+    var userID: String!
+    var username: String!
     var explosionPlayer: AVAudioPlayer!
     var categories = [Category]()
     var checked: [[String:String]] = []
     var message: String?
+    var linkObj: [String:AnyObject] = [:]
     var previousVC: String!
     var locationService: LocationService!
+    var post = [String:AnyObject]()
 
 //    var locationManager: CLLocationManager!
 //    var currentLocation: CLLocation!
     
     override func viewDidLoad() {
         super.viewDidLoad()
-        NSUserDefaults.standardUserDefaults().setValue(false, forKey: "_UIConstraintBasedLayoutLogUnsatisfiable")
+        UserDefaults.standard.setValue(false, forKey: "_UIConstraintBasedLayoutLogUnsatisfiable")
 
         print("CategoryVC")
         print("\(message)\(previousVC)")
+        print("\(linkObj["image"])\(previousVC)\n\n\n\n\n\n")
         
         //Subclass navigation bar after app is finished and all other non DRY
-        let image = UIImage(named: "metal-bg.jpg")?.resizableImageWithCapInsets(UIEdgeInsetsMake(0, 15, 0, 15), resizingMode: UIImageResizingMode.Stretch)
-        self.navigationController?.navigationBar.setBackgroundImage(image, forBarMetrics: .Default)
+        let image = UIImage(named: "metal-bg.jpg")?.resizableImage(withCapInsets: UIEdgeInsetsMake(0, 15, 0, 15), resizingMode: UIImageResizingMode.stretch)
+        self.navigationController?.navigationBar.setBackgroundImage(image, for: .default)
         self.title = "Pick Categories"
         self.navigationController?.navigationBar.titleTextAttributes = [NSFontAttributeName: UIFont(name: "TOSCA ZERO", size: 30)!, NSForegroundColorAttributeName: LIGHT_GREY]
+        
+        createBtn.setTitleColor(ANTI_FLASH_WHITE, for: .normal)
+
+        if previousVC == TEXT_POST_VC {
+            createBtn.backgroundColor = AUBURN_RED
+        } else if previousVC == LINK_POST_VC {
+            createBtn.backgroundColor = FIRE_ORANGE
+        }
+        
+        userID = UserService.ds.currentUserID
+        username = UserService.ds.currentUserUsername
+        key = firebasePost.key
+
         
         tableView.delegate = self
         tableView.dataSource = self
@@ -52,7 +75,7 @@ class CategoryVC: UIViewController, UITableViewDataSource, UITableViewDelegate, 
 //        locationService.addObserver(self, forKeyPath: "longitude", options: .New, context: &longitude)
 
         
-        CategoryService.ds.REF_CATEGORIES.queryOrderedByChild("name").observeEventType(FIRDataEventType.Value, withBlock: { (snapshot) in
+        CategoryService.ds.REF_CATEGORIES.queryOrdered(byChild: "name").observe(FIRDataEventType.value, with: { (snapshot) in
             
             if let snapshots = snapshot.children.allObjects as? [FIRDataSnapshot] {
                 
@@ -86,22 +109,22 @@ class CategoryVC: UIViewController, UITableViewDataSource, UITableViewDelegate, 
 //    }
 
     
-    func tableView(tableView: UITableView, heightForRowAtIndexPath indexPath: NSIndexPath) -> CGFloat {
+    func tableView(_ tableView: UITableView, heightForRowAt indexPath: IndexPath) -> CGFloat {
         return 50.0
     }
     
-    func tableView(tableView: UITableView, cellForRowAtIndexPath indexPath: NSIndexPath) -> UITableViewCell {
+    func tableView(_ tableView: UITableView, cellForRowAt indexPath: IndexPath) -> UITableViewCell {
         
-        let category = categories[indexPath.row]
+        let category = categories[(indexPath as NSIndexPath).row]
         
-        if let cell = tableView.dequeueReusableCellWithIdentifier("CategoryCell") as? CategoryCell {
+        if let cell = tableView.dequeueReusableCell(withIdentifier: "CategoryCell") as? CategoryCell {
             
             cell.request?.cancel()
             
             var img: UIImage?
             
             if let url = category.image_path {
-                img = SubscriptionsVC.imageCache.objectForKey(url) as? UIImage
+                img = SubscriptionsVC.imageCache.object(forKey: url as AnyObject) as? UIImage
             }
             
             cell.configureCell(category, img: img)
@@ -114,12 +137,12 @@ class CategoryVC: UIViewController, UITableViewDataSource, UITableViewDelegate, 
         }
     }
     
-    func tableView(tableView: UITableView, didSelectRowAtIndexPath indexPath: NSIndexPath) {
+    func tableView(_ tableView: UITableView, didSelectRowAt indexPath: IndexPath) {
         
 //        let category = categories[indexPath.row]
-        if let cell = tableView.cellForRowAtIndexPath(indexPath) {
+        if let cell = tableView.cellForRow(at: indexPath) {
             
-            let category = categories[indexPath.row]
+            let category = categories[(indexPath as NSIndexPath).row]
 //            print(category.categoryKey)
             var doesItExist = false
             
@@ -128,14 +151,14 @@ class CategoryVC: UIViewController, UITableViewDataSource, UITableViewDelegate, 
                     category.categoryKey:category.name
                 ]
                 checked.append(cat)
-                cell.accessoryType = .Checkmark
+                cell.accessoryType = .checkmark
             } else if checked.count > 0 {
-                for(index, value) in checked.enumerate() {
+                for(index, value) in checked.enumerated() {
 //                    print(value)
                     if let _ = value[category.categoryKey] {
                         doesItExist = true
-                        checked.removeAtIndex(index)
-                        cell.accessoryType = .None
+                        checked.remove(at: index)
+                        cell.accessoryType = .none
                         break
                     }
                 }
@@ -144,7 +167,7 @@ class CategoryVC: UIViewController, UITableViewDataSource, UITableViewDelegate, 
                         category.categoryKey: category.name
                     ]
                     checked.append(cat)
-                    cell.accessoryType = .Checkmark
+                    cell.accessoryType = .checkmark
                 }
 
             }
@@ -152,124 +175,27 @@ class CategoryVC: UIViewController, UITableViewDataSource, UITableViewDelegate, 
         }
     }
     
-    func tableView(tableView: UITableView, numberOfRowsInSection section: Int) -> Int {
+    func tableView(_ tableView: UITableView, numberOfRowsInSection section: Int) -> Int {
         return categories.count
     }
     
-    func numberOfSectionsInTableView(tableView: UITableView) -> Int {
+    func numberOfSections(in tableView: UITableView) -> Int {
         return 1
     }
     
     
-    @IBAction func createPostBtnPressed(sender: AnyObject) {
+    @IBAction func createPostBtnPressed(_ sender: AnyObject) {
+        
         if checked.count > 0 {
 
-            var post = [String:AnyObject]()
-            
-            if CLLocationManager.authorizationStatus() == CLAuthorizationStatus.Denied {
+            if CLLocationManager.authorizationStatus() == CLAuthorizationStatus.denied {
                 print("You have to allow location to make a post!")
-            } else if CLLocationManager.authorizationStatus() == CLAuthorizationStatus.AuthorizedWhenInUse || CLLocationManager.authorizationStatus() == CLAuthorizationStatus.NotDetermined {
+            } else if CLLocationManager.authorizationStatus() == CLAuthorizationStatus.authorizedWhenInUse || CLLocationManager.authorizationStatus() == CLAuthorizationStatus.notDetermined {
                 
-                let userID = UserService.ds.currentUserID
-                let username = UserService.ds.currentUserUsername
-                
-                if previousVC == "TextPostVC" {
-                    
-                    if let msg = message where msg != "" {
-                    
-                        let firebasePost = PostService.ds.REF_POSTS.childByAutoId()
-                        let key = firebasePost.key
-                        let activeFirebasePost = PostService.ds.REF_ACTIVE_POSTS.child(key)
-                        let userPosts = UserService.ds.REF_USER_POSTS.child(userID).child(key)
-                        let postCategoryRef = PostService.ds.REF_POSTS.child(key).child("categories")
-
-                        var selectedCategories: [String:AnyObject] = [:]
-                        for(_, value) in checked.enumerate() {
-                            for (_, val) in value {
-//                                let selectedCategory = [
-//                                    val: true
-//                                ]
-                                selectedCategories[val] = true
-                            }
-                        }
-                        let msg = message!
-
-                            post = [
-                                "user_id": userID,
-                                "username": username,
-                                "post_ref": key,
-                                "categories": selectedCategories,
-                                "type": "text",
-                                "message": msg,
-                                "active": true,
-                                "likes": 0,
-                                "dislikes": 0,
-                                "shares": 0,
-                                "latitude": DALLAS_LATITUDE,
-                                "longitude": DALLAS_LONGITUDE,
-                                "distance": 1000.0,
-                                "usersInRadius": 0,
-                                "created_at": FIRServerValue.timestamp()
-                            ]
-                
-                        activeFirebasePost.setValue(post)
-                        firebasePost.setValue(post)
-                        userPosts.setValue(post)
-
-                        
-                        for(_, value) in checked.enumerate() {
-                            for (_, val) in value {
-                                let selectedCategory = [
-                                    val: true
-                                ]
-                                postCategoryRef.updateChildValues(selectedCategory)
-                                userPosts.child("categories").updateChildValues(selectedCategory)
-                                activeFirebasePost.child("categories").updateChildValues(selectedCategory)
-                                //activePostCategoryRef.updateChildValues(selectedCategory)
-                            }
-                        }
-                        
-                        let userPostsRef = UserService.ds.REF_USER_CURRENT.child("posts")
-                        let userPost = [
-                            key: true
-                        ]
-                        userPostsRef.updateChildValues(userPost)
-
-                        
-                        let url = NSURL(string: "https://nameless-chamber-44579.herokuapp.com/post")!
-                        Alamofire.request(.POST, url, parameters: post).validate().responseString { response in
-                            switch response.result {
-                            case .Success( _):
-                                print(response.result.value!)
-                                print("Validation Successful")
-                            case .Failure(let error):
-                                print(error)
-                            }
-                        }
-//                        Alamofire.request(.GET, url).validate().responseJSON { response in
-//                            switch response.result {
-//                            case .Success:
-//                                print(response.result.value!)
-////                                print(response.data)
-////                                print(response.response)
-////                                print(response.request)
-//
-//                                print("Validation Successful")
-//                            case .Failure(let error):
-//                                print("ERROR:\n")
-//                                print(error)
-//                            }
-//                        }
-
-//                        post["categories"] = nil
-                
-                
-
-//                        print(post)
-                        playExplosion()
-                        self.navigationController?.popToRootViewControllerAnimated(true)
-                    }
-                    //End of if message != nil
+                if previousVC == TEXT_POST_VC {
+                    self.gatherPostData(postType: "text", data: message! as AnyObject)
+                } else if previousVC == LINK_POST_VC {
+                    self.gatherPostData(postType: "link", data: linkObj as AnyObject)
                 }
             }
         } else {
@@ -277,12 +203,134 @@ class CategoryVC: UIViewController, UITableViewDataSource, UITableViewDelegate, 
         }
     }
     
-
-    @IBAction func backBtnPressed(sender: AnyObject) {
+    func gatherPostData(postType: String, data: AnyObject) {
         
-        if previousVC == "TextPostVC" {
+        
+        let storageRef = storage.reference(forURL: "gs://infobomb-9b66c.appspot.com")
+        
+        var selectedCategories: [String:AnyObject] = [:]
+        for(_, value) in checked.enumerated() {
+            for (_, val) in value {
+                selectedCategories[val] = true as AnyObject?
+            }
+        }
+        
+        post = [
+            "user_id": userID as AnyObject,
+            "username": username as AnyObject,
+            "post_ref": key as AnyObject,
+            "categories": selectedCategories as AnyObject,
+            "active": true as AnyObject,
+            "likes": 0 as AnyObject,
+            "dislikes": 0 as AnyObject,
+            "shares": 0 as AnyObject,
+            "latitude": DALLAS_LATITUDE as AnyObject,
+            "longitude": DALLAS_LONGITUDE as AnyObject,
+            "distance": 1000.0 as AnyObject,
+            "usersInRadius": 0 as AnyObject,
+            "created_at": FIRServerValue.timestamp() as AnyObject
+        ]
+        
+        if postType == "text" {
+            
+            post["type"] = postType as AnyObject?
+            print(data)
+            if let message = data as? String {
+                post["message"] = message as AnyObject?
+            }
+            self.postToFirebase()
+            
+        } else if postType == "link" {
+            
+            post["type"] = postType as AnyObject?
+            
+            if let linkTitle = data["title"] as! String? {
+                post["title"] = linkTitle as AnyObject?
+            }
+            if let linkDescription = data["description"] as! String? {
+                post["description"] = linkDescription as AnyObject?
+            }
+            if let linkShortUrl = data["canonicalUrl"] as! String? {
+                post["shortUrl"] = linkShortUrl as AnyObject?
+            }
+            if let linkUrl = data["url"] as! String? {
+                post["url"] = linkUrl as AnyObject?
+            }
+            if let linkImage = data["image"] as! NSData? {
+                //need to store in storage and reference it from path
+                let linkPreviewRef = storageRef.child("link-preview/image_\(NSUUID().uuidString)")
+                // Upload the file to the path "images/rivers.jpg"
+                let uploadTask = linkPreviewRef.put(linkImage as Data, metadata: nil) { metadata, error in
+                    if (error != nil) {
+                        // Uh-oh, an error occurred!
+                        print("Failed to upload image to firebase\n\n\n\n\n\n\n\n")
+                    } else {
+                        print("HERE")
+                        let downloadURL = metadata!.downloadURL()!.absoluteString
+                        self.post["image"] = downloadURL as AnyObject?
+                        self.postToFirebase()
+                    }
+                }
+                return
+            }
+            self.postToFirebase()
+        }
+        
+
+
+    }
+    
+    func postToFirebase() {
+        
+        let activeFirebasePost = PostService.ds.REF_ACTIVE_POSTS.child(key)
+        let userPosts = UserService.ds.REF_USER_POSTS.child(userID).child(key)
+        let postCategoryRef = PostService.ds.REF_POSTS.child(key).child("categories")
+
+        
+        activeFirebasePost.setValue(post)
+        firebasePost.setValue(post)
+        userPosts.setValue(post)
+        
+        for(_, value) in checked.enumerated() {
+            for (_, val) in value {
+                let selectedCategory = [
+                    val: true
+                ]
+                postCategoryRef.updateChildValues(selectedCategory)
+                userPosts.child("categories").updateChildValues(selectedCategory)
+                activeFirebasePost.child("categories").updateChildValues(selectedCategory)
+            }
+        }
+        
+        let userPostsRef = UserService.ds.REF_USER_CURRENT.child("posts")
+        let userPost = [
+            key: true
+        ]
+        userPostsRef.updateChildValues(userPost)
+        
+        let url = URL(string: "https://nameless-chamber-44579.herokuapp.com/post")!
+        Alamofire.request(url, method: .post, parameters: post).validate().responseJSON { response in
+            switch response.result {
+            case .success( _):
+                print(response.result.value!)
+                print("Validation Successful")
+                self.playExplosion()
+            case .failure(let error):
+                print("POST REQUEST ERROR: \(error)")
+            }
+        }
+
+    }
+    
+
+    @IBAction func backBtnPressed(_ sender: AnyObject) {
+        
+        if previousVC == TEXT_POST_VC {
 //            locationService.stopUpdatingLocation()
-            self.performSegueWithIdentifier("unwindToTextPost", sender: self)
+            self.performSegue(withIdentifier: "unwindToTextPost", sender: self)
+        } else if previousVC == LINK_POST_VC {
+            //locationService.stopUpdatingLocation()
+            self.performSegue(withIdentifier: "unwindToLinkPost", sender: self)
         }
         
     }
@@ -312,10 +360,10 @@ class CategoryVC: UIViewController, UITableViewDataSource, UITableViewDelegate, 
 
     func playExplosion() {
         
-        let path = NSBundle.mainBundle().pathForResource("blast", ofType: "mp3")!
+        let path = Bundle.main.path(forResource: "blast", ofType: "mp3")!
         
         do {
-            explosionPlayer = try AVAudioPlayer(contentsOfURL: NSURL(string: path)!)
+            explosionPlayer = try AVAudioPlayer(contentsOf: URL(string: path)!)
             explosionPlayer.prepareToPlay()
             explosionPlayer.play()
             

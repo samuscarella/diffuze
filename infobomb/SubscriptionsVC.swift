@@ -17,14 +17,14 @@ class SubscriptionsVC: UIViewController, UITableViewDataSource, UITableViewDeleg
     
     var categories = [Category]()
     
-    static var imageCache = NSCache()
+    static var imageCache = NSCache<AnyObject, AnyObject>()
 
     override func viewDidLoad() {
         super.viewDidLoad()
         
         //Subclass navigation bar after app is finished and all other non DRY
-        let image = UIImage(named: "metal-bg.jpg")?.resizableImageWithCapInsets(UIEdgeInsetsMake(0, 15, 0, 15), resizingMode: UIImageResizingMode.Stretch)
-        self.navigationController?.navigationBar.setBackgroundImage(image, forBarMetrics: .Default)
+        let image = UIImage(named: "metal-bg.jpg")?.resizableImage(withCapInsets: UIEdgeInsetsMake(0, 15, 0, 15), resizingMode: UIImageResizingMode.stretch)
+        self.navigationController?.navigationBar.setBackgroundImage(image, for: .default)
         self.title = "Subscriptions"
         self.navigationController?.navigationBar.titleTextAttributes = [NSFontAttributeName: UIFont(name: "TOSCA ZERO", size: 30)!, NSForegroundColorAttributeName: LIGHT_GREY]
         
@@ -35,26 +35,26 @@ class SubscriptionsVC: UIViewController, UITableViewDataSource, UITableViewDeleg
 //        let menuBar = UIBarButtonItem(customView: menuButton)
 //        self.navigationItem.leftBarButtonItem = menuBar
 
-        let button: UIButton = UIButton(type: UIButtonType.Custom)
-        button.setImage(UIImage(named: "notification.png"), forState: UIControlState.Normal)
+        let button: UIButton = UIButton(type: UIButtonType.custom)
+        button.setImage(UIImage(named: "notification.png"), for: UIControlState())
 //        button.addTarget(self, action: #selector(SubscriptionsVC.notificationBtnPressed), forControlEvents: UIControlEvents.TouchUpInside)
-        button.frame = CGRectMake(0, 0, 27, 27)
+        button.frame = CGRect(x: 0, y: 0, width: 27, height: 27)
         let barButton = UIBarButtonItem(customView: button)
         self.navigationItem.rightBarButtonItem = barButton
         
-        let menuButton: UIButton = UIButton(type: UIButtonType.Custom)
-        menuButton.setImage(UIImage(named: "menu-btn.png"), forState: UIControlState.Normal)
-        menuButton.frame = CGRectMake(0, 0, 60, 30)
+        let menuButton: UIButton = UIButton(type: UIButtonType.custom)
+        menuButton.setImage(UIImage(named: "menu-btn.png"), for: UIControlState())
+        menuButton.frame = CGRect(x: 0, y: 0, width: 60, height: 30)
         let leftBarButton = UIBarButtonItem(customView: menuButton)
         self.navigationItem.leftBarButtonItem = leftBarButton
 
 
-        NSNotificationCenter.defaultCenter().addObserver(LocationService(), selector: #selector(LocationService.stopUpdatingLocation), name: "userSignedOut", object: nil)
+        NotificationCenter.default.addObserver(LocationService(), selector: #selector(LocationService.stopUpdatingLocation), name: NSNotification.Name(rawValue: "userSignedOut"), object: nil)
 
         tableView.delegate = self
         tableView.dataSource = self
 
-        CategoryService.ds.REF_CATEGORIES.queryOrderedByChild("name").observeEventType(FIRDataEventType.Value, withBlock: { (snapshot) in
+        CategoryService.ds.REF_CATEGORIES.queryOrdered(byChild: "name").observe(FIRDataEventType.value, with: { (snapshot) in
             
             if let snapshots = snapshot.children.allObjects as? [FIRDataSnapshot] {
                 
@@ -76,28 +76,28 @@ class SubscriptionsVC: UIViewController, UITableViewDataSource, UITableViewDeleg
         //Burger side menu
         if revealViewController() != nil {
             
-            menuButton.addTarget(revealViewController(), action: #selector(SWRevealViewController.revealToggle(_:)), forControlEvents: UIControlEvents.TouchUpInside)
+            menuButton.addTarget(revealViewController(), action: #selector(SWRevealViewController.revealToggle(_:)), for: UIControlEvents.touchUpInside)
         }
 
     }
     
 
-    func tableView(tableView: UITableView, heightForRowAtIndexPath indexPath: NSIndexPath) -> CGFloat {
+    func tableView(_ tableView: UITableView, heightForRowAt indexPath: IndexPath) -> CGFloat {
         return 50.0
     }
     
-    func tableView(tableView: UITableView, cellForRowAtIndexPath indexPath: NSIndexPath) -> UITableViewCell {
+    func tableView(_ tableView: UITableView, cellForRowAt indexPath: IndexPath) -> UITableViewCell {
         
-        let category = categories[indexPath.row]
+        let category = categories[(indexPath as NSIndexPath).row]
         
-        if let cell = tableView.dequeueReusableCellWithIdentifier("SubscriptionCell") as? SubscriptionCell {
+        if let cell = tableView.dequeueReusableCell(withIdentifier: "SubscriptionCell") as? SubscriptionCell {
             
             cell.request?.cancel()
         
             var img: UIImage?
             
             if let url = category.image_path {
-                img = SubscriptionsVC.imageCache.objectForKey(url) as? UIImage
+                img = SubscriptionsVC.imageCache.object(forKey: url as AnyObject) as? UIImage
             }
         
             cell.configureCell(category, img: img)
@@ -109,11 +109,11 @@ class SubscriptionsVC: UIViewController, UITableViewDataSource, UITableViewDeleg
         }
     }
 
-    func tableView(tableView: UITableView, numberOfRowsInSection section: Int) -> Int {
+    func tableView(_ tableView: UITableView, numberOfRowsInSection section: Int) -> Int {
         return categories.count
     }
     
-    func numberOfSectionsInTableView(tableView: UITableView) -> Int {
+    func numberOfSections(in tableView: UITableView) -> Int {
         return 1
     }
     

@@ -11,8 +11,8 @@
 		931479D01D88D34600F5E366 /* PostService.swift in Sources */ = {isa = PBXBuildFile; fileRef = 931479CF1D88D34600F5E366 /* PostService.swift */; };
 		9315C06E1D8376130051BFCD /* FirebaseStorage.swift in Sources */ = {isa = PBXBuildFile; fileRef = 9315C06D1D8376130051BFCD /* FirebaseStorage.swift */; };
 		931CC0061D9AE377005DA803 /* PostDetailVC.swift in Sources */ = {isa = PBXBuildFile; fileRef = 931CC0051D9AE377005DA803 /* PostDetailVC.swift */; };
-		931EC27C1D8E05A40072BAF1 /* Pulse.swift in Sources */ = {isa = PBXBuildFile; fileRef = 931EC27B1D8E05A40072BAF1 /* Pulse.swift */; };
 		9324326E1D98B73000D5C3DA /* ShakeImage.swift in Sources */ = {isa = PBXBuildFile; fileRef = 9324326D1D98B73000D5C3DA /* ShakeImage.swift */; };
+		933A0AD61DA154C0008E58E6 /* LinkPostVC.swift in Sources */ = {isa = PBXBuildFile; fileRef = 933A0AD51DA154C0008E58E6 /* LinkPostVC.swift */; };
 		933C2C201D803C4100DB89AE /* TopNav.swift in Sources */ = {isa = PBXBuildFile; fileRef = 933C2C1F1D803C4100DB89AE /* TopNav.swift */; };
 		933C2C221D8087F400DB89AE /* SubscriptionCell.swift in Sources */ = {isa = PBXBuildFile; fileRef = 933C2C211D8087F400DB89AE /* SubscriptionCell.swift */; };
 		9340CA751D7DB10800AE1231 /* AppDelegate.swift in Sources */ = {isa = PBXBuildFile; fileRef = 9340CA741D7DB10800AE1231 /* AppDelegate.swift */; };
@@ -52,6 +52,7 @@
 		93C1645B1D8EBD24004B0432 /* PostCell.swift in Sources */ = {isa = PBXBuildFile; fileRef = 93C1645A1D8EBD24004B0432 /* PostCell.swift */; };
 		93C1645D1D8F299A004B0432 /* PostTextView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 93C1645C1D8F299A004B0432 /* PostTextView.swift */; };
 		93C1645F1D8F3A4B004B0432 /* MaterialUIView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 93C1645E1D8F3A4B004B0432 /* MaterialUIView.swift */; };
+		93C7CABC1DA9602600B46D06 /* ImagePostVC.swift in Sources */ = {isa = PBXBuildFile; fileRef = 93C7CABB1DA9602600B46D06 /* ImagePostVC.swift */; };
 		93C893021D80F0D4008B792D /* Category.swift in Sources */ = {isa = PBXBuildFile; fileRef = 93C893011D80F0D4008B792D /* Category.swift */; };
 		93C893041D81811E008B792D /* CategoryService.swift in Sources */ = {isa = PBXBuildFile; fileRef = 93C893031D81811E008B792D /* CategoryService.swift */; };
 		93C893101D823800008B792D /* Sdk in Resources */ = {isa = PBXBuildFile; fileRef = 93C8930F1D823800008B792D /* Sdk */; };
@@ -60,14 +61,15 @@
 		93EFD5751D7F9CB800455DF0 /* Main.storyboard in Resources */ = {isa = PBXBuildFile; fileRef = 93EFD5731D7F9CB800455DF0 /* Main.storyboard */; };
 		93EFD5771D7F9EDE00455DF0 /* SubscriptionsVC.swift in Sources */ = {isa = PBXBuildFile; fileRef = 93EFD5761D7F9EDE00455DF0 /* SubscriptionsVC.swift */; };
 		93EFD5791D7FAD2000455DF0 /* PremiumVC.swift in Sources */ = {isa = PBXBuildFile; fileRef = 93EFD5781D7FAD2000455DF0 /* PremiumVC.swift */; };
+		93F177D81DA33FA4002D0570 /* MaterialImgView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 93F177D71DA33FA4002D0570 /* MaterialImgView.swift */; };
 /* End PBXBuildFile section */
 
 /* Begin PBXFileReference section */
 		931479CF1D88D34600F5E366 /* PostService.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = PostService.swift; sourceTree = "<group>"; };
 		9315C06D1D8376130051BFCD /* FirebaseStorage.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = FirebaseStorage.swift; sourceTree = "<group>"; };
 		931CC0051D9AE377005DA803 /* PostDetailVC.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = PostDetailVC.swift; sourceTree = "<group>"; };
-		931EC27B1D8E05A40072BAF1 /* Pulse.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = Pulse.swift; sourceTree = "<group>"; };
 		9324326D1D98B73000D5C3DA /* ShakeImage.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = ShakeImage.swift; sourceTree = "<group>"; };
+		933A0AD51DA154C0008E58E6 /* LinkPostVC.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = LinkPostVC.swift; sourceTree = "<group>"; };
 		933C2C1F1D803C4100DB89AE /* TopNav.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = TopNav.swift; sourceTree = "<group>"; };
 		933C2C211D8087F400DB89AE /* SubscriptionCell.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = SubscriptionCell.swift; sourceTree = "<group>"; };
 		9340CA711D7DB10800AE1231 /* infobomb.app */ = {isa = PBXFileReference; explicitFileType = wrapper.application; includeInIndex = 0; path = infobomb.app; sourceTree = BUILT_PRODUCTS_DIR; };
@@ -111,6 +113,7 @@
 		93C1645A1D8EBD24004B0432 /* PostCell.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = PostCell.swift; sourceTree = "<group>"; };
 		93C1645C1D8F299A004B0432 /* PostTextView.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = PostTextView.swift; sourceTree = "<group>"; };
 		93C1645E1D8F3A4B004B0432 /* MaterialUIView.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = MaterialUIView.swift; sourceTree = "<group>"; };
+		93C7CABB1DA9602600B46D06 /* ImagePostVC.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = ImagePostVC.swift; sourceTree = "<group>"; };
 		93C893011D80F0D4008B792D /* Category.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = Category.swift; sourceTree = "<group>"; };
 		93C893031D81811E008B792D /* CategoryService.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = CategoryService.swift; sourceTree = "<group>"; };
 		93C8930F1D823800008B792D /* Sdk */ = {isa = PBXFileReference; lastKnownFileType = folder; path = Sdk; sourceTree = "<group>"; };
@@ -119,6 +122,7 @@
 		93EFD5741D7F9CB800455DF0 /* Base */ = {isa = PBXFileReference; lastKnownFileType = file.storyboard; name = Base; path = Base.lproj/Main.storyboard; sourceTree = "<group>"; };
 		93EFD5761D7F9EDE00455DF0 /* SubscriptionsVC.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = SubscriptionsVC.swift; sourceTree = "<group>"; };
 		93EFD5781D7FAD2000455DF0 /* PremiumVC.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = PremiumVC.swift; sourceTree = "<group>"; };
+		93F177D71DA33FA4002D0570 /* MaterialImgView.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = MaterialImgView.swift; sourceTree = "<group>"; };
 		C0FF00DE2CB60F82ECBCC1CC /* Pods-infobomb.release.xcconfig */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = text.xcconfig; name = "Pods-infobomb.release.xcconfig"; path = "Pods/Target Support Files/Pods-infobomb/Pods-infobomb.release.xcconfig"; sourceTree = "<group>"; };
 		F6F8457C302CBD008B41FF0C /* Pods_infobomb.framework */ = {isa = PBXFileReference; explicitFileType = wrapper.framework; includeInIndex = 0; path = Pods_infobomb.framework; sourceTree = BUILT_PRODUCTS_DIR; };
 		FFD2AE8019A0A7458BEC0084 /* Pods-infobomb.debug.xcconfig */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = text.xcconfig; name = "Pods-infobomb.debug.xcconfig"; path = "Pods/Target Support Files/Pods-infobomb/Pods-infobomb.debug.xcconfig"; sourceTree = "<group>"; };
@@ -193,7 +197,6 @@
 				9340CA801D7DB10800AE1231 /* Info.plist */,
 				9340CA9C1D7E2BC200AE1231 /* GoogleService-Info.plist */,
 				93B8E7B01D7ED935005ACC48 /* infobomb-Bridging-Header.h */,
-				931EC27B1D8E05A40072BAF1 /* Pulse.swift */,
 			);
 			path = infobomb;
 			sourceTree = "<group>";
@@ -211,6 +214,8 @@
 				93AA25F71D85ACF4002344D3 /* TextPostVC.swift */,
 				937E3AEA1D85F64B00BB7C01 /* CategoryVC.swift */,
 				931CC0051D9AE377005DA803 /* PostDetailVC.swift */,
+				933A0AD51DA154C0008E58E6 /* LinkPostVC.swift */,
+				93C7CABB1DA9602600B46D06 /* ImagePostVC.swift */,
 			);
 			name = Controller;
 			sourceTree = "<group>";
@@ -232,6 +237,7 @@
 				93C1645C1D8F299A004B0432 /* PostTextView.swift */,
 				93C1645E1D8F3A4B004B0432 /* MaterialUIView.swift */,
 				9324326D1D98B73000D5C3DA /* ShakeImage.swift */,
+				93F177D71DA33FA4002D0570 /* MaterialImgView.swift */,
 			);
 			name = View;
 			sourceTree = "<group>";
@@ -321,12 +327,13 @@
 			isa = PBXProject;
 			attributes = {
 				LastSwiftUpdateCheck = 0730;
-				LastUpgradeCheck = 0730;
+				LastUpgradeCheck = 0800;
 				ORGANIZATIONNAME = samuscarella;
 				TargetAttributes = {
 					9340CA701D7DB10800AE1231 = {
 						CreatedOnToolsVersion = 7.3.1;
 						DevelopmentTeam = 34PXKGACJV;
+						LastSwiftMigration = 0800;
 					};
 				};
 			};
@@ -400,7 +407,7 @@
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 			shellPath = /bin/sh;
-			shellScript = "diff \"${PODS_ROOT}/../Podfile.lock\" \"${PODS_ROOT}/Manifest.lock\" > /dev/null\nif [[ $? != 0 ]] ; then\n    cat << EOM\nerror: The sandbox is not in sync with the Podfile.lock. Run 'pod install' or update your CocoaPods installation.\nEOM\n    exit 1\nfi\n";
+			shellScript = "diff \"${PODS_ROOT}/../Podfile.lock\" \"${PODS_ROOT}/Manifest.lock\" > /dev/null\nif [ $? != 0 ] ; then\n    # print error to STDERR\n    echo \"error: The sandbox is not in sync with the Podfile.lock. Run 'pod install' or update your CocoaPods installation.\" >&2\n    exit 1\nfi\n";
 			showEnvVarsInLog = 0;
 		};
 		68ADA26DFBBCC4C9E72329EC /* [CP] Copy Pods Resources */ = {
@@ -431,11 +438,11 @@
 				9340CA771D7DB10800AE1231 /* ViewController.swift in Sources */,
 				93B8E7B31D7EE055005ACC48 /* SWRevealViewController.m in Sources */,
 				9340CA991D7DE3CA00AE1231 /* LoginButton.swift in Sources */,
+				93C7CABC1DA9602600B46D06 /* ImagePostVC.swift in Sources */,
 				937E3AE51D85BBD400BB7C01 /* MaterialTextView.swift in Sources */,
 				939BEEEF1D7E484200F1C954 /* ActivityVC.swift in Sources */,
 				9340CA931D7DDFC800AE1231 /* TransparentPasswordField.swift in Sources */,
 				93AA25EE1D84C4BF002344D3 /* NewPostVC.swift in Sources */,
-				931EC27C1D8E05A40072BAF1 /* Pulse.swift in Sources */,
 				9340CA9F1D7E2E4700AE1231 /* UserService.swift in Sources */,
 				93C893021D80F0D4008B792D /* Category.swift in Sources */,
 				933C2C221D8087F400DB89AE /* SubscriptionCell.swift in Sources */,
@@ -458,6 +465,8 @@
 				931479D01D88D34600F5E366 /* PostService.swift in Sources */,
 				937E3AEF1D8615A600BB7C01 /* CategoryCell.swift in Sources */,
 				939D3AE51D8B966400F0F064 /* LocationService.swift in Sources */,
+				933A0AD61DA154C0008E58E6 /* LinkPostVC.swift in Sources */,
+				93F177D81DA33FA4002D0570 /* MaterialImgView.swift in Sources */,
 				93AA25F21D84CB86002344D3 /* MyInfoVC.swift in Sources */,
 				933C2C201D803C4100DB89AE /* TopNav.swift in Sources */,
 				93AA25EC1D846509002344D3 /* User.swift in Sources */,
@@ -500,8 +509,10 @@
 				CLANG_WARN_DIRECT_OBJC_ISA_USAGE = YES_ERROR;
 				CLANG_WARN_EMPTY_BODY = YES;
 				CLANG_WARN_ENUM_CONVERSION = YES;
+				CLANG_WARN_INFINITE_RECURSION = YES;
 				CLANG_WARN_INT_CONVERSION = YES;
 				CLANG_WARN_OBJC_ROOT_CLASS = YES_ERROR;
+				CLANG_WARN_SUSPICIOUS_MOVE = YES;
 				CLANG_WARN_UNREACHABLE_CODE = YES;
 				CLANG_WARN__DUPLICATE_METHOD_MATCH = YES;
 				"CODE_SIGN_IDENTITY[sdk=iphoneos*]" = "iPhone Developer";
@@ -546,8 +557,10 @@
 				CLANG_WARN_DIRECT_OBJC_ISA_USAGE = YES_ERROR;
 				CLANG_WARN_EMPTY_BODY = YES;
 				CLANG_WARN_ENUM_CONVERSION = YES;
+				CLANG_WARN_INFINITE_RECURSION = YES;
 				CLANG_WARN_INT_CONVERSION = YES;
 				CLANG_WARN_OBJC_ROOT_CLASS = YES_ERROR;
+				CLANG_WARN_SUSPICIOUS_MOVE = YES;
 				CLANG_WARN_UNREACHABLE_CODE = YES;
 				CLANG_WARN__DUPLICATE_METHOD_MATCH = YES;
 				"CODE_SIGN_IDENTITY[sdk=iphoneos*]" = "iPhone Developer";
@@ -566,6 +579,7 @@
 				IPHONEOS_DEPLOYMENT_TARGET = 9.3;
 				MTL_ENABLE_DEBUG_INFO = NO;
 				SDKROOT = iphoneos;
+				SWIFT_OPTIMIZATION_LEVEL = "-Owholemodule";
 				TARGETED_DEVICE_FAMILY = "1,2";
 				VALIDATE_PRODUCT = YES;
 			};
@@ -575,6 +589,7 @@
 			isa = XCBuildConfiguration;
 			baseConfigurationReference = FFD2AE8019A0A7458BEC0084 /* Pods-infobomb.debug.xcconfig */;
 			buildSettings = {
+				ALWAYS_EMBED_SWIFT_STANDARD_LIBRARIES = YES;
 				ASSETCATALOG_COMPILER_APPICON_NAME = AppIcon;
 				CODE_SIGN_IDENTITY = "iPhone Developer";
 				"CODE_SIGN_IDENTITY[sdk=iphoneos*]" = "iPhone Developer";
@@ -584,6 +599,7 @@
 				PRODUCT_NAME = "$(TARGET_NAME)";
 				PROVISIONING_PROFILE = "";
 				SWIFT_OBJC_BRIDGING_HEADER = "infobomb/infobomb-Bridging-Header.h";
+				SWIFT_VERSION = 3.0;
 			};
 			name = Debug;
 		};
@@ -591,6 +607,7 @@
 			isa = XCBuildConfiguration;
 			baseConfigurationReference = C0FF00DE2CB60F82ECBCC1CC /* Pods-infobomb.release.xcconfig */;
 			buildSettings = {
+				ALWAYS_EMBED_SWIFT_STANDARD_LIBRARIES = YES;
 				ASSETCATALOG_COMPILER_APPICON_NAME = AppIcon;
 				CODE_SIGN_IDENTITY = "iPhone Developer";
 				"CODE_SIGN_IDENTITY[sdk=iphoneos*]" = "iPhone Developer";
@@ -600,6 +617,7 @@
 				PRODUCT_NAME = "$(TARGET_NAME)";
 				PROVISIONING_PROFILE = "";
 				SWIFT_OBJC_BRIDGING_HEADER = "infobomb/infobomb-Bridging-Header.h";
+				SWIFT_VERSION = 3.0;
 			};
 			name = Release;
 		};

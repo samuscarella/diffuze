@@ -25,8 +25,6 @@ class PostCell: UITableViewCell {
     @IBOutlet weak var postScore: UILabel!
     @IBOutlet weak var followPosterImg: UIImageView!
     @IBOutlet weak var sharePostImg: UIImageView!
-    @IBOutlet weak var playAudioBtn: UIButton!
-    @IBOutlet weak var visitSiteBtn: UIButton!
     
     @IBOutlet weak var postMessageTopConstraint: NSLayoutConstraint!
     
@@ -38,13 +36,13 @@ class PostCell: UITableViewCell {
         
     }
     
-    override func drawRect(rect: CGRect) {
+    override func draw(_ rect: CGRect) {
         profileImg.layer.cornerRadius = profileImg.frame.size.width / 2
         profileImg.clipsToBounds = true
 //        showcaseImg.clipsToBounds = true
     }
     
-    func configureCell(post: Post, currentLocation: Dictionary<String, AnyObject>?) {
+    func configureCell(_ post: Post, currentLocation: Dictionary<String, AnyObject>?) {
 
         self.post = post
         self.username.text = post.username
@@ -61,10 +59,7 @@ class PostCell: UITableViewCell {
             self.message.text = post.message
             self.postScore.text = String(score)
             
-            self.postImg.hidden = true
-            self.playAudioBtn.hidden = true
-            self.visitSiteBtn.hidden = true
-//            self.postMessageTopConstraint.
+            self.postImg.isHidden = true
             self.postMessageTopConstraint.constant = -200
             
             if (currentLocation != nil) {

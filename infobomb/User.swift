@@ -11,9 +11,9 @@ import Firebase
 
 class User {
     
-    private var _email: String!
-    private var _username: String!
-    private var _subscriptions: [Category]?
+    fileprivate var _email: String!
+    fileprivate var _username: String!
+    fileprivate var _subscriptions: [Category]?
     
     var email: String {
         return _email

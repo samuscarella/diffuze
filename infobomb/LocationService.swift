@@ -30,7 +30,7 @@ class LocationService: NSObject, CLLocationManagerDelegate {
     }
     
     
-    func locationManager(manager: CLLocationManager, didUpdateLocations locations: [CLLocation]) {
+    func locationManager(_ manager: CLLocationManager, didUpdateLocations locations: [CLLocation]) {
     
             currentLocation = locations.last! as CLLocation
     
@@ -43,7 +43,7 @@ class LocationService: NSObject, CLLocationManagerDelegate {
             latitude = Double(currentLocation.coordinate.latitude)
             longitude = Double(currentLocation.coordinate.longitude)
         
-            NSNotificationCenter.defaultCenter().postNotificationName("userUpdatedLocation", object: nil)
+            NotificationCenter.default.post(name: Notification.Name(rawValue: "userUpdatedLocation"), object: nil)
     }
 
     
@@ -52,30 +52,30 @@ class LocationService: NSObject, CLLocationManagerDelegate {
     }
     
     
-    func locationManager(manager: CLLocationManager, didFailWithError error: NSError) {
+    func locationManager(_ manager: CLLocationManager, didFailWithError error: Error) {
         print("ERROR GETTING LOCATION. IS DEVICE PLUGGED IN?")
     }
     
     
-    func locationManager(manager: CLLocationManager, didChangeAuthorizationStatus status: CLAuthorizationStatus) {
+    func locationManager(_ manager: CLLocationManager, didChangeAuthorization status: CLAuthorizationStatus) {
         switch status {
-        case .NotDetermined:
+        case .notDetermined:
             locationManager.requestWhenInUseAuthorization()
             print("Access NotDetermined")
             break
-        case .AuthorizedWhenInUse:
+        case .authorizedWhenInUse:
             locationManager.startUpdatingLocation()
             print("Access WhenInUse")
             break
-        case .AuthorizedAlways:
+        case .authorizedAlways:
             locationManager.startUpdatingLocation()
             print("Access Always")
             break
-        case .Restricted:
+        case .restricted:
             // restricted by e.g. parental controls. User can't enable Location Services
             print("Access Restricted")
             break
-        case .Denied:
+        case .denied:
             // user denied your app access to Location Services, but can grant access from Settings.app
             locationManager.requestWhenInUseAuthorization()
             print("Access Denied")
@@ -84,12 +84,12 @@ class LocationService: NSObject, CLLocationManagerDelegate {
     }
 
 
-    func getDistanceBetweenUserAndPost(userLocation: Dictionary<String, AnyObject>, post: Post) -> Int {
+    func getDistanceBetweenUserAndPost(_ userLocation: Dictionary<String, AnyObject>, post: Post) -> Int {
         
         let postLocation = CLLocation(latitude: post.latitude, longitude: post.longitude)
         let userLoc = CLLocation(latitude: Double(userLocation["latitude"]! as! NSNumber), longitude: Double(userLocation["longitude"]! as! NSNumber))
         
-        let meters = userLoc.distanceFromLocation(postLocation)
+        let meters = userLoc.distance(from: postLocation)
         let miles = meters * 0.000621371
         
         var finalDistance: Double
