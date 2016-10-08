@@ -22,52 +22,52 @@ class NewPostVC: UIViewController, CLLocationManagerDelegate {
     
     override func viewDidLoad() {
         super.viewDidLoad()
-        NSUserDefaults.standardUserDefaults().setValue(false, forKey: "_UIConstraintBasedLayoutLogUnsatisfiable")
+        UserDefaults.standard.setValue(false, forKey: "_UIConstraintBasedLayoutLogUnsatisfiable")
         print("NewPostVC")
         //Subclass navigation bar after app is finished and all other non DRY
-        let image = UIImage(named: "metal-bg.jpg")?.resizableImageWithCapInsets(UIEdgeInsetsMake(0, 15, 0, 15), resizingMode: UIImageResizingMode.Stretch)
-        self.navigationController?.navigationBar.setBackgroundImage(image, forBarMetrics: .Default)
+        let image = UIImage(named: "metal-bg.jpg")?.resizableImage(withCapInsets: UIEdgeInsetsMake(0, 15, 0, 15), resizingMode: UIImageResizingMode.stretch)
+        self.navigationController?.navigationBar.setBackgroundImage(image, for: .default)
         self.title = "New Post"
         self.navigationController?.navigationBar.titleTextAttributes = [NSFontAttributeName: UIFont(name: "TOSCA ZERO", size: 30)!, NSForegroundColorAttributeName: LIGHT_GREY]
         
-        let button: UIButton = UIButton(type: UIButtonType.Custom)
-        button.setImage(UIImage(named: "notification.png"), forState: UIControlState.Normal)
+        let button: UIButton = UIButton(type: UIButtonType.custom)
+        button.setImage(UIImage(named: "notification.png"), for: UIControlState())
 //        button.addTarget(self, action: #selector(ActivityVC.notificationBtnPressed), forControlEvents: UIControlEvents.TouchUpInside)
-        button.frame = CGRectMake(0, 0, 27, 27)
+        button.frame = CGRect(x: 0, y: 0, width: 27, height: 27)
         let barButton = UIBarButtonItem(customView: button)
         self.navigationItem.rightBarButtonItem = barButton
         
-        let menuButton: UIButton = UIButton(type: UIButtonType.Custom)
-        menuButton.setImage(UIImage(named: "menu-btn.png"), forState: UIControlState.Normal)
-        menuButton.frame = CGRectMake(0, 0, 60, 30)
+        let menuButton: UIButton = UIButton(type: UIButtonType.custom)
+        menuButton.setImage(UIImage(named: "menu-btn.png"), for: UIControlState())
+        menuButton.frame = CGRect(x: 0, y: 0, width: 60, height: 30)
         let leftBarButton = UIBarButtonItem(customView: menuButton)
         self.navigationItem.leftBarButtonItem = leftBarButton
 
         
-        textView.separatorColor = UIColor.clearColor()
-        linkView.separatorColor = UIColor.clearColor()
-        imageView.separatorColor = UIColor.clearColor()
-        videoView.separatorColor = UIColor.clearColor()
-        audioView.separatorColor = UIColor.clearColor()
-        premiumView.separatorColor = UIColor.clearColor()
+//        textView.separatorColor = UIColor.clear
+//        linkView.separatorColor = UIColor.clear
+//        imageView.separatorColor = UIColor.clear
+//        videoView.separatorColor = UIColor.clear
+//        audioView.separatorColor = UIColor.clear
+//        premiumView.separatorColor = UIColor.clear
         
-        NSNotificationCenter.defaultCenter().addObserver(LocationService(), selector: #selector(LocationService.stopUpdatingLocation), name: "userSignedOut", object: nil)
+        NotificationCenter.default.addObserver(LocationService(), selector: #selector(LocationService.stopUpdatingLocation), name: NSNotification.Name(rawValue: "userSignedOut"), object: nil)
 
         //Burger side menu
         if revealViewController() != nil {
-            menuButton.addTarget(revealViewController(), action: #selector(SWRevealViewController.revealToggle(_:)), forControlEvents: UIControlEvents.TouchUpInside)
+            menuButton.addTarget(revealViewController(), action: #selector(SWRevealViewController.revealToggle(_:)), for: UIControlEvents.touchUpInside)
         }
 
     }
     
-    @IBAction func unwindToNewPost(segue: UIStoryboardSegue) {
+    @IBAction func unwindToNewPost(_ segue: UIStoryboardSegue) {
         
     }
     
-    @IBAction func cancelNewPostBtn(sender: AnyObject) {
+    @IBAction func cancelNewPostBtn(_ sender: AnyObject) {
         
         if (self.navigationController != nil) {
-            self.navigationController!.popViewControllerAnimated(true)
+            self.navigationController!.popViewController(animated: true)
         }
     }
     

@@ -13,8 +13,8 @@ class CategoryService {
     
     static let ds = CategoryService()
     
-    private var _REF_BASE = URL_BASE
-    private var _REF_CATEGORIES = URL_BASE.child("categories")
+    fileprivate var _REF_BASE = URL_BASE
+    fileprivate var _REF_CATEGORIES = URL_BASE.child("categories")
     
     var REF_BASE: FIRDatabaseReference {
         return _REF_BASE
@@ -24,13 +24,13 @@ class CategoryService {
         return _REF_CATEGORIES
     }
     
-    func createFirebaseCategory(name: String, image: UIImage) {
+    func createFirebaseCategory(_ name: String, image: UIImage) {
         
-        let categoryImageRef = REF_IMAGES_BUCKET.child("image_\(NSDate.timeIntervalSinceReferenceDate()).png")
+        let categoryImageRef = REF_IMAGES_BUCKET.child("image_\(Date.timeIntervalSinceReferenceDate).png")
         let imgData = UIImagePNGRepresentation(image)
         let localFile = imgData
         // Upload the file to the path "images/rivers.jpg"
-        let _ = categoryImageRef.putData(localFile!, metadata: nil) { metadata, error in
+        let _ = categoryImageRef.put(localFile!, metadata: nil) { metadata, error in
             
             if (error != nil) {
                 print(error.debugDescription)
@@ -40,10 +40,10 @@ class CategoryService {
                 let downloadURL = metadata!.downloadURL
                 
                 let category: Dictionary<String, AnyObject> = [
-                    "name": name,
-                    "image_path": downloadURL()!.absoluteString,
-                    "createdAt": FIRServerValue.timestamp(),
-                    "updatedAt": FIRServerValue.timestamp()
+                    "name": name as AnyObject,
+                    "image_path": downloadURL()!.absoluteString as AnyObject,
+                    "createdAt": FIRServerValue.timestamp() as AnyObject,
+                    "updatedAt": FIRServerValue.timestamp() as AnyObject
                 ]
                 
                 //Create new model and pass in object

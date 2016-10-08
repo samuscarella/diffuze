@@ -26,19 +26,19 @@ class SubscriptionCell: UITableViewCell {
         // Initialization code
     }
     
-    override func drawRect(rect: CGRect) {
+    override func draw(_ rect: CGRect) {
         
         subscriptionImage.layer.cornerRadius = subscriptionImage.frame.size.width / 2
         subscriptionImage.clipsToBounds = true
     }
 
-    override func setSelected(selected: Bool, animated: Bool) {
+    override func setSelected(_ selected: Bool, animated: Bool) {
         super.setSelected(selected, animated: animated)
 
         // Configure the view for the selected state
     }
     
-    func configureCell(category: Category, img: UIImage?) {
+    func configureCell(_ category: Category, img: UIImage?) {
         
         self.category = category
         self.subscriptionTxt.text = category.name
@@ -49,35 +49,35 @@ class SubscriptionCell: UITableViewCell {
             self.subscriptionImage.image = img
         } else {
 
-            request = Alamofire.request(.GET, category.image_path!).validate(contentType: ["image/*"]).response(completionHandler: { request, response, data, err in
+            request = Alamofire.request(category.image_path!).validate(contentType: ["image/*"]).response { response in
             
-                if err == nil {
-                    let img = UIImage(data: data!)!
+                if response.error == nil {
+                    let img = UIImage(data: response.data!)!
                     self.subscriptionImage.image = img
-                    SubscriptionsVC.imageCache.setObject(img, forKey: self.category.image_path!)
+                    SubscriptionsVC.imageCache.setObject(img, forKey: self.category.image_path! as AnyObject)
                 }
-            })
+            }
         }
         
-        subscriptionRef.child(category.name).observeSingleEventOfType(.Value, withBlock: { (snapshot) in
+        subscriptionRef.child(category.name).observeSingleEvent(of: .value, with: { (snapshot) in
             
             if let doesNotExist = snapshot.value as? NSNull {
-                self.subscriptionSwitch.on = false
+                self.subscriptionSwitch.isOn = false
             } else {
-                self.subscriptionSwitch.on = true
+                self.subscriptionSwitch.isOn = true
             }
         })
         
-        subscriptionSwitch.addTarget(self, action: #selector(SubscriptionCell.subscribeSwitchPressed(_:)), forControlEvents: UIControlEvents.TouchUpInside)
+        subscriptionSwitch.addTarget(self, action: #selector(SubscriptionCell.subscribeSwitchPressed(_:)), for: UIControlEvents.touchUpInside)
     }
     
     
-    func subscribeSwitchPressed(sender: UISwitch) {
+    func subscribeSwitchPressed(_ sender: UISwitch) {
         
         let subscriberRef = CategoryService.ds.REF_CATEGORIES.child(category.categoryKey).child("subscribers")
         let username = UserService.ds.currentUserUsername
         
-        subscriptionRef.child(category.name).observeSingleEventOfType(.Value, withBlock: { (snapshot) in
+        subscriptionRef.child(category.name).observeSingleEvent(of: .value, with: { (snapshot) in
             
             if let doesNotExist = snapshot.value as? NSNull {
                 

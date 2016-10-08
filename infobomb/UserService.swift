@@ -14,9 +14,9 @@ class UserService {
     
         static let ds = UserService()
     
-        private var _REF_BASE = URL_BASE
-        private var _REF_USERS = URL_BASE.child("users")
-        private var _REF_USER_POSTS = URL_BASE.child("user-posts")
+        fileprivate var _REF_BASE = URL_BASE
+        fileprivate var _REF_USERS = URL_BASE.child("users")
+        fileprivate var _REF_USER_POSTS = URL_BASE.child("user-posts")
 
     
     var REF_BASE: FIRDatabaseReference {
@@ -32,22 +32,22 @@ class UserService {
     }
     
     var REF_USER_CURRENT: FIRDatabaseReference {
-        let uid = NSUserDefaults.standardUserDefaults().valueForKey(KEY_UID) as! String
+        let uid = UserDefaults.standard.value(forKey: KEY_UID) as! String
         let user = URL_BASE.child("users").child(uid)
         return user
     }
     
     var currentUserUsername: String {
-        let username = NSUserDefaults.standardUserDefaults().valueForKey(KEY_USERNAME) as! String
+        let username = UserDefaults.standard.value(forKey: KEY_USERNAME) as! String
         return username
     }
     
     var currentUserID: String {
-        let userID = NSUserDefaults.standardUserDefaults().valueForKey(KEY_UID) as! String
+        let userID = UserDefaults.standard.value(forKey: KEY_UID) as! String
         return userID
     }
     
-    func createFirebaseUser(uid: String, user: Dictionary<String, String>) {
+    func createFirebaseUser(_ uid: String, user: Dictionary<String, String>) {
         REF_USERS.child(uid).updateChildValues(user)
     }
     

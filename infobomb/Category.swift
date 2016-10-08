@@ -11,10 +11,10 @@ import Firebase
 
 class Category {
     
-    private var _categoryKey: String!
-    private var _name: String!
-    private var _image_path: String?
-    private var _categoryRef: FIRDatabaseReference!
+    fileprivate var _categoryKey: String!
+    fileprivate var _name: String!
+    fileprivate var _image_path: String?
+    fileprivate var _categoryRef: FIRDatabaseReference!
     
     var categoryKey: String {
         return _categoryKey

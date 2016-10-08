@@ -20,27 +20,23 @@ class TextPostVC: UIViewController, UITextViewDelegate {
     
     override func viewDidLoad() {
         super.viewDidLoad()
-        NSUserDefaults.standardUserDefaults().setValue(false, forKey: "_UIConstraintBasedLayoutLogUnsatisfiable")
+        UserDefaults.standard.setValue(false, forKey: "_UIConstraintBasedLayoutLogUnsatisfiable")
         print("TextPostVC")
         //Subclass navigation bar after app is finished and all other non DRY
-        let image = UIImage(named: "metal-bg.jpg")?.resizableImageWithCapInsets(UIEdgeInsetsMake(0, 15, 0, 15), resizingMode: UIImageResizingMode.Stretch)
-        self.navigationController?.navigationBar.setBackgroundImage(image, forBarMetrics: .Default)
+        let image = UIImage(named: "metal-bg.jpg")?.resizableImage(withCapInsets: UIEdgeInsetsMake(0, 15, 0, 15), resizingMode: UIImageResizingMode.stretch)
+        self.navigationController?.navigationBar.setBackgroundImage(image, for: .default)
         self.title = "Text"
         self.navigationController?.navigationBar.titleTextAttributes = [NSFontAttributeName: UIFont(name: "TOSCA ZERO", size: 30)!,NSForegroundColorAttributeName: LIGHT_GREY]
         
-        textImgView.separatorColor = UIColor.clearColor()
-        textHeader.separatorColor = UIColor.clearColor()
+        textImgView.separatorColor = UIColor.clear
+        textHeader.separatorColor = UIColor.clear
         
-        NSNotificationCenter.defaultCenter().addObserver(self, selector: #selector(TextPostVC.keyboardWillShow(_:)), name: UIKeyboardWillShowNotification, object: nil)
-        NSNotificationCenter.defaultCenter().addObserver(self, selector: #selector(TextPostVC.keyboardWillHide(_:)), name: UIKeyboardWillHideNotification, object: nil)
+//        NotificationCenter.default.addObserver(self, selector: #selector(TextPostVC.keyboardWillShow(_:)), name: NSNotification.Name.UIKeyboardWillShow, object: nil)
+//        NotificationCenter.default.addObserver(self, selector: #selector(TextPostVC.keyboardWillHide(_:)), name: NSNotification.Name.UIKeyboardWillHide, object: nil)
         //Looks for single or multiple taps.
         let tap: UITapGestureRecognizer = UITapGestureRecognizer(target: self, action: #selector(TextPostVC.dismissKeyboard))
         view.addGestureRecognizer(tap)
 
-    }
-    
-    override func viewDidAppear(animated: Bool) {
-        print("TextPostVC")
     }
     
     //Calls this function when the tap is recognized.
@@ -51,36 +47,36 @@ class TextPostVC: UIViewController, UITextViewDelegate {
 
     
 
-    func keyboardWillShow(notification: NSNotification) {
-        
-        if let keyboardSize = (notification.userInfo?[UIKeyboardFrameBeginUserInfoKey] as? NSValue)?.CGRectValue() {
-            if view.frame.origin.y == 0 {
-                self.view.frame.origin.y -= keyboardSize.height
-            }
-            else {
-                
-            }
-        }
-        
+//    func keyboardWillShow(_ notification: Notification) {
+//        
+//        if let keyboardSize = ((notification as NSNotification).userInfo?[UIKeyboardFrameBeginUserInfoKey] as? NSValue)?.cgRectValue {
+//            if view.frame.origin.y == 0 {
+//                self.view.frame.origin.y -= keyboardSize.height
+//            }
+//            else {
+//                
+//            }
+//        }
+//        
+//    }
+//    
+//    func keyboardWillHide(_ notification: Notification) {
+//        if let keyboardSize = ((notification as NSNotification).userInfo?[UIKeyboardFrameBeginUserInfoKey] as? NSValue)?.cgRectValue {
+//            if view.frame.origin.y != 0 {
+//                self.view.frame.origin.y += keyboardSize.height
+//            }
+//            else {
+//                
+//            }
+//        }
+//    }
+    
+    
+    @IBAction func backBtnPressed(_ sender: AnyObject) {
+        self.performSegue(withIdentifier: "unwindToNewPost", sender: self)
     }
     
-    func keyboardWillHide(notification: NSNotification) {
-        if let keyboardSize = (notification.userInfo?[UIKeyboardFrameBeginUserInfoKey] as? NSValue)?.CGRectValue() {
-            if view.frame.origin.y != 0 {
-                self.view.frame.origin.y += keyboardSize.height
-            }
-            else {
-                
-            }
-        }
-    }
-    
-    
-    @IBAction func backBtnPressed(sender: AnyObject) {
-        self.performSegueWithIdentifier("unwindToNewPost", sender: self)
-    }
-    
-    override func shouldPerformSegueWithIdentifier(identifier: String, sender: AnyObject?) -> Bool {
+    override func shouldPerformSegue(withIdentifier identifier: String, sender: Any?) -> Bool {
         
         if identifier == TEXT_POST_VC {
             if textField.text.isEmpty {
@@ -92,12 +88,12 @@ class TextPostVC: UIViewController, UITextViewDelegate {
         return false
     }
     
-    override func prepareForSegue(segue: UIStoryboardSegue, sender: AnyObject!) {
+    override func prepare(for segue: UIStoryboardSegue, sender: Any!) {
         
         if (segue.identifier == TEXT_POST_VC) {
             
-            if let message = textField.text where message != "" {
-                let nav = segue.destinationViewController as! UINavigationController;
+            if let message = textField.text , message != "" {
+                let nav = segue.destination as! UINavigationController;
                 let categoryView = nav.topViewController as! CategoryVC
                 categoryView.previousVC = TEXT_POST_VC
                 categoryView.message = message
@@ -105,7 +101,7 @@ class TextPostVC: UIViewController, UITextViewDelegate {
         }
     }
     
-    @IBAction func unwindToTextPost(segue: UIStoryboardSegue) {
+    @IBAction func unwindToTextPost(_ segue: UIStoryboardSegue) {
         
     }
     

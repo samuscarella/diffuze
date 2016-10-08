@@ -13,7 +13,7 @@ class LoginButton: UIButton {
     override func awakeFromNib() {
         
         layer.cornerRadius = 1.0
-        layer.backgroundColor = AUBURN_RED.CGColor
+        layer.backgroundColor = AUBURN_RED.cgColor
         
     }
 }

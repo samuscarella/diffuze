@@ -34,6 +34,8 @@ LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
 OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
 THE SOFTWARE.
 </string>
+			<key>License</key>
+			<string>MIT</string>
 			<key>Title</key>
 			<string>Alamofire</string>
 			<key>Type</key>
@@ -42,6 +44,8 @@ THE SOFTWARE.
 		<dict>
 			<key>FooterText</key>
 			<string>Copyright 2016 Google</string>
+			<key>License</key>
+			<string>Copyright</string>
 			<key>Title</key>
 			<string>Firebase</string>
 			<key>Type</key>
@@ -50,6 +54,8 @@ THE SOFTWARE.
 		<dict>
 			<key>FooterText</key>
 			<string>Copyright 2016 Google</string>
+			<key>License</key>
+			<string>Copyright</string>
 			<key>Title</key>
 			<string>FirebaseAnalytics</string>
 			<key>Type</key>
@@ -58,6 +64,8 @@ THE SOFTWARE.
 		<dict>
 			<key>FooterText</key>
 			<string>Copyright 2016 Google</string>
+			<key>License</key>
+			<string>Copyright</string>
 			<key>Title</key>
 			<string>FirebaseAuth</string>
 			<key>Type</key>
@@ -66,6 +74,18 @@ THE SOFTWARE.
 		<dict>
 			<key>FooterText</key>
 			<string>Copyright 2016 Google</string>
+			<key>License</key>
+			<string>Copyright</string>
+			<key>Title</key>
+			<string>FirebaseCore</string>
+			<key>Type</key>
+			<string>PSGroupSpecifier</string>
+		</dict>
+		<dict>
+			<key>FooterText</key>
+			<string>Copyright 2016 Google</string>
+			<key>License</key>
+			<string>Copyright</string>
 			<key>Title</key>
 			<string>FirebaseDatabase</string>
 			<key>Type</key>
@@ -74,6 +94,8 @@ THE SOFTWARE.
 		<dict>
 			<key>FooterText</key>
 			<string>Copyright 2016 Google</string>
+			<key>License</key>
+			<string>Copyright</string>
 			<key>Title</key>
 			<string>FirebaseInstanceID</string>
 			<key>Type</key>
@@ -82,6 +104,8 @@ THE SOFTWARE.
 		<dict>
 			<key>FooterText</key>
 			<string>Copyright 2016 Google</string>
+			<key>License</key>
+			<string>Copyright</string>
 			<key>Title</key>
 			<string>FirebaseStorage</string>
 			<key>Type</key>
@@ -89,7 +113,9 @@ THE SOFTWARE.
 		</dict>
 		<dict>
 			<key>FooterText</key>
-			<string>Copyright 2015 Google Inc.</string>
+			<string>Copyright 2016 Google</string>
+			<key>License</key>
+			<string>Copyright</string>
 			<key>Title</key>
 			<string>GoogleInterchangeUtilities</string>
 			<key>Type</key>
@@ -97,7 +123,9 @@ THE SOFTWARE.
 		</dict>
 		<dict>
 			<key>FooterText</key>
-			<string>Copyright 2015 Google Inc.</string>
+			<string>Copyright 2016 Google</string>
+			<key>License</key>
+			<string>Copyright</string>
 			<key>Title</key>
 			<string>GoogleNetworkingUtilities</string>
 			<key>Type</key>
@@ -105,15 +133,9 @@ THE SOFTWARE.
 		</dict>
 		<dict>
 			<key>FooterText</key>
-			<string>Copyright 2015 Google Inc.</string>
-			<key>Title</key>
-			<string>GoogleParsingUtilities</string>
-			<key>Type</key>
-			<string>PSGroupSpecifier</string>
-		</dict>
-		<dict>
-			<key>FooterText</key>
-			<string>Copyright 2015 Google Inc.</string>
+			<string>Copyright 2016 Google</string>
+			<key>License</key>
+			<string>Copyright</string>
 			<key>Title</key>
 			<string>GoogleSymbolUtilities</string>
 			<key>Type</key>
@@ -121,7 +143,9 @@ THE SOFTWARE.
 		</dict>
 		<dict>
 			<key>FooterText</key>
-			<string>Copyright 2015 Google Inc.</string>
+			<string>Copyright 2016 Google</string>
+			<key>License</key>
+			<string>Copyright</string>
 			<key>Title</key>
 			<string>GoogleUtilities</string>
 			<key>Type</key>
@@ -131,7 +155,7 @@ THE SOFTWARE.
 			<key>FooterText</key>
 			<string>The MIT License (MIT)
 
-Copyright (c) 2016 shu223
+Copyright (c) 2016 Leonardo Cardoso
 
 Permission is hereby granted, free of charge, to any person obtaining a copy
 of this software and associated documentation files (the "Software"), to deal
@@ -149,10 +173,11 @@ FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE
 AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER
 LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
 OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
-SOFTWARE.
-</string>
+SOFTWARE.</string>
+			<key>License</key>
+			<string>MIT</string>
 			<key>Title</key>
-			<string>Pulsator</string>
+			<string>SwiftLinkPreview</string>
 			<key>Type</key>
 			<string>PSGroupSpecifier</string>
 		</dict>

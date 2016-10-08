@@ -28,18 +28,18 @@ class ViewController: UIViewController {
 
     }
     
-    override func viewDidAppear(animated: Bool) {
+    override func viewDidAppear(_ animated: Bool) {
         super.viewDidAppear(animated)
         
         print("Sign In View Did Appear...")
         
-        if NSUserDefaults.standardUserDefaults().valueForKey(KEY_UID) != nil && NSUserDefaults.standardUserDefaults().valueForKey(KEY_USERNAME) != nil {
+        if UserDefaults.standard.value(forKey: KEY_UID) != nil && UserDefaults.standard.value(forKey: KEY_USERNAME) != nil {
             if let user = FIRAuth.auth()?.currentUser {
                 print("User is signed in: \(user.displayName!)")
-                NSUserDefaults.standardUserDefaults().setValue(user.uid, forKey: KEY_UID)
-                NSUserDefaults.standardUserDefaults().setValue(user.displayName, forKey: KEY_USERNAME)
+                UserDefaults.standard.setValue(user.uid, forKey: KEY_UID)
+                UserDefaults.standard.setValue(user.displayName, forKey: KEY_USERNAME)
                 self.playIntroSound()
-                self.performSegueWithIdentifier(SEGUE_LOGGED_IN, sender: nil)
+                self.performSegue(withIdentifier: SEGUE_LOGGED_IN, sender: nil)
             } else {
                 print("User is not signed in.")
             }
@@ -50,21 +50,21 @@ class ViewController: UIViewController {
     }
     
     
-    @IBAction func loginUserBtnPressed(sender: AnyObject) {
+    @IBAction func loginUserBtnPressed(_ sender: AnyObject) {
         
-        if let email = emailField!.text where email != "", let username = usernameField!.text where username != "", let pwd = passwordField!.text where pwd != "" {
+        if let email = emailField!.text , email != "", let username = usernameField!.text , username != "", let pwd = passwordField!.text , pwd != "" {
             
-            FIRAuth.auth()?.signInWithEmail(email, password: pwd) { (user, error) in
+            FIRAuth.auth()?.signIn(withEmail: email, password: pwd) { (user, error) in
                 
                 if error != nil {
                     
                         print(error)
                     
-                    if error!.code == USER_NOT_FOUND {
+                    if error!._code == USER_NOT_FOUND {
                         
                         print("User not found. Attempting to create new user...")
                         
-                        FIRAuth.auth()?.createUserWithEmail(email, password: pwd) { (user, error) in
+                        FIRAuth.auth()?.createUser(withEmail: email, password: pwd) { (user, error) in
                             
                             if error != nil {
                                 
@@ -72,7 +72,7 @@ class ViewController: UIViewController {
                                 self.showErrorAlert("Could not create account", msg: "Problem creating account. Try something else")
                             } else {
                                 
-                                FIRAuth.auth()?.signInWithEmail(email, password: pwd) { (user, error) in
+                                FIRAuth.auth()?.signIn(withEmail: email, password: pwd) { (user, error) in
                                     
                                     let user = FIRAuth.auth()?.currentUser
                                     if let user = user {
@@ -80,7 +80,7 @@ class ViewController: UIViewController {
                                         
                                         changeRequest.displayName = username
                                         
-                                        changeRequest.commitChangesWithCompletion { error in
+                                        changeRequest.commitChanges { error in
                                             if error != nil {
                                                 print("Could not update user display name.")
                                             } else {
@@ -89,8 +89,8 @@ class ViewController: UIViewController {
                                         }
                                     }
 
-                                    NSUserDefaults.standardUserDefaults().setValue(user!.uid, forKey: KEY_UID)
-                                    NSUserDefaults.standardUserDefaults().setValue(username, forKey: KEY_USERNAME)
+                                    UserDefaults.standard.setValue(user!.uid, forKey: KEY_UID)
+                                    UserDefaults.standard.setValue(username, forKey: KEY_USERNAME)
 
                                     let userData = [
                                         "email": email,
@@ -100,20 +100,20 @@ class ViewController: UIViewController {
                                     ]
                                     UserService.ds.createFirebaseUser(user!.uid, user: userData)
                                     self.playIntroSound()
-                                    self.performSegueWithIdentifier(SEGUE_LOGGED_IN, sender: nil)
+                                    self.performSegue(withIdentifier: SEGUE_LOGGED_IN, sender: nil)
                                 }
                             }
                         }
-                    } else if error!.code == PASSWORD_NOT_FOUND {
+                    } else if error?._code == PASSWORD_NOT_FOUND {
                         self.showErrorAlert("Could not login", msg: "Please check your username or password!")
                     }
                 } else {
                     
-                    NSUserDefaults.standardUserDefaults().setValue(user!.uid, forKey: KEY_UID)
-                    NSUserDefaults.standardUserDefaults().setValue(username, forKey: KEY_USERNAME)
+                    UserDefaults.standard.setValue(user!.uid, forKey: KEY_UID)
+                    UserDefaults.standard.setValue(username, forKey: KEY_USERNAME)
                     print("User is signed in: \(user!.displayName)")
                     self.playIntroSound()
-                    self.performSegueWithIdentifier(SEGUE_LOGGED_IN, sender: nil)
+                    self.performSegue(withIdentifier: SEGUE_LOGGED_IN, sender: nil)
                 }
             }
         
@@ -123,20 +123,20 @@ class ViewController: UIViewController {
         
     }
     
-    func showErrorAlert(title: String, msg: String) {
-        let alert = UIAlertController(title: title, message: msg, preferredStyle: .Alert)
-        let action = UIAlertAction(title: "Ok", style: .Default, handler: nil)
+    func showErrorAlert(_ title: String, msg: String) {
+        let alert = UIAlertController(title: title, message: msg, preferredStyle: .alert)
+        let action = UIAlertAction(title: "Ok", style: .default, handler: nil)
         alert.addAction(action)
-        presentViewController(alert, animated: true, completion: nil)
+        present(alert, animated: true, completion: nil)
     }
     
     
     func playIntroSound() {
         
-        let path = NSBundle.mainBundle().pathForResource("intro", ofType: "mp3")!
+        let path = Bundle.main.path(forResource: "intro", ofType: "mp3")!
         
         do {
-            introMusic = try AVAudioPlayer(contentsOfURL: NSURL(string: path)!)
+            introMusic = try AVAudioPlayer(contentsOf: URL(string: path)!)
             introMusic.prepareToPlay()
             introMusic.play()
             
