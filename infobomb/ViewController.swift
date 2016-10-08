@@ -111,6 +111,7 @@ class ViewController: UIViewController {
                     
                     NSUserDefaults.standardUserDefaults().setValue(user!.uid, forKey: KEY_UID)
                     NSUserDefaults.standardUserDefaults().setValue(username, forKey: KEY_USERNAME)
+                    print("User is signed in: \(user!.displayName)")
                     self.playIntroSound()
                     self.performSegueWithIdentifier(SEGUE_LOGGED_IN, sender: nil)
                 }

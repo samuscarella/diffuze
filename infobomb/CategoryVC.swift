@@ -38,7 +38,7 @@ class CategoryVC: UIViewController, UITableViewDataSource, UITableViewDelegate, 
         print("\(message)\(previousVC)")
         
         //Subclass navigation bar after app is finished and all other non DRY
-        let image = UIImage(named: "metal-bg.jpg")
+        let image = UIImage(named: "metal-bg.jpg")?.resizableImageWithCapInsets(UIEdgeInsetsMake(0, 15, 0, 15), resizingMode: UIImageResizingMode.Stretch)
         self.navigationController?.navigationBar.setBackgroundImage(image, forBarMetrics: .Default)
         self.title = "Pick Categories"
         self.navigationController?.navigationBar.titleTextAttributes = [NSFontAttributeName: UIFont(name: "TOSCA ZERO", size: 30)!, NSForegroundColorAttributeName: LIGHT_GREY]
