@@ -14,6 +14,11 @@
 			<key>isShown</key>
 			<false/>
 		</dict>
+		<key>Pulsator.xcscheme</key>
+		<dict>
+			<key>isShown</key>
+			<false/>
+		</dict>
 		<key>SwiftLinkPreview.xcscheme</key>
 		<dict>
 			<key>isShown</key>
@@ -22,17 +27,22 @@
 	</dict>
 	<key>SuppressBuildableAutocreation</key>
 	<dict>
-		<key>72EFE7C02FA8B02BC00871C8AC690481</key>
+		<key>05C1897A7D96890C962C523CEDF0D70D</key>
+		<dict>
+			<key>primary</key>
+			<true/>
+		</dict>
+		<key>2EC57B59857A4CE7A8F5B0DB236B75EB</key>
+		<dict>
+			<key>primary</key>
+			<true/>
+		</dict>
+		<key>5CF69D7B297383A9E56A6A70F0904835</key>
 		<dict>
 			<key>primary</key>
 			<true/>
 		</dict>
 		<key>79C040AFDDCE1BCBF6D8B5EB0B85887F</key>
-		<dict>
-			<key>primary</key>
-			<true/>
-		</dict>
-		<key>A59FAF756A86BC8E56FA07EA87261739</key>
 		<dict>
 			<key>primary</key>
 			<true/>

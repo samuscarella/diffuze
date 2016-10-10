@@ -23,6 +23,7 @@ let REF_AUDIO_BUCKET = storageRef.child("audio")
 //development
 let DALLAS_LATITUDE = 32.85477263390352
 let DALLAS_LONGITUDE = -96.74635749319265
+let PLACEHOLDER_TEXT = "Enter Text..."
 
 //Scroll View
 let FLT_MAX = 1000
@@ -34,12 +35,18 @@ let KEY_USERNAME = "username"
 //Auth Providers
 let FACEBOOK = "facebook"
 let FIREBASE = "firebase"
+let CLOUDINARY_URL = "cloudinary://466524748444115:RSAd9YoIfC3A8AZED33PJQhfbac@infobomb"
 
 //Segues
 let SEGUE_LOGGED_IN = "loggedIn"
 let SEGUE_NEW_POST = "newPost"
 let TEXT_POST_VC = "TextPostVC"
 let LINK_POST_VC = "LinkPostVC"
+let VIDEO_POST_VC = "VideoPostVC"
+let AUDIO_POST_VC = "AudioPostVC"
+let IMAGE_POST_VC = "ImagePostVC"
+let NEW_IMAGE_POST = "newImagePost"
+let NEW_VIDEO_POST = "newVideoPost"
 
 //Status Codes
 let USER_NOT_FOUND = 17011
@@ -49,6 +56,10 @@ let PASSWORD_NOT_FOUND = 17009
 let RED: UIColor = UIColor(red: 255.0, green: 0, blue: 0, alpha: 1)
 let SHADOW_COLOR: CGFloat = 157.0 / 255.0
 let CRIMSON: UIColor = UIColor(red: 230.0 / 255.0, green: 0.0, blue: 0.0, alpha: 1)
+let GOLDEN_YELLOW: UIColor = UIColor(red: 232.0 / 255.0, green: 197.0 / 255.0, blue: 71.0 / 255.0, alpha: 1)
+let OCEAN_BLUE: UIColor = UIColor(red: 25.0 / 255.0, green: 100.0 / 255.0, blue: 126.0 / 255.0, alpha: 1)
+let DARK_GREY: UIColor = UIColor(red: 85.0 / 255.0, green: 85.0 / 255.0, blue: 85.0 / 255.0, alpha: 1)
+let DARK_GREEN: UIColor = UIColor(red: 101.0 / 255.0, green: 145.0 / 255.0, blue: 87.0 / 255.0, alpha: 1)
 let AUBURN_RED: UIColor = UIColor(red: 140.0 / 255.0, green: 39.0 / 255.0, blue: 30.0 / 255.0, alpha: 1)
 let FIRE_ORANGE: UIColor = UIColor(red: 255.0 / 255.0, green: 126.0 / 255.0, blue: 0.0 / 255.0, alpha: 1)
 let LIGHT_GREY: UIColor = UIColor(red: 211.0 / 255.0, green: 208.0 / 255.0, blue: 203.0 / 255.0, alpha: 1)

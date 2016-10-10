@@ -16,6 +16,8 @@ class TextPostVC: UIViewController, UITextViewDelegate {
     @IBOutlet weak var textHeader: MaterialView!
     @IBOutlet weak var chooseCategoriesBtn: MaterialButton!
     
+    let PLACEHOLDER_TEXT = "Enter Text..."
+    
     var message: String!
     
     override func viewDidLoad() {
@@ -28,9 +30,12 @@ class TextPostVC: UIViewController, UITextViewDelegate {
         self.title = "Text"
         self.navigationController?.navigationBar.titleTextAttributes = [NSFontAttributeName: UIFont(name: "TOSCA ZERO", size: 30)!,NSForegroundColorAttributeName: LIGHT_GREY]
         
+        textField.delegate = self
+        
         textImgView.separatorColor = UIColor.clear
         textHeader.separatorColor = UIColor.clear
         
+        applyPlaceholderStyle(aTextview: textField!, placeholderText: PLACEHOLDER_TEXT)
 //        NotificationCenter.default.addObserver(self, selector: #selector(TextPostVC.keyboardWillShow(_:)), name: NSNotification.Name.UIKeyboardWillShow, object: nil)
 //        NotificationCenter.default.addObserver(self, selector: #selector(TextPostVC.keyboardWillHide(_:)), name: NSNotification.Name.UIKeyboardWillHide, object: nil)
         //Looks for single or multiple taps.
@@ -44,6 +49,77 @@ class TextPostVC: UIViewController, UITextViewDelegate {
         //Causes the view (or one of its embedded text fields) to resign the first responder status.
         view.endEditing(true)
     }
+    
+    func applyPlaceholderStyle(aTextview: UITextView, placeholderText: String)
+    {
+        // make it look (initially) like a placeholder
+        aTextview.textColor = UIColor.lightGray
+        aTextview.text = placeholderText
+        aTextview.textAlignment = .center
+    }
+    
+    func applyNonPlaceholderStyle(aTextview: UITextView)
+    {
+        // make it look like normal text instead of a placeholder
+        aTextview.textColor = UIColor.darkText
+        aTextview.alpha = 1.0
+        aTextview.textAlignment = .left
+    }
+    
+    
+    func textViewShouldBeginEditing(_ aTextView: UITextView) -> Bool {
+        if aTextView == textField && aTextView.text == PLACEHOLDER_TEXT
+        {
+            // move cursor to start
+            moveCursorToStart(aTextView: aTextView)
+        }
+        return true
+    }
+    
+    func moveCursorToStart(aTextView: UITextView)
+    {
+        DispatchQueue.main.async {
+            aTextView.selectedRange = NSMakeRange(0, 0);
+        }
+    }
+    
+    func textView(_ textView: UITextView, shouldChangeTextIn range: NSRange, replacementText text: String) -> Bool {
+        // remove the placeholder text when they start typing
+        // first, see if the field is empty
+        // if it's not empty, then the text should be black and not italic
+        // BUT, we also need to remove the placeholder text if that's the only text
+        // if it is empty, then the text should be the placeholder
+        let newLength = textView.text.utf16.count + text.utf16.count - range.length
+        if newLength > 0 // have text, so don't show the placeholder
+        {
+            // check if the only text is the placeholder and remove it if needed
+            // unless they've hit the delete button with the placeholder displayed
+            if textView == textField && textView.text == PLACEHOLDER_TEXT
+            {
+                if text.utf16.count == 0 // they hit the back button
+                {
+                    return false // ignore it
+                }
+                applyNonPlaceholderStyle(aTextview: textView)
+                textField.text = ""
+            }
+            return true
+        }
+        else  // no text, so show the placeholder
+        {
+            applyPlaceholderStyle(aTextview: textView, placeholderText: PLACEHOLDER_TEXT)
+            moveCursorToStart(aTextView: textView)
+            return false
+        }
+    }
+    
+//    func textViewShouldEndEditing(_ textView: UITextView) -> Bool {
+//        if textField.text.isEmpty {
+//            textField.text = "Enter Text..."
+//            textField.textColor = UIColor.lightGray
+//            textField.textAlignment = .center
+//        }
+//    }
 
     
 
@@ -79,7 +155,7 @@ class TextPostVC: UIViewController, UITextViewDelegate {
     override func shouldPerformSegue(withIdentifier identifier: String, sender: Any?) -> Bool {
         
         if identifier == TEXT_POST_VC {
-            if textField.text.isEmpty {
+            if textField.text.isEmpty || textField.text == "Enter Text..." {
                 return false
             } else {
                 return true
@@ -92,7 +168,7 @@ class TextPostVC: UIViewController, UITextViewDelegate {
         
         if (segue.identifier == TEXT_POST_VC) {
             
-            if let message = textField.text , message != "" {
+            if let message = textField.text, message != "" {
                 let nav = segue.destination as! UINavigationController;
                 let categoryView = nav.topViewController as! CategoryVC
                 categoryView.previousVC = TEXT_POST_VC
