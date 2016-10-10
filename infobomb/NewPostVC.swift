@@ -60,6 +60,34 @@ class NewPostVC: UIViewController, CLLocationManagerDelegate {
 
     }
     
+//    override func shouldPerformSegue(withIdentifier identifier: String, sender: Any?) -> Bool {
+//        
+//        if identifier == IMAGE_POST_VC {
+//            if imageView.image == nil {
+//                return false
+//            } else {
+//                return true
+//            }
+//        }
+//        return false
+//    }
+    
+    override func prepare(for segue: UIStoryboardSegue, sender: Any!) {
+        
+        if segue.identifier == NEW_IMAGE_POST || segue.identifier == NEW_VIDEO_POST {
+            
+            let nav = segue.destination as! UINavigationController;
+            let mediaView = nav.topViewController as! ImagePostVC
+
+            if (segue.identifier == NEW_IMAGE_POST) {
+                mediaView.previousVC = NEW_IMAGE_POST
+            } else if (segue.identifier == NEW_VIDEO_POST) {
+                mediaView.previousVC = NEW_VIDEO_POST
+            }
+        }
+        
+    }
+    
     @IBAction func unwindToNewPost(_ segue: UIStoryboardSegue) {
         
     }

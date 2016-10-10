@@ -8,4 +8,5 @@ target ‘infobomb’ do
  pod 'Firebase/Storage'
  pod 'Alamofire', '~> 4.0'
  pod 'SwiftLinkPreview', '~> 1.0.1'
+ pod ‘Pulsator’
 end

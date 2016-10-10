@@ -11,11 +11,12 @@ import Firebase
 import CoreLocation
 import AVFoundation
 import Alamofire
+import Foundation
 
 private var latitude = 0.0
 private var longitude = 0.0
 
-class CategoryVC: UIViewController, UITableViewDataSource, UITableViewDelegate, CLLocationManagerDelegate {
+class CategoryVC: UIViewController, UITableViewDataSource, UITableViewDelegate, CLLocationManagerDelegate, CLUploaderDelegate {
 
     @IBOutlet weak var backBtn: UIBarButtonItem!
     @IBOutlet weak var tableView: UITableView!
@@ -35,6 +36,7 @@ class CategoryVC: UIViewController, UITableViewDataSource, UITableViewDelegate, 
     var previousVC: String!
     var locationService: LocationService!
     var post = [String:AnyObject]()
+    var postImg: Data?
 
 //    var locationManager: CLLocationManager!
 //    var currentLocation: CLLocation!
@@ -45,7 +47,7 @@ class CategoryVC: UIViewController, UITableViewDataSource, UITableViewDelegate, 
 
         print("CategoryVC")
         print("\(message)\(previousVC)")
-        print("\(linkObj["image"])\(previousVC)\n\n\n\n\n\n")
+        print("\(postImg)\(previousVC)\n\n\n\n\n\n")
         
         //Subclass navigation bar after app is finished and all other non DRY
         let image = UIImage(named: "metal-bg.jpg")?.resizableImage(withCapInsets: UIEdgeInsetsMake(0, 15, 0, 15), resizingMode: UIImageResizingMode.stretch)
@@ -59,13 +61,18 @@ class CategoryVC: UIViewController, UITableViewDataSource, UITableViewDelegate, 
             createBtn.backgroundColor = AUBURN_RED
         } else if previousVC == LINK_POST_VC {
             createBtn.backgroundColor = FIRE_ORANGE
+        } else if previousVC == IMAGE_POST_VC {
+            createBtn.backgroundColor = GOLDEN_YELLOW
+        } else if previousVC == VIDEO_POST_VC {
+            createBtn.backgroundColor = DARK_GREEN
+        } else if previousVC == AUDIO_POST_VC {
+            createBtn.backgroundColor = OCEAN_BLUE
         }
         
         userID = UserService.ds.currentUserID
         username = UserService.ds.currentUserUsername
         key = firebasePost.key
 
-        
         tableView.delegate = self
         tableView.dataSource = self
         
@@ -196,6 +203,12 @@ class CategoryVC: UIViewController, UITableViewDataSource, UITableViewDelegate, 
                     self.gatherPostData(postType: "text", data: message! as AnyObject)
                 } else if previousVC == LINK_POST_VC {
                     self.gatherPostData(postType: "link", data: linkObj as AnyObject)
+                } else if previousVC == IMAGE_POST_VC {
+                    self.gatherPostData(postType: "image", data: linkObj as AnyObject)
+                } else if previousVC == VIDEO_POST_VC {
+                    self.gatherPostData(postType: "video", data: linkObj as AnyObject)
+                } else if previousVC == AUDIO_POST_VC {
+                    self.gatherPostData(postType: "audio", data: linkObj as AnyObject)
                 }
             }
         } else {
@@ -231,10 +244,12 @@ class CategoryVC: UIViewController, UITableViewDataSource, UITableViewDelegate, 
             "created_at": FIRServerValue.timestamp() as AnyObject
         ]
         
+        let uniqueString = NSUUID().uuidString
+        
         if postType == "text" {
             
             post["type"] = postType as AnyObject?
-            print(data)
+
             if let message = data as? String {
                 post["message"] = message as AnyObject?
             }
@@ -262,7 +277,7 @@ class CategoryVC: UIViewController, UITableViewDataSource, UITableViewDelegate, 
                 // Upload the file to the path "images/rivers.jpg"
                 let uploadTask = linkPreviewRef.put(linkImage as Data, metadata: nil) { metadata, error in
                     if (error != nil) {
-                        // Uh-oh, an error occurred!
+
                         print("Failed to upload image to firebase\n\n\n\n\n\n\n\n")
                     } else {
                         print("HERE")
@@ -274,9 +289,57 @@ class CategoryVC: UIViewController, UITableViewDataSource, UITableViewDelegate, 
                 return
             }
             self.postToFirebase()
-        }
-        
+            
+        } else if postType == "image" {
+            
+            post["type"] = postType as AnyObject?
+            
+            if let imageText = data["text"] as! String? {
+                post["message"] = imageText as AnyObject?
+            }
+            
+            let image = data["image"] as! NSData
+            
+            let imageRef = storageRef.child("images/image_post/image_\(uniqueString)")
+            
+                let uploadTask = imageRef.put(image as Data, metadata: nil) { metadata, error in
+                    if (error != nil) {
+                        // Uh-oh, an error occurred!
+                        print("Failed to upload image to firebase")
+                    } else {
+                        print("HERE")
+                        let downloadURL = metadata!.downloadURL()!.absoluteString
+                        self.post["image"] = downloadURL as AnyObject?
+                        self.postToFirebase()
+                    }
+                }
+        } else if postType == "video" {
+            
+            post["type"] = postType as AnyObject?
+            
+            if let videoText = data["text"] as! String? {
+                post["message"] = videoText as AnyObject?
+            }
+            
+            let video = data["video"] as! NSData
+            
+            let imageRef = storageRef.child("videos/video_post/video_\(uniqueString)")
+            
+            let uploadTask = imageRef.put(video as Data, metadata: nil) { metadata, error in
+                if (error != nil) {
+                    // Uh-oh, an error occurred!
+                    print("Failed to upload image to firebase")
+                } else {
+                    print("HERE")
+                    let downloadURL = metadata!.downloadURL()!.absoluteString
+                    self.post["video"] = downloadURL as AnyObject?
+                    self.postToFirebase()
+                }
+            }
 
+        } else if postType == "audio" {
+            
+        }
 
     }
     
@@ -331,31 +394,15 @@ class CategoryVC: UIViewController, UITableViewDataSource, UITableViewDelegate, 
         } else if previousVC == LINK_POST_VC {
             //locationService.stopUpdatingLocation()
             self.performSegue(withIdentifier: "unwindToLinkPost", sender: self)
+        } else if previousVC == IMAGE_POST_VC {
+            self.performSegue(withIdentifier: "unwindToImagePost", sender: self)
+        } else if previousVC == VIDEO_POST_VC {
+            self.performSegue(withIdentifier: "unwindToImagePost", sender: self)
+        } else if previousVC == AUDIO_POST_VC {
+            self.performSegue(withIdentifier: "unwindToAudioPost", sender: self)
         }
         
     }
-    
-//    func bypassAuthentication() {
-//        let manager = Alamofire.Manager.sharedInstance
-//        manager.delegate.sessionDidReceiveChallenge = { session, challenge in
-//            var disposition: NSURLSessionAuthChallengeDisposition = .PerformDefaultHandling
-//            var credential: NSURLCredential?
-//            if challenge.protectionSpace.authenticationMethod == NSURLAuthenticationMethodServerTrust {
-//                disposition = NSURLSessionAuthChallengeDisposition.UseCredential
-//                credential = NSURLCredential(forTrust: challenge.protectionSpace.serverTrust!)
-//            } else {
-//                if challenge.previousFailureCount > 0 {
-//                    disposition = .CancelAuthenticationChallenge
-//                } else {
-//                    credential = manager.session.configuration.URLCredentialStorage?.defaultCredentialForProtectionSpace(challenge.protectionSpace)
-//                    if credential != nil {
-//                        disposition = .UseCredential
-//                    }
-//                }
-//            }
-//            return (disposition, credential)
-//        }
-//    }
 
 
     func playExplosion() {

@@ -38,6 +38,7 @@ PODS:
   - GoogleSymbolUtilities (1.1.2)
   - GoogleUtilities (1.3.2):
     - GoogleSymbolUtilities (~> 1.1)
+  - Pulsator (0.2.0)
   - SwiftLinkPreview (1.0.1)
 
 DEPENDENCIES:
@@ -45,6 +46,7 @@ DEPENDENCIES:
   - Firebase/Auth
   - Firebase/Database
   - Firebase/Storage
+  - Pulsator
   - SwiftLinkPreview (~> 1.0.1)
 
 SPEC CHECKSUMS:
@@ -60,8 +62,9 @@ SPEC CHECKSUMS:
   GoogleNetworkingUtilities: 3edd3a8161347494f2da60ea0deddc8a472d94cb
   GoogleSymbolUtilities: 631ee17048aa5e9ab133470d768ea997a5ef9b96
   GoogleUtilities: 8bbc733218aad26306f9d4a253823986110e3358
+  Pulsator: 0df1d24c09354555be8f4c386ba7c4df297690eb
   SwiftLinkPreview: 977461879ae31f9e2d1bf2fafba0553d99eacbb9
 
-PODFILE CHECKSUM: 4b1c6bf0225ec720a7a4e20dc83de0f82a4fb9a0
+PODFILE CHECKSUM: dfcec0d6fed5144a61ad87ac33fd3e9de3bf60d4
 
 COCOAPODS: 1.1.0.beta.1

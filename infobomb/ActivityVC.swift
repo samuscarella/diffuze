@@ -8,7 +8,7 @@
 
 import UIKit
 import CoreLocation
-//import Pulsator
+import Pulsator
 import Firebase
 //
 //private var latitude: Double = 0.0
@@ -21,7 +21,7 @@ class ActivityVC: UIViewController, CLLocationManagerDelegate, UITableViewDelega
     @IBOutlet weak var pulseImg: UIImageView!
     @IBOutlet weak var tableView: UITableView!
     
-    //let pulsator = Pulsator
+    let pulsator = Pulsator()
     
     var locationService: LocationService!
     var currentLocation: [String:AnyObject] = [:]
@@ -68,14 +68,14 @@ class ActivityVC: UIViewController, CLLocationManagerDelegate, UITableViewDelega
 
 //        NSNotificationCenter.defaultCenter().addObserver(self, selector: #selector(ActivityVC.refreshTableView), name: "userUpdatedLocation", object: nil)
         NotificationCenter.default.addObserver(locationService, selector: #selector(locationService.stopUpdatingLocation), name: NSNotification.Name(rawValue: "userSignedOut"), object: nil)
-        /*
-         pulsator.radius = 300.0
+        
+        pulsator.radius = 300.0
         pulsator.backgroundColor = UIColor(red: 255.0, green: 0, blue: 0, alpha: 1).cgColor
         pulsator.animationDuration = 0.9
         pulsator.pulseInterval = 0.1
         pulseImg.layer.superlayer?.insertSublayer(pulsator, below: pulseImg.layer)
         pulsator.start()
- */
+ 
         
         tableView.delegate = self
         tableView.dataSource = self
@@ -183,7 +183,7 @@ class ActivityVC: UIViewController, CLLocationManagerDelegate, UITableViewDelega
         pulseImg.layer.layoutIfNeeded()
         pulseImg.layer.cornerRadius = pulseImg.frame.size.width / 2
         pulseImg.clipsToBounds = true
-        //pulsator.position = pulseImg.layer.position
+        pulsator.position = pulseImg.layer.position
         shake()
     }
     

@@ -55,7 +55,8 @@ class LinkPostVC: UIViewController {
         
         let tap: UITapGestureRecognizer = UITapGestureRecognizer(target: self, action: #selector(LinkPostVC.dismissKeyboard))
         view.addGestureRecognizer(tap)
-        
+//        let tap2: UITapGestureRecognizer = UITapGestureRecognizer(target: self, action: #selector(LinkPostVC.getPreview))
+//        view.addGestureRecognizer(tap2)
     }
     
     //Calls this function when the tap is recognized.
@@ -107,6 +108,7 @@ class LinkPostVC: UIViewController {
             
             slp.cancel()
             
+            //add timer to stop app from crashing send notification after time runs out to cancel request
             slp.preview(
                 textField.text,
                 onSuccess: { result in
@@ -143,14 +145,16 @@ class LinkPostVC: UIViewController {
                     }
                     if let imageUrl = result["image"] as? String, imageUrl != ""  {
                         
-                        self.request = Alamofire.request(imageUrl).validate(contentType: ["image/*"]).response {  response in
-                            
+                        self.request = Alamofire.request(imageUrl).validate(contentType: ["image/png", "image/jpg", "image/jpeg"]).response {  response in
+                            //TODO: convert svg to png to allow more image previews
                             if response.error == nil {
-                                let img = UIImage(data: response.data!)!
-                                self.websitePreview.isHidden = false
-                                self.websitePreview.image = img
-                                self.linkObj["image"] = response.data! as NSData?
-                                self.linkData = true
+                                if let imgData = response.data as NSData? {
+                                    let img = UIImage(data: imgData as Data)!
+                                    self.websitePreview.isHidden = false
+                                    self.websitePreview.image = img
+                                    self.linkObj["image"] = imgData as NSData
+                                    self.linkData = true
+                                }
                             } else {
                                 print("Image Preview Error: \(response.error)")
                                 //add stock no image photo
