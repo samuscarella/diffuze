@@ -30,6 +30,11 @@ class NewPostVC: UIViewController, CLLocationManagerDelegate {
         self.title = "New Post"
         self.navigationController?.navigationBar.titleTextAttributes = [NSFontAttributeName: UIFont(name: "TOSCA ZERO", size: 30)!, NSForegroundColorAttributeName: LIGHT_GREY]
         
+        self.navigationController?.navigationBar.setBackgroundImage(UIImage(), for: .default)
+        self.navigationController?.navigationBar.shadowImage = UIImage()
+        self.navigationController?.navigationBar.isTranslucent = true
+
+        
         let button: UIButton = UIButton(type: UIButtonType.custom)
         button.setImage(UIImage(named: "notification.png"), for: UIControlState())
 //        button.addTarget(self, action: #selector(ActivityVC.notificationBtnPressed), forControlEvents: UIControlEvents.TouchUpInside)
@@ -42,7 +47,6 @@ class NewPostVC: UIViewController, CLLocationManagerDelegate {
         menuButton.frame = CGRect(x: 0, y: 0, width: 60, height: 30)
         let leftBarButton = UIBarButtonItem(customView: menuButton)
         self.navigationItem.leftBarButtonItem = leftBarButton
-
         
 //        textView.separatorColor = UIColor.clear
 //        linkView.separatorColor = UIColor.clear

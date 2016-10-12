@@ -34,6 +34,8 @@
 		935C20FF1D7F8AC300C41A47 /* NotoSans-BoldItalic.ttf in Resources */ = {isa = PBXBuildFile; fileRef = 935C20FB1D7F8AC300C41A47 /* NotoSans-BoldItalic.ttf */; };
 		935C21001D7F8AC300C41A47 /* NotoSans-Italic.ttf in Resources */ = {isa = PBXBuildFile; fileRef = 935C20FC1D7F8AC300C41A47 /* NotoSans-Italic.ttf */; };
 		935C21011D7F8AC300C41A47 /* NotoSans-Regular.ttf in Resources */ = {isa = PBXBuildFile; fileRef = 935C20FD1D7F8AC300C41A47 /* NotoSans-Regular.ttf */; };
+		937131F61DACD925006CC35E /* UIImageExtension.swift in Sources */ = {isa = PBXBuildFile; fileRef = 937131F51DACD925006CC35E /* UIImageExtension.swift */; };
+		937131F81DACDB8D006CC35E /* NewPostNavBarView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 937131F71DACDB8D006CC35E /* NewPostNavBarView.swift */; };
 		93770C3C1DA9E37E00A2A134 /* libCloudinary.a in Frameworks */ = {isa = PBXBuildFile; fileRef = 93770C3B1DA9E37E00A2A134 /* libCloudinary.a */; };
 		93770C401DAA718C00A2A134 /* AudioPostVC.swift in Sources */ = {isa = PBXBuildFile; fileRef = 93770C3F1DAA718C00A2A134 /* AudioPostVC.swift */; };
 		937E3AE51D85BBD400BB7C01 /* MaterialTextView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 937E3AE41D85BBD400BB7C01 /* MaterialTextView.swift */; };
@@ -97,6 +99,8 @@
 		935C20FB1D7F8AC300C41A47 /* NotoSans-BoldItalic.ttf */ = {isa = PBXFileReference; lastKnownFileType = file; path = "NotoSans-BoldItalic.ttf"; sourceTree = "<group>"; };
 		935C20FC1D7F8AC300C41A47 /* NotoSans-Italic.ttf */ = {isa = PBXFileReference; lastKnownFileType = file; path = "NotoSans-Italic.ttf"; sourceTree = "<group>"; };
 		935C20FD1D7F8AC300C41A47 /* NotoSans-Regular.ttf */ = {isa = PBXFileReference; lastKnownFileType = file; path = "NotoSans-Regular.ttf"; sourceTree = "<group>"; };
+		937131F51DACD925006CC35E /* UIImageExtension.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = UIImageExtension.swift; sourceTree = "<group>"; };
+		937131F71DACDB8D006CC35E /* NewPostNavBarView.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = NewPostNavBarView.swift; sourceTree = "<group>"; };
 		93770C3B1DA9E37E00A2A134 /* libCloudinary.a */ = {isa = PBXFileReference; lastKnownFileType = archive.ar; path = libCloudinary.a; sourceTree = "<group>"; };
 		93770C3F1DAA718C00A2A134 /* AudioPostVC.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = AudioPostVC.swift; sourceTree = "<group>"; };
 		937E3AE41D85BBD400BB7C01 /* MaterialTextView.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = MaterialTextView.swift; sourceTree = "<group>"; };
@@ -198,6 +202,7 @@
 		9340CA731D7DB10800AE1231 /* infobomb */ = {
 			isa = PBXGroup;
 			children = (
+				937131F41DACD905006CC35E /* Extensions */,
 				93EE29311DA9E2010082FDA5 /* Cloudinary */,
 				932E92871D7ED829003D9D4A /* MySideMenu */,
 				9340CA8B1D7DB45A00AE1231 /* Services */,
@@ -257,6 +262,7 @@
 				9324326D1D98B73000D5C3DA /* ShakeImage.swift */,
 				93F177D71DA33FA4002D0570 /* MaterialImgView.swift */,
 				93EE29211DA9C9550082FDA5 /* VideoContainerView.swift */,
+				937131F71DACDB8D006CC35E /* NewPostNavBarView.swift */,
 			);
 			name = View;
 			sourceTree = "<group>";
@@ -306,6 +312,14 @@
 				939D3AE41D8B966400F0F064 /* LocationService.swift */,
 			);
 			name = Services;
+			sourceTree = "<group>";
+		};
+		937131F41DACD905006CC35E /* Extensions */ = {
+			isa = PBXGroup;
+			children = (
+				937131F51DACD925006CC35E /* UIImageExtension.swift */,
+			);
+			name = Extensions;
 			sourceTree = "<group>";
 		};
 		93EE29311DA9E2010082FDA5 /* Cloudinary */ = {
@@ -470,6 +484,7 @@
 				9393A1CC1D83AC3B0078503C /* MaterialView.swift in Sources */,
 				9324326E1D98B73000D5C3DA /* ShakeImage.swift in Sources */,
 				9340CA771D7DB10800AE1231 /* ViewController.swift in Sources */,
+				937131F61DACD925006CC35E /* UIImageExtension.swift in Sources */,
 				93B8E7B31D7EE055005ACC48 /* SWRevealViewController.m in Sources */,
 				9340CA991D7DE3CA00AE1231 /* LoginButton.swift in Sources */,
 				9385D00B1DA9979800AAAAD2 /* ImagePostVC.swift in Sources */,
@@ -492,6 +507,7 @@
 				93EFD5771D7F9EDE00455DF0 /* SubscriptionsVC.swift in Sources */,
 				935C20F91D7F36C200C41A47 /* LeftNavVC.swift in Sources */,
 				93C164591D8E447A004B0432 /* Post.swift in Sources */,
+				937131F81DACDB8D006CC35E /* NewPostNavBarView.swift in Sources */,
 				93C1645F1D8F3A4B004B0432 /* MaterialUIView.swift in Sources */,
 				93C893041D81811E008B792D /* CategoryService.swift in Sources */,
 				937E3AEB1D85F64B00BB7C01 /* CategoryVC.swift in Sources */,

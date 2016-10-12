@@ -6,6 +6,8 @@
 //  Copyright © 2016 samuscarella. All rights reserved.
 //
 
+//change preview call to after text changes start timer and then after x seconds call api
+
 import UIKit
 import SwiftLinkPreview
 import Alamofire
@@ -41,22 +43,48 @@ class LinkPostVC: UIViewController {
         UserDefaults.standard.setValue(false, forKey: "_UIConstraintBasedLayoutLogUnsatisfiable")
         print("LinkPostVC")
         //Subclass navigation bar after app is finished and all other non DRY
-        let image = UIImage(named: "metal-bg.jpg")?.resizableImage(withCapInsets: UIEdgeInsetsMake(0, 15, 0, 15), resizingMode: UIImageResizingMode.stretch)
-        self.navigationController?.navigationBar.setBackgroundImage(image, for: .default)
-        self.title = "Link"
-        self.navigationController?.navigationBar.titleTextAttributes = [NSFontAttributeName: UIFont(name: "TOSCA ZERO", size: 30)!,NSForegroundColorAttributeName: LIGHT_GREY]
+//        let image = UIImage(named: "metal-bg.jpg")?.resizableImage(withCapInsets: UIEdgeInsetsMake(0, 15, 0, 15), resizingMode: UIImageResizingMode.stretch)
+//        self.navigationController?.navigationBar.setBackgroundImage(image, for: .default)
+//        self.navigationController?.navigationBar.titleTextAttributes = [NSFontAttributeName: UIFont(name: "TOSCA ZERO", size: 30)!,NSForegroundColorAttributeName: LIGHT_GREY]
         
+        
+        UIApplication.shared.statusBarStyle = .lightContent
+        self.navigationController?.navigationBar.setBackgroundImage(UIImage(), for: .default)
+        self.navigationController?.navigationBar.shadowImage = UIImage()
+        self.navigationController?.navigationBar.isTranslucent = true
+
 //        NotificationCenter.default.addObserver(self, selector: #selector(LinkPostVC.keyboardWillShow(_:)), name: NSNotification.Name.UIKeyboardWillShow, object: nil)
         NotificationCenter.default.addObserver(self, selector: #selector(LinkPostVC.getPreview), name: NSNotification.Name.UIKeyboardWillHide, object: nil)
 
-        
-        linkHeaderView.separatorColor = UIColor.clear
-        linkHeader.separatorColor = UIColor.clear
         
         let tap: UITapGestureRecognizer = UITapGestureRecognizer(target: self, action: #selector(LinkPostVC.dismissKeyboard))
         view.addGestureRecognizer(tap)
 //        let tap2: UITapGestureRecognizer = UITapGestureRecognizer(target: self, action: #selector(LinkPostVC.getPreview))
 //        view.addGestureRecognizer(tap2)
+        
+        let customView = UIView()
+        customView.frame = CGRect(x: 0, y: 0, width: 36, height: 36)
+        customView.backgroundColor = FIRE_ORANGE
+        let logo = UIImage(named: "link-1.png")
+        let imageView = UIImageView(image:logo)
+        imageView.frame = CGRect(x: 0, y: 0, width: 27, height: 27)
+        imageView.contentMode = UIViewContentMode.scaleAspectFit
+        customView.addSubview(imageView)
+        customView.layer.cornerRadius = customView.frame.size.width / 2
+        customView.clipsToBounds = true
+        
+        imageView.center = (imageView.superview?.center)!
+        
+        self.navigationItem.titleView = customView
+        
+        let button: UIButton = UIButton(type: UIButtonType.custom)
+        button.setImage(UIImage(named: "notification.png"), for: UIControlState())
+        button.addTarget(self, action: #selector(ActivityVC.notificationBtnPressed), for: UIControlEvents.touchUpInside)
+        button.frame = CGRect(x: 0, y: 0, width: 27, height: 27)
+        let rightBarButton = UIBarButtonItem(customView: button)
+        self.navigationItem.rightBarButtonItem = rightBarButton
+
+
     }
     
     //Calls this function when the tap is recognized.

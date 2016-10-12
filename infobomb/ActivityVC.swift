@@ -11,6 +11,9 @@ import CoreLocation
 import Pulsator
 import Firebase
 //
+
+//add radar as the location based feed and activity feed will relate to users following content
+
 //private var latitude: Double = 0.0
 //private var longitude: Double = 0.0
 
@@ -20,6 +23,7 @@ class ActivityVC: UIViewController, CLLocationManagerDelegate, UITableViewDelega
     @IBOutlet weak var notificationBtn: UIBarButtonItem!
     @IBOutlet weak var pulseImg: UIImageView!
     @IBOutlet weak var tableView: UITableView!
+    @IBOutlet weak var background: UIView!
     
     let pulsator = Pulsator()
     
@@ -33,11 +37,17 @@ class ActivityVC: UIViewController, CLLocationManagerDelegate, UITableViewDelega
     override func viewDidLoad() {
         super.viewDidLoad()
         UserDefaults.standard.setValue(false, forKey: "_UIConstraintBasedLayoutLogUnsatisfiable")
+        self.view.backgroundColor = SMOKY_BLACK
         //Subclass navigation bar after app is finished and all other non DRY
         let image = UIImage(named: "metal-bg.jpg")?.resizableImage(withCapInsets: UIEdgeInsetsMake(0, 15, 0, 15), resizingMode: UIImageResizingMode.stretch)
         self.navigationController!.navigationBar.setBackgroundImage(image, for: .default)
         self.title = "Activity"
         self.navigationController!.navigationBar.titleTextAttributes = [NSFontAttributeName: UIFont(name: "TOSCA ZERO", size:36)!, NSForegroundColorAttributeName: LIGHT_GREY]
+        
+        self.navigationController?.navigationBar.setBackgroundImage(UIImage(), for: .default)
+        self.navigationController?.navigationBar.shadowImage = UIImage()
+        self.navigationController?.navigationBar.isTranslucent = true
+
 
         let button: UIButton = UIButton(type: UIButtonType.custom)
         button.setImage(UIImage(named: "notification.png"), for: UIControlState())
@@ -63,7 +73,7 @@ class ActivityVC: UIViewController, CLLocationManagerDelegate, UITableViewDelega
                 let longitude = value!["longitude"]
                 self.currentLocation["latitude"] = latitude as AnyObject?
                 self.currentLocation["longitude"] = longitude as AnyObject?
-                self.tableView.reloadData()
+//                self.tableView.reloadData()
         })
 
 //        NSNotificationCenter.defaultCenter().addObserver(self, selector: #selector(ActivityVC.refreshTableView), name: "userUpdatedLocation", object: nil)
@@ -72,16 +82,17 @@ class ActivityVC: UIViewController, CLLocationManagerDelegate, UITableViewDelega
         pulsator.radius = 300.0
         pulsator.backgroundColor = UIColor(red: 255.0, green: 0, blue: 0, alpha: 1).cgColor
         pulsator.animationDuration = 0.9
-        pulsator.pulseInterval = 0.1
+        pulsator.pulseInterval = 5.0
+//        pulsator.timingFunction = add timer for audio pulse to add more waves
         pulseImg.layer.superlayer?.insertSublayer(pulsator, below: pulseImg.layer)
         pulsator.start()
  
         
-        tableView.delegate = self
-        tableView.dataSource = self
-        tableView.rowHeight = UITableViewAutomaticDimension
-        tableView.tableFooterView = UIView()
-        tableView.estimatedRowHeight = 300
+//        tableView.delegate = self
+//        tableView.dataSource = self
+//        tableView.rowHeight = UITableViewAutomaticDimension
+//        tableView.tableFooterView = UIView()
+//        tableView.estimatedRowHeight = 300
         
 
         let userID = FIRAuth.auth()?.currentUser?.uid
@@ -146,7 +157,7 @@ class ActivityVC: UIViewController, CLLocationManagerDelegate, UITableViewDelega
                         }
                     }
                 }
-                            self.tableView.reloadData()
+//                            self.tableView.reloadData()
             })
         }) { (error) in
             print("CurrentUserError: \(error.localizedDescription)")

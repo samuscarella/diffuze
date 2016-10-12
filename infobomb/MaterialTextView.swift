@@ -8,7 +8,7 @@
 
 import UIKit
 
-class MaterialTextView: UITextView, UITextViewDelegate {
+class MaterialTextView: UITextView {
 
     override func awakeFromNib() {
         

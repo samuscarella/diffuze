@@ -15,6 +15,7 @@ class TextPostVC: UIViewController, UITextViewDelegate {
     @IBOutlet weak var textField: MaterialTextView!
     @IBOutlet weak var textHeader: MaterialView!
     @IBOutlet weak var chooseCategoriesBtn: MaterialButton!
+    @IBOutlet weak var chooseCategoriesBtnBottomConstraint: NSLayoutConstraint!
     
     let PLACEHOLDER_TEXT = "Enter Text..."
     
@@ -22,28 +23,69 @@ class TextPostVC: UIViewController, UITextViewDelegate {
     
     override func viewDidLoad() {
         super.viewDidLoad()
+        
         UserDefaults.standard.setValue(false, forKey: "_UIConstraintBasedLayoutLogUnsatisfiable")
         print("TextPostVC")
+        
+
         //Subclass navigation bar after app is finished and all other non DRY
-        let image = UIImage(named: "metal-bg.jpg")?.resizableImage(withCapInsets: UIEdgeInsetsMake(0, 15, 0, 15), resizingMode: UIImageResizingMode.stretch)
-        self.navigationController?.navigationBar.setBackgroundImage(image, for: .default)
-        self.title = "Text"
-        self.navigationController?.navigationBar.titleTextAttributes = [NSFontAttributeName: UIFont(name: "TOSCA ZERO", size: 30)!,NSForegroundColorAttributeName: LIGHT_GREY]
+//        let image = UIImage(named: "metal-bg.jpg")?.resizableImage(withCapInsets: UIEdgeInsetsMake(0, 15, 0, 15), resizingMode: UIImageResizingMode.stretch)
+//        self.navigationController?.navigationBar.setBackgroundImage(image, for: .default)
+//        self.navigationController?.navigationBar.titleTextAttributes = [NSFontAttributeName: UIFont(name: "TOSCA ZERO", size: 30)!]
+        
+        UIApplication.shared.statusBarStyle = .lightContent
+        self.navigationController?.navigationBar.setBackgroundImage(UIImage(), for: .default)
+        self.navigationController?.navigationBar.shadowImage = UIImage()
+        self.navigationController?.navigationBar.isTranslucent = true
+        
+        let customView = UIView()
+        customView.frame = CGRect(x: 0, y: 0, width: 36, height: 36)
+        customView.backgroundColor = AUBURN_RED
+        let logo = UIImage(named: "font.png")
+        let imageView = UIImageView(image:logo)
+        imageView.frame = CGRect(x: 0, y: 0, width: 27, height: 27)
+        imageView.contentMode = UIViewContentMode.scaleAspectFit
+        customView.addSubview(imageView)
+        customView.layer.cornerRadius = customView.frame.size.width / 2
+        customView.clipsToBounds = true
+        
+        imageView.center = (imageView.superview?.center)!
+
+        self.navigationItem.titleView = customView
+        
+        let button: UIButton = UIButton(type: UIButtonType.custom)
+        button.setImage(UIImage(named: "notification.png"), for: UIControlState())
+        button.addTarget(self, action: #selector(ActivityVC.notificationBtnPressed), for: UIControlEvents.touchUpInside)
+        button.frame = CGRect(x: 0, y: 0, width: 27, height: 27)
+        let rightBarButton = UIBarButtonItem(customView: button)
+        self.navigationItem.rightBarButtonItem = rightBarButton
         
         textField.delegate = self
-        
-        textImgView.separatorColor = UIColor.clear
-        textHeader.separatorColor = UIColor.clear
+
         
         applyPlaceholderStyle(aTextview: textField!, placeholderText: PLACEHOLDER_TEXT)
-//        NotificationCenter.default.addObserver(self, selector: #selector(TextPostVC.keyboardWillShow(_:)), name: NSNotification.Name.UIKeyboardWillShow, object: nil)
-//        NotificationCenter.default.addObserver(self, selector: #selector(TextPostVC.keyboardWillHide(_:)), name: NSNotification.Name.UIKeyboardWillHide, object: nil)
-        //Looks for single or multiple taps.
+        NotificationCenter.default.addObserver(self, selector: #selector(TextPostVC.keyboardWillShow(_:)), name: NSNotification.Name.UIKeyboardWillShow, object: nil)
+        NotificationCenter.default.addObserver(self, selector: #selector(TextPostVC.keyboardWillHide(_:)), name: NSNotification.Name.UIKeyboardWillHide, object: nil)
+
         let tap: UITapGestureRecognizer = UITapGestureRecognizer(target: self, action: #selector(TextPostVC.dismissKeyboard))
         view.addGestureRecognizer(tap)
 
     }
     
+    override func viewDidAppear(_ animated: Bool) {
+        self.chooseCategoriesBtnBottomConstraint.constant = 0
+    }
+    
+    override func viewWillDisappear(_ animated: Bool) {
+        super.viewWillDisappear(animated)
+        UIApplication.shared.statusBarStyle = UIStatusBarStyle.default
+        
+    }
+    
+    override var preferredStatusBarStyle: UIStatusBarStyle {
+            return .lightContent
+    }
+
     //Calls this function when the tap is recognized.
     func dismissKeyboard() {
         //Causes the view (or one of its embedded text fields) to resign the first responder status.
@@ -84,71 +126,66 @@ class TextPostVC: UIViewController, UITextViewDelegate {
     }
     
     func textView(_ textView: UITextView, shouldChangeTextIn range: NSRange, replacementText text: String) -> Bool {
-        // remove the placeholder text when they start typing
-        // first, see if the field is empty
-        // if it's not empty, then the text should be black and not italic
-        // BUT, we also need to remove the placeholder text if that's the only text
-        // if it is empty, then the text should be the placeholder
+
+        if(text == "\n") {
+            textView.resignFirstResponder()
+            self.chooseCategoriesBtnBottomConstraint.constant = 0
+            return false
+        }
+
         let newLength = textView.text.utf16.count + text.utf16.count - range.length
-        if newLength > 0 // have text, so don't show the placeholder
-        {
-            // check if the only text is the placeholder and remove it if needed
-            // unless they've hit the delete button with the placeholder displayed
-            if textView == textField && textView.text == PLACEHOLDER_TEXT
-            {
-                if text.utf16.count == 0 // they hit the back button
-                {
-                    return false // ignore it
+        if newLength > 0 {
+            if textView == textField && textView.text == PLACEHOLDER_TEXT {
+                if text.utf16.count == 0 {
+                    return false
                 }
                 applyNonPlaceholderStyle(aTextview: textView)
                 textField.text = ""
             }
             return true
-        }
-        else  // no text, so show the placeholder
-        {
+        } else{
             applyPlaceholderStyle(aTextview: textView, placeholderText: PLACEHOLDER_TEXT)
             moveCursorToStart(aTextView: textView)
             return false
         }
     }
     
-//    func textViewShouldEndEditing(_ textView: UITextView) -> Bool {
-//        if textField.text.isEmpty {
-//            textField.text = "Enter Text..."
-//            textField.textColor = UIColor.lightGray
-//            textField.textAlignment = .center
-//        }
-//    }
 
-    
+    func keyboardWillShow(_ notification: Notification) {
+        
+        if let keyboardSize = ((notification as NSNotification).userInfo?[UIKeyboardFrameBeginUserInfoKey] as? NSValue)?.cgRectValue {
+            if view.frame.origin.y == 0 {
+               self.chooseCategoriesBtnBottomConstraint.constant = keyboardSize.height
+                UIView.animate(withDuration: 0.9) {
+                    self.view.layoutIfNeeded()
+                }
 
-//    func keyboardWillShow(_ notification: Notification) {
-//        
-//        if let keyboardSize = ((notification as NSNotification).userInfo?[UIKeyboardFrameBeginUserInfoKey] as? NSValue)?.cgRectValue {
-//            if view.frame.origin.y == 0 {
-//                self.view.frame.origin.y -= keyboardSize.height
-//            }
-//            else {
-//                
-//            }
-//        }
-//        
-//    }
-//    
-//    func keyboardWillHide(_ notification: Notification) {
-//        if let keyboardSize = ((notification as NSNotification).userInfo?[UIKeyboardFrameBeginUserInfoKey] as? NSValue)?.cgRectValue {
-//            if view.frame.origin.y != 0 {
-//                self.view.frame.origin.y += keyboardSize.height
-//            }
-//            else {
-//                
-//            }
-//        }
-//    }
+//                self.chooseCategoriesBtn.frame.origin.y -= keyboardSize.height
+            }
+            else {
+                
+            }
+        }
+        
+    }
     
+    func keyboardWillHide(_ notification: Notification) {
+        if let keyboardSize = ((notification as NSNotification).userInfo?[UIKeyboardFrameBeginUserInfoKey] as? NSValue)?.cgRectValue {
+            if view.frame.origin.y != 0 {
+                self.chooseCategoriesBtnBottomConstraint.constant = keyboardSize.height
+                UIView.animate(withDuration: 0.9) {
+                    self.view.layoutIfNeeded()
+                }
+
+            }
+            else {
+                
+            }
+        }
+    }
     
     @IBAction func backBtnPressed(_ sender: AnyObject) {
+        dismissKeyboard()
         self.performSegue(withIdentifier: "unwindToNewPost", sender: self)
     }
     
@@ -169,6 +206,8 @@ class TextPostVC: UIViewController, UITextViewDelegate {
         if (segue.identifier == TEXT_POST_VC) {
             
             if let message = textField.text, message != "" {
+                self.chooseCategoriesBtnBottomConstraint.constant = 0
+                self.chooseCategoriesBtn.updateConstraints()
                 let nav = segue.destination as! UINavigationController;
                 let categoryView = nav.topViewController as! CategoryVC
                 categoryView.previousVC = TEXT_POST_VC
