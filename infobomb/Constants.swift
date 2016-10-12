@@ -59,6 +59,7 @@ let CRIMSON: UIColor = UIColor(red: 230.0 / 255.0, green: 0.0, blue: 0.0, alpha:
 let GOLDEN_YELLOW: UIColor = UIColor(red: 232.0 / 255.0, green: 197.0 / 255.0, blue: 71.0 / 255.0, alpha: 1)
 let OCEAN_BLUE: UIColor = UIColor(red: 25.0 / 255.0, green: 100.0 / 255.0, blue: 126.0 / 255.0, alpha: 1)
 let DARK_GREY: UIColor = UIColor(red: 85.0 / 255.0, green: 85.0 / 255.0, blue: 85.0 / 255.0, alpha: 1)
+let SUPER_DARK_GREY: UIColor = UIColor(colorLiteralRed: 46.0, green: 46.0, blue: 46.0, alpha: 1)
 let DARK_GREEN: UIColor = UIColor(red: 101.0 / 255.0, green: 145.0 / 255.0, blue: 87.0 / 255.0, alpha: 1)
 let AUBURN_RED: UIColor = UIColor(red: 140.0 / 255.0, green: 39.0 / 255.0, blue: 30.0 / 255.0, alpha: 1)
 let FIRE_ORANGE: UIColor = UIColor(red: 255.0 / 255.0, green: 126.0 / 255.0, blue: 0.0 / 255.0, alpha: 1)

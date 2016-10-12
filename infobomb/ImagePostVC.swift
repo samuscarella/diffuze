@@ -13,14 +13,11 @@ class ImagePostVC: UIViewController, UINavigationControllerDelegate, UITextViewD
     
     
     @IBOutlet weak var noMediaImg: UIImageView!
-    @IBOutlet weak var mediaTypeText: UILabel!
     @IBOutlet weak var chooseMediaIcon: UIImageView!
     @IBOutlet weak var videoView: VideoContainerView!
     @IBOutlet weak var backBtn: UIBarButtonItem!
     @IBOutlet weak var imageView: UIImageView!
     @IBOutlet weak var textField: MaterialTextView!
-    @IBOutlet weak var imageIconView: MaterialView!
-    @IBOutlet weak var imageHeaderView: MaterialView!
     @IBOutlet weak var noImageView: MaterialUIView!
     @IBOutlet weak var pickImgBtn: UIButton!
     @IBOutlet weak var chooseCategoriesBtn: MaterialButton!
@@ -42,26 +39,26 @@ class ImagePostVC: UIViewController, UINavigationControllerDelegate, UITextViewD
         UserDefaults.standard.setValue(false, forKey: "_UIConstraintBasedLayoutLogUnsatisfiable")
         print("ImagePostVC")
         //Subclass navigation bar after app is finished and all other non DRY
-        let image = UIImage(named: "metal-bg.jpg")?.resizableImage(withCapInsets: UIEdgeInsetsMake(0, 15, 0, 15), resizingMode: UIImageResizingMode.stretch)
-        self.navigationController?.navigationBar.setBackgroundImage(image, for: .default)
+//        self.navigationController?.navigationBar.setBackgroundImage(image, for: .default)
         self.navigationController?.navigationBar.titleTextAttributes = [NSFontAttributeName: UIFont(name: "TOSCA ZERO", size: 30)!,NSForegroundColorAttributeName: LIGHT_GREY]
         
         imagePicker.delegate = self
         textField.delegate = self
         
+        UIApplication.shared.statusBarStyle = .lightContent
+        self.navigationController?.navigationBar.setBackgroundImage(UIImage(), for: .default)
+        self.navigationController?.navigationBar.shadowImage = UIImage()
+        self.navigationController?.navigationBar.isTranslucent = true
+
         chooseImgIcon.isHidden = true
 
         if previousVC == NEW_IMAGE_POST {
-            self.title = "Image"
-            mediaTypeText.text = "Image"
-            imageIconView.backgroundColor = GOLDEN_YELLOW
+//            imageIconView.backgroundColor = GOLDEN_YELLOW
             chooseCategoriesBtn.backgroundColor = GOLDEN_YELLOW
             uploadText.text = "Upload Image"
             noMediaImg.image = UIImage(named: "no-photo-grey")
         } else {
-            self.title = "Video"
-            mediaTypeText.text = "Video"
-            imageIconView.backgroundColor = DARK_GREEN
+//            imageIconView.backgroundColor = DARK_GREEN
             chooseCategoriesBtn.backgroundColor = DARK_GREEN
             uploadText.text = "Upload Video"
             noMediaImg.image = UIImage(named: "no-video")
@@ -69,13 +66,33 @@ class ImagePostVC: UIViewController, UINavigationControllerDelegate, UITextViewD
         
         applyPlaceholderStyle(aTextview: textField!, placeholderText: PLACEHOLDER_TEXT)
         
+        let customView = UIView()
+        customView.frame = CGRect(x: 0, y: 0, width: 36, height: 36)
+        customView.backgroundColor = GOLDEN_YELLOW
+        let logo = UIImage(named: "photo-camera.png")
+        let imageView = UIImageView(image:logo)
+        imageView.frame = CGRect(x: 0, y: 0, width: 27, height: 27)
+        imageView.contentMode = UIViewContentMode.scaleAspectFit
+        customView.addSubview(imageView)
+        customView.layer.cornerRadius = customView.frame.size.width / 2
+        customView.clipsToBounds = true
+        
+        imageView.center = (imageView.superview?.center)!
+        
+        self.navigationItem.titleView = customView
+        
+        let button: UIButton = UIButton(type: UIButtonType.custom)
+        button.setImage(UIImage(named: "notification.png"), for: UIControlState())
+        button.addTarget(self, action: #selector(ActivityVC.notificationBtnPressed), for: UIControlEvents.touchUpInside)
+        button.frame = CGRect(x: 0, y: 0, width: 27, height: 27)
+        let rightBarButton = UIBarButtonItem(customView: button)
+        self.navigationItem.rightBarButtonItem = rightBarButton
+
+        
         //NotificationCenter.default.addObserver(self, selector: #selector(LinkPostVC.keyboardWillShow(_:)), name: NSNotification.Name.UIKeyboardWillShow, object: nil)
         
         let tap: UITapGestureRecognizer = UITapGestureRecognizer(target: self, action: #selector(ImagePostVC.dismissKeyboard))
         view.addGestureRecognizer(tap)
-        
-        imageIconView.separatorColor = UIColor.clear
-        imageHeaderView.separatorColor = UIColor.clear
         
     }
     
