@@ -67,6 +67,8 @@ class CategoryVC: UIViewController, UITableViewDataSource, UITableViewDelegate, 
             createBtn.backgroundColor = DARK_GREEN
         } else if previousVC == AUDIO_POST_VC {
             createBtn.backgroundColor = OCEAN_BLUE
+        } else if previousVC == QUOTE_POST_VC {
+            createBtn.backgroundColor = PURPLE
         }
         
         userID = UserService.ds.currentUserID
@@ -209,6 +211,8 @@ class CategoryVC: UIViewController, UITableViewDataSource, UITableViewDelegate, 
                     self.gatherPostData(postType: "video", data: linkObj as AnyObject)
                 } else if previousVC == AUDIO_POST_VC {
                     self.gatherPostData(postType: "audio", data: linkObj as AnyObject)
+                } else if previousVC == QUOTE_POST_VC {
+                    self.gatherPostData(postType: "quote", data: linkObj as AnyObject)
                 }
             }
         } else {
@@ -339,6 +343,8 @@ class CategoryVC: UIViewController, UITableViewDataSource, UITableViewDelegate, 
 
         } else if postType == "audio" {
             
+        } else if postType == "quote" {
+            
         }
 
     }
@@ -400,6 +406,8 @@ class CategoryVC: UIViewController, UITableViewDataSource, UITableViewDelegate, 
             self.performSegue(withIdentifier: "unwindToImagePost", sender: self)
         } else if previousVC == AUDIO_POST_VC {
             self.performSegue(withIdentifier: "unwindToAudioPost", sender: self)
+        } else if previousVC == QUOTE_POST_VC {
+            self.performSegue(withIdentifier: "unwindToQuotePost", sender: self)
         }
         
     }

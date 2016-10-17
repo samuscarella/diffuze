@@ -9,24 +9,31 @@
 import UIKit
 import AVFoundation
 import AVKit
+import Pulsator
 
-class AudioPostVC: UIViewController, UITextViewDelegate, AVAudioRecorderDelegate, AVAudioPlayerDelegate {
+class AudioPostVC: UIViewController, UITextFieldDelegate, AVAudioRecorderDelegate, AVAudioPlayerDelegate {
 
+    @IBOutlet weak var titleField: UITextField!
+    @IBOutlet weak var recordBtnView: UIView!
     @IBOutlet weak var chooseCategoriesBtn: MaterialButton!
-    @IBOutlet weak var textField: UITextView!
-    @IBOutlet weak var clickRecordLbl: UILabel!
-    @IBOutlet weak var restartAndStopBtn: UIButton!
     @IBOutlet weak var playBtn: UIButton!
     @IBOutlet weak var audioSlider: UISlider!
     @IBOutlet weak var backBtn: UIBarButtonItem!
-    @IBOutlet weak var postTypeView: MaterialView!
-    @IBOutlet weak var postTypeHeader: MaterialView!
     @IBOutlet weak var recordBtn: UIButton!
     @IBOutlet weak var timeLbl: UILabel!
     @IBOutlet weak var audioWaveView: VideoContainerView!
+    @IBOutlet weak var recordBtnMidView: UIView!
+    @IBOutlet weak var recordBtnOuterView: UIView!
+    @IBOutlet weak var tapBtnLbl: UILabel!
+    @IBOutlet weak var recordBtnHeight: NSLayoutConstraint!
+    @IBOutlet weak var recordBtnWidth: NSLayoutConstraint!
+    @IBOutlet weak var savedTimeLbl: UILabel!
+    @IBOutlet weak var restartBtn: UIButton!
     
     var item: AVPlayerItem?
     
+    let pulsator = Pulsator()
+
     var recordingSession: AVAudioSession!
     var audioRecorder: AVAudioRecorder!
     var updater: CADisplayLink! = nil
@@ -41,30 +48,81 @@ class AudioPostVC: UIViewController, UITextViewDelegate, AVAudioRecorderDelegate
 
         UserDefaults.standard.setValue(false, forKey: "_UIConstraintBasedLayoutLogUnsatisfiable")
         print("AudioPostVC")
-        //Subclass navigation bar after app is finished and all other non DRY
-        let image = UIImage(named: "metal-bg.jpg")?.resizableImage(withCapInsets: UIEdgeInsetsMake(0, 15, 0, 15), resizingMode: UIImageResizingMode.stretch)
-        self.title = "Audio"
-        self.navigationController?.navigationBar.setBackgroundImage(image, for: .default)
-        self.navigationController?.navigationBar.titleTextAttributes = [NSFontAttributeName: UIFont(name: "TOSCA ZERO", size: 30)!,NSForegroundColorAttributeName: LIGHT_GREY]
         
-        NotificationCenter.default.addObserver(self, selector: #selector(AudioPostVC.keyboardWillShow(_:)), name: NSNotification.Name.UIKeyboardWillShow, object: nil)
-        NotificationCenter.default.addObserver(self, selector: #selector(AudioPostVC.keyboardWillHide(_:)), name: NSNotification.Name.UIKeyboardWillHide, object: nil)
+        //        NotificationCenter.default.addObserver(self, selector: #selector(AudioPostVC.keyboardWillShow(_:)), name: NSNotification.Name.UIKeyboardWillShow, object: nil)
+        //        NotificationCenter.default.addObserver(self, selector: #selector(AudioPostVC.keyboardWillHide(_:)), name: NSNotification.Name.UIKeyboardWillHide, object: nil)
+        
+        UIApplication.shared.statusBarStyle = .lightContent
+        self.navigationController?.navigationBar.setBackgroundImage(UIImage(), for: .default)
+        self.navigationController?.navigationBar.shadowImage = UIImage()
+        self.navigationController?.navigationBar.isTranslucent = true
+        
+        let customView = UIView()
+        customView.frame = CGRect(x: 0, y: 0, width: 36, height: 36)
+        customView.backgroundColor = OCEAN_BLUE
+        let logo = UIImage(named: "microphone.png")
+        let imageView = UIImageView(image:logo)
+        imageView.frame = CGRect(x: 0, y: 0, width: 27, height: 27)
+        imageView.contentMode = UIViewContentMode.scaleAspectFit
+        customView.addSubview(imageView)
+        customView.layer.cornerRadius = customView.frame.size.width / 2
+        customView.clipsToBounds = true
+        
+        imageView.center = (imageView.superview?.center)!
+        
+        self.navigationItem.titleView = customView
+        
+        titleField.delegate = self
+        titleField.alpha = 0.3
+        titleField.attributedPlaceholder = NSAttributedString(string: "Title",
+                                                              attributes:[NSForegroundColorAttributeName: UIColor.white, NSFontAttributeName: UIFont.italicSystemFont(ofSize: 24.0)])
+
 
         
-        postTypeView.separatorColor = UIColor.clear
-        postTypeHeader.separatorColor = UIColor.clear
-        hideButtons()
-        audioSlider.minimumValue = 0
-        audioSlider.maximumValue = 100
-        audioSlider.isUserInteractionEnabled = false
+        let button: UIButton = UIButton(type: UIButtonType.custom)
+        button.setImage(UIImage(named: "notification.png"), for: UIControlState())
+//        button.addTarget(self, action: #selector(AudioPostVC.notificationBtnPressed), for: UIControlEvents.touchUpInside)
+        button.frame = CGRect(x: 0, y: 0, width: 27, height: 27)
+        let rightBarButton = UIBarButtonItem(customView: button)
+        self.navigationItem.rightBarButtonItem = rightBarButton
         
-        textField.delegate = self
+        let yCenter = NSLayoutConstraint(item: recordBtnView, attribute: .centerY, relatedBy: .equal, toItem: self.view, attribute: .centerY, multiplier: 1, constant: 0)
+        
+        NSLayoutConstraint.activate([yCenter])
+        
+        recordBtn.layer.cornerRadius = recordBtn.frame.size.width / 2
+        recordBtnView.frame = CGRect(x: 0, y: 0, width: 75, height: 75)
+        recordBtnView.backgroundColor = SMOKY_BLACK
+        recordBtnView.layer.borderColor = ANTI_FLASH_WHITE.cgColor
+        recordBtnView.layer.borderWidth = 2
+        recordBtnView.layer.cornerRadius = recordBtnView.frame.size.width / 2
+        recordBtnMidView.frame = CGRect(x: 0, y: 0, width: 117, height: 117)
+        recordBtnMidView.alpha = 0.4
+        recordBtnMidView.layer.cornerRadius = recordBtnMidView.frame.size.width / 2
+        recordBtnOuterView.frame = CGRect(x: 0, y: 0, width: 159, height: 159)
+        recordBtnOuterView.layer.cornerRadius = recordBtnOuterView.frame.size.width / 2
+        recordBtnOuterView.layer.borderWidth = 2
+        recordBtnOuterView.layer.borderColor = POWDER_BLUE.cgColor
+        recordBtnOuterView.backgroundColor = UIColor(red: 143.0 / 255.0, green: 191.0 / 255.0, blue: 224.0 / 255.0, alpha: 0.2)
+        
+        recordBtn.showsTouchWhenHighlighted = true
+        pulsator.radius = 300.0
+        pulsator.numPulse = 6
+        pulsator.backgroundColor = OCEAN_BLUE.cgColor
+        pulsator.animationDuration = 3.0
+        pulsator.pulseInterval = 0
+    
+        recordBtnView.layer.superlayer?.insertSublayer(pulsator, below: recordBtnView.layer)
+          audioSlider.minimumValue = 0
+          audioSlider.maximumValue = 100
+        titleField.isHidden = true
+        
+//        textField.delegate = self
 
-        
         let tap: UITapGestureRecognizer = UITapGestureRecognizer(target: self, action: #selector(AudioPostVC.dismissKeyboard))
         view.addGestureRecognizer(tap)
 
-        applyPlaceholderStyle(aTextview: textField!, placeholderText: PLACEHOLDER_TEXT)
+//        applyPlaceholderStyle(aTextview: textField!, placeholderText: PLACEHOLDER_TEXT)
 
         recordingSession = AVAudioSession.sharedInstance()
         
@@ -74,7 +132,7 @@ class AudioPostVC: UIViewController, UITextViewDelegate, AVAudioRecorderDelegate
             recordingSession.requestRecordPermission() { [unowned self] allowed in
                 DispatchQueue.main.async {
                     if allowed {
-                        self.recordBtn.isHidden = false
+                        print("Recording session enabled.")
                     }
                 }
             }
@@ -85,40 +143,134 @@ class AudioPostVC: UIViewController, UITextViewDelegate, AVAudioRecorderDelegate
 
     }
     
+    override func viewDidLayoutSubviews() {
+        super.viewDidLayoutSubviews()
+        
+        titleField.textColor = UIColor.white
+        let bottomLine = CALayer()
+        bottomLine.frame = CGRect(x: 0.0, y: titleField.frame.height - 1, width: titleField.frame.width, height: 1.0)
+        bottomLine.backgroundColor = UIColor.white.cgColor
+//        titleField.layer.addSublayer(bottomLine)
+
+        pulsator.position = recordBtnView.layer.position
+    }
+
+    
     override func viewDidAppear(_ animated: Bool) {
         
         NotificationCenter.default.addObserver(self, selector: #selector(AudioPostVC.playerItemDidReachEnd(notification:)), name: NSNotification.Name.AVPlayerItemDidPlayToEndTime, object: self.player?.currentItem)
         
     }
     
-    func dismissKeyboard() {
-        //Causes the view (or one of its embedded text fields) to resign the first responder status.
-        view.endEditing(true)
+    @IBAction func recordBtnPressed(_ sender: AnyObject) {
+        
+        if audioRecorder == nil {
+            
+            startRecordingAnimations()
+
+        } else if audioRecorder.isRecording {
+            
+            stopRecordingAnimationsAndSave()
+            
+        } else {
+            
+            updater.invalidate()
+            audioRecorder = nil
+            audioPlayer = nil
+            audioSlider.isHidden = true
+            startRecordingAnimations()
+            linkObj["audio"] = nil
+            self.recordBtnMidView.layer.borderWidth = 0
+        }
     }
     
-        func keyboardWillShow(_ notification: Notification) {
+    func startRecordingAnimations() {
+        
+        playBtn.isHidden = true
+        audioSlider.isHidden = true
+        savedTimeLbl.isHidden = true
+        restartBtn.isHidden = true
+        tapBtnLbl.isHidden = true
+        titleField.isHidden = true
+        timeLbl.isHidden = false
+        startRecording()
+        pulsator.start()
+        
+        UIView.animate(withDuration: 0.2, delay: 0, options: .allowAnimatedContent, animations: {
+            
+            self.recordBtnHeight.constant = 42
+            self.recordBtnWidth.constant = 42
+            self.recordBtn.frame.size.width = 42
+            self.recordBtn.frame.size.height = 42
+            self.recordBtn.layer.cornerRadius = 6
+            
+        }, completion: { finished in
+                
+        })
+    }
     
-            if let keyboardSize = ((notification as NSNotification).userInfo?[UIKeyboardFrameBeginUserInfoKey] as? NSValue)?.cgRectValue {
-                if view.frame.origin.y == 0 {
-                    self.view.frame.origin.y -= keyboardSize.height
-                }
-                else {
-    
-                }
-            }
-    
+    func stopRecordingAnimationsAndSave() {
+        
+        audioRecorder.stop()
+        pulsator.stop()
+        stopVideo()
+        audioSlider.value = 0
+        timeLbl.isHidden = true
+        audioSlider.isHidden = false
+        playBtn.isHidden = false
+        restartBtn.isHidden = false
+        savedTimeLbl.isHidden = false
+        titleField.isHidden = false
+        
+        do {
+            try audioPlayer = AVAudioPlayer(contentsOf: audioRecorder.url)
+            updateSliderWithAudio()
+            audioPlayer?.delegate = self
+            let dFormat = "%02d"
+            let min: Int = Int((Double((audioPlayer?.duration)!) - (audioPlayer?.currentTime)!) / 60)
+            let sec: Int = Int((Double((audioPlayer?.duration)!) - (audioPlayer?.currentTime)!).truncatingRemainder(dividingBy: 60.0))
+            let string = "\(String(format: dFormat, min)):\(String(format: dFormat, sec))"
+            savedTimeLbl.text = string
+        } catch let err as NSError {
+            print(err.debugDescription)
         }
-    
-        func keyboardWillHide(_ notification: Notification) {
-            if let keyboardSize = ((notification as NSNotification).userInfo?[UIKeyboardFrameBeginUserInfoKey] as? NSValue)?.cgRectValue {
-                if view.frame.origin.y != 0 {
-                    self.view.frame.origin.y += keyboardSize.height
-                }
-                else {
-                    
-                }
-            }
+
+        if let audioURL = audioRecorder.url as NSURL? {
+            linkObj["audio"] = audioURL
         }
+        
+        UIView.animate(withDuration: 0.2, delay: 0, options: .allowAnimatedContent, animations: {
+            
+            self.recordBtnHeight.constant = 69
+            self.recordBtnWidth.constant = 69
+            self.recordBtn.frame.size.width = 69
+            self.recordBtn.frame.size.height = 69
+            self.recordBtn.layer.cornerRadius = self.recordBtn.frame.size.width / 2
+            self.recordBtnMidView.layer.borderColor = POWDER_BLUE.cgColor
+            self.recordBtnMidView.layer.borderWidth = 2
+            
+            }, completion: { finished in
+                
+        })
+
+    }
+    
+    func textFieldDidBeginEditing(_ textField: UITextField) {
+        print("HERE")
+        titleField.alpha = 1.0
+    }
+    
+    
+    func textFieldDidEndEditing(_ textField: UITextField) {
+        if textField.text == "" {
+            titleField.alpha = 0.3
+        }
+    }
+    
+    func dismissKeyboard() {
+
+        view.endEditing(true)
+    }
     
 
     func playerItemDidReachEnd(notification: NSNotification) {
@@ -126,7 +278,7 @@ class AudioPostVC: UIViewController, UITextViewDelegate, AVAudioRecorderDelegate
         self.player?.play()
     }
 
-   func  playVideo() {
+    func playVideo() {
     
         let path = Bundle.main.path(forResource: "wave", ofType: "mov")!
     
@@ -146,69 +298,6 @@ class AudioPostVC: UIViewController, UITextViewDelegate, AVAudioRecorderDelegate
         videoLayer?.isHidden = true
     }
     
-    func applyPlaceholderStyle(aTextview: UITextView, placeholderText: String)
-    {
-        // make it look (initially) like a placeholder
-        aTextview.textColor = UIColor.lightGray
-        aTextview.text = placeholderText
-        aTextview.textAlignment = .center
-    }
-    
-    func applyNonPlaceholderStyle(aTextview: UITextView)
-    {
-        // make it look like normal text instead of a placeholder
-        aTextview.textColor = UIColor.darkText
-        aTextview.alpha = 1.0
-        aTextview.textAlignment = .left
-    }
-    
-    
-    func textViewShouldBeginEditing(_ aTextView: UITextView) -> Bool {
-        if aTextView == textField && aTextView.text == PLACEHOLDER_TEXT
-        {
-            // move cursor to start
-            moveCursorToStart(aTextView: aTextView)
-        }
-        return true
-    }
-    
-    func moveCursorToStart(aTextView: UITextView)
-    {
-        DispatchQueue.main.async {
-            aTextView.selectedRange = NSMakeRange(0, 0);
-        }
-    }
-    
-    func textView(_ textView: UITextView, shouldChangeTextIn range: NSRange, replacementText text: String) -> Bool {
-        // remove the placeholder text when they start typing
-        // first, see if the field is empty
-        // if it's not empty, then the text should be black and not italic
-        // BUT, we also need to remove the placeholder text if that's the only text
-        // if it is empty, then the text should be the placeholder
-        let newLength = textView.text.utf16.count + text.utf16.count - range.length
-        if newLength > 0 // have text, so don't show the placeholder
-        {
-            // check if the only text is the placeholder and remove it if needed
-            // unless they've hit the delete button with the placeholder displayed
-            if textView == textField && textView.text == PLACEHOLDER_TEXT
-            {
-                if text.utf16.count == 0 // they hit the back button
-                {
-                    return false // ignore it
-                }
-                applyNonPlaceholderStyle(aTextview: textView)
-                textField.text = ""
-            }
-            return true
-        }
-        else  // no text, so show the placeholder
-        {
-            applyPlaceholderStyle(aTextview: textView, placeholderText: PLACEHOLDER_TEXT)
-            moveCursorToStart(aTextView: textView)
-            return false
-        }
-    }
-
     func startRecording() {
         
         let uniqueString = NSUUID().uuidString
@@ -227,11 +316,24 @@ class AudioPostVC: UIViewController, UITextViewDelegate, AVAudioRecorderDelegate
             audioRecorder.delegate = self
             audioRecorder.record()
             playVideo()
-            Timer.scheduledTimer(timeInterval: 0.001, target: self, selector: #selector(AudioPostVC.updateTimeLbl(timer:)), userInfo: nil, repeats: true)
+            Timer.scheduledTimer(timeInterval: 0.01, target: self, selector: #selector(AudioPostVC.updateTimeLbl(timer:)), userInfo: nil, repeats: true)
             
         } catch let err as NSError {
             print(err.debugDescription)
         }
+    }
+    
+    @IBAction func restartBtnPressed(_ sender: AnyObject) {
+        
+        audioPlayer?.stop()
+        let playImage = UIImage(named: "play-button")
+        playBtn.setImage(playImage, for: .normal)
+        updater.invalidate()
+        audioSlider.value = 1
+        recordBtn.isUserInteractionEnabled = true
+        audioPlayer?.currentTime = 0
+        updateDuration()
+
     }
     
     func updateTimeLbl(timer: Timer) {
@@ -240,29 +342,37 @@ class AudioPostVC: UIViewController, UITextViewDelegate, AVAudioRecorderDelegate
         }
         if audioRecorder.isRecording {
             let dFormat = "%02d"
-            let min:Int = Int(audioRecorder.currentTime / 60)
-            let sec:Int = Int(audioRecorder.currentTime.truncatingRemainder(dividingBy: 60.0))
-//            let milSec:Int = Int(Double(audioRecorder.currentTime * 1000).truncatingRemainder(dividingBy: 1000.0))
-//            let milSecString = String(milSec)
-//            let truncated = milSecString.substring(to: milSecString.index(before: milSecString.endIndex))
-//            let milSecInt = Int((Double(truncated)! * 100).truncatingRemainder(dividingBy: 100.0))
-            let string = "\(String(format: dFormat, min)).\(String(format: dFormat, sec))"
+            let min: Int = Int(audioRecorder.currentTime / 60)
+            let sec: Int = Int(audioRecorder.currentTime.truncatingRemainder(dividingBy: 60.0))
+            let string = "\(String(format: dFormat, min)):\(String(format: dFormat, sec))"
             timeLbl.text = string
         }
     }
     
-    func resumeRecording() {
-        audioRecorder.record()
+    func updateDuration() {
+        let dFormat = "%02d"
+        let min: Int = Int((Double((audioPlayer?.duration)!) - (audioPlayer?.currentTime)!) / 60)
+        let sec: Int = Int((Double((audioPlayer?.duration)!) - (audioPlayer?.currentTime)!).truncatingRemainder(dividingBy: 60.0))
+        let string = "\(String(format: dFormat, min)):\(String(format: dFormat, sec))"
+        savedTimeLbl.text = string
+
     }
+    
+    func updateDurationLbl(timer: Timer) {
+        if audioPlayer == nil {
+            return
+        }
+        if (audioPlayer?.isPlaying)! {
+            updateDuration()
+        }
+    }
+
     
     func trackAudio() {
-        let normalizedTime = Float((audioPlayer?.currentTime)! * 100.0 / (audioPlayer?.duration)!)
-        audioSlider.value = normalizedTime
-    }
-    
-    func finishRecording(success: Bool) {
-        audioRecorder.stop()
-//        audioRecorder = nil
+        if audioPlayer != nil {
+            let normalizedTime = Float((audioPlayer?.currentTime)! * 100.0 / (audioPlayer?.duration)!)
+            audioSlider.value = normalizedTime
+        }
     }
     
     func getDocumentsDirectory() -> URL {
@@ -271,128 +381,57 @@ class AudioPostVC: UIViewController, UITextViewDelegate, AVAudioRecorderDelegate
         return documentsDirectory
     }
     
-    @IBAction func restartBtnPressed(_ sender: AnyObject) {
-        if restartAndStopBtn.currentImage == UIImage(named: "stop") {
-            audioPlayer?.stop()
-            updater.invalidate()
-            audioSlider.value = 1
-            playBtn.isUserInteractionEnabled = true
-            playBtn.alpha = 1
-            recordBtn.isUserInteractionEnabled = true
-            recordBtn.alpha = 1
-            restartAndStopBtn.setImage(UIImage(named: "icon"), for: .normal)
-        } else {
-            audioURL = nil
-            linkObj["audio"] = nil
-            clickRecordLbl.isHidden = false
-            audioRecorder = nil
-            hideButtons()
-            timeLbl.text = "00.00"
-        }
-    }
-    
+
     @IBAction func playbackAudioBtnPressed(_ sender: AnyObject) {
         
-        
-                if audioRecorder != nil {
-                    do {
-                        audioRecorder.stop()
-                        
-                        updater = CADisplayLink(target: self, selector: #selector(AudioPostVC.trackAudio))
-                        updater.frameInterval = 1
-                        updater.add(to: RunLoop.current, forMode: RunLoopMode.commonModes)
-                        
-                       try audioPlayer = AVAudioPlayer(contentsOf: audioRecorder.url)
-                        audioPlayer?.delegate = self
+       if (audioPlayer?.isPlaying)! {
+                recordBtn.isUserInteractionEnabled = true
+                audioPlayer?.pause()
+                let playImage = UIImage(named: "play-button")
+                playBtn.setImage(playImage, for: .normal)
+        } else if audioPlayer != nil && !(audioPlayer?.isPlaying)! {
+            playAudio()
+            updateSliderWithAudio()
+            recordBtn.isUserInteractionEnabled = false
+            Timer.scheduledTimer(timeInterval: 0.01, target: self, selector: #selector(AudioPostVC.updateDurationLbl(timer:)), userInfo: nil, repeats: true)
 
-                        audioPlayer?.play()
-                        recordBtn.isUserInteractionEnabled = false
-                        recordBtn.alpha = 0.2
-                        restartAndStopBtn.setImage(UIImage(named: "stop"), for: .normal)
-                        playBtn.isUserInteractionEnabled = false
-                        playBtn.alpha = 0.2
-                    } catch let err as NSError {
-                        print(err.debugDescription)
-                    }
-   
-                } else {
-                    print("Audio recorder is nil")
-                }
+        }
 
     }
     
-    @IBAction func recordBtn(_ sender: AnyObject) {
-        
-        if audioRecorder == nil {
-            clickRecordLbl.isHidden = true
-            startRecording()
-            recordBtn.setImage(UIImage(named: "stop-recording"), for: .normal)
-        } else if audioRecorder.isRecording {
-            if let audioURL = audioRecorder.url as NSURL? {
-                linkObj["audio"] = audioURL
-            }
-            chooseCategoriesBtn.isUserInteractionEnabled = true
-            clickRecordLbl.isHidden = true
-            pauseRecording()
-            recordBtn.setImage(UIImage(named: "rec"), for: .normal)
-            audioSlider.value = 1
-            showButtons()
-            stopVideo()
-//            finishRecording(success: true)
-        } else {
-            clickRecordLbl.isHidden = true
-            resumeRecording()
-            chooseCategoriesBtn.isUserInteractionEnabled = false
-            recordBtn.setImage(UIImage(named: "stop-recording"), for: .normal)
-            playVideo()
-            hideButtons()
-        }
+    func playAudio() {
+        audioPlayer?.play()
+        let pauseImage = UIImage(named: "pause-button")
+        playBtn.setImage(pauseImage, for: .normal)
     }
-    
-    func showButtons() {
-        audioSlider.isHidden = false
-        playBtn.alpha = 1
-        playBtn.isUserInteractionEnabled = true
-        restartAndStopBtn.alpha = 1
-        restartAndStopBtn.isUserInteractionEnabled = true
-    }
-    
-    func hideButtons() {
-        audioSlider.isHidden = true
-        playBtn.alpha = 0.2
-        playBtn.isUserInteractionEnabled = false
-        restartAndStopBtn.alpha = 0.2
-        restartAndStopBtn.isUserInteractionEnabled = false
-    }
-    
-    func pauseRecording() {
-        if audioRecorder != nil {
-            audioRecorder.pause()
-        }
-    }
+ 
     
     func audioPlayerDidFinishPlaying(_ player: AVAudioPlayer, successfully flag: Bool) {
         
-        restartAndStopBtn.setImage(UIImage(named: "icon"), for: .normal)
-        playBtn.isUserInteractionEnabled = true
+        let playImage = UIImage(named: "play-buwtton")
+        playBtn.setImage(playImage, for: .normal)
         updater.invalidate()
         audioSlider.value = 1
-        playBtn.alpha = 1
         recordBtn.isUserInteractionEnabled = true
-        recordBtn.alpha = 1
+        updateDuration()
 
+    }
+    
+    func updateSliderWithAudio() {
+        updater = CADisplayLink(target: self, selector: #selector(AudioPostVC.trackAudio))
+        updater.frameInterval = 1
+        updater.add(to: RunLoop.current, forMode: RunLoopMode.commonModes)
     }
     
     func audioRecorderDidFinishRecording(_ recorder: AVAudioRecorder, successfully flag: Bool) {
         if !flag {
-            finishRecording(success: false)
         }
     }
     
     override func shouldPerformSegue(withIdentifier identifier: String, sender: Any?) -> Bool {
         
         if identifier == AUDIO_POST_VC {
-            if linkObj["audio"] == nil {
+            if linkObj["audio"] == nil || audioRecorder.isRecording || (audioPlayer?.isPlaying)! || titleField.text == "" {
                 return false
             } else {
                 return true

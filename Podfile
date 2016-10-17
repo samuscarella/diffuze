@@ -9,4 +9,5 @@ target ‘infobomb’ do
  pod 'Alamofire', '~> 4.0'
  pod 'SwiftLinkPreview', '~> 1.0.1'
  pod ‘Pulsator’
+ pod ‘FDWaveformView’
 end

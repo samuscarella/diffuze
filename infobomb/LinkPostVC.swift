@@ -173,14 +173,14 @@ class LinkPostVC: UIViewController {
                     }
                     if let imageUrl = result["image"] as? String, imageUrl != ""  {
                         
-                        self.request = Alamofire.request(imageUrl).validate(contentType: ["image/png", "image/jpg", "image/jpeg"]).response {  response in
+                        self.request = Alamofire.request(imageUrl).validate(contentType: ["image/png", "image/jpg", "image/jpeg", "image/gif"]).response {  response in
                             //TODO: convert svg to png to allow more image previews
                             if response.error == nil {
-                                if let imgData = response.data as NSData? {
+                                if let imgData = response.data as Data? {
                                     let img = UIImage(data: imgData as Data)!
                                     self.websitePreview.isHidden = false
                                     self.websitePreview.image = img
-                                    self.linkObj["image"] = imgData as NSData
+                                    self.linkObj["image"] = imgData as AnyObject?
                                     self.linkData = true
                                 }
                             } else {

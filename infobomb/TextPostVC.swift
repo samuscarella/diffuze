@@ -26,7 +26,6 @@ class TextPostVC: UIViewController, UITextViewDelegate {
         
         UserDefaults.standard.setValue(false, forKey: "_UIConstraintBasedLayoutLogUnsatisfiable")
         print("TextPostVC")
-        
 
         //Subclass navigation bar after app is finished and all other non DRY
 //        let image = UIImage(named: "metal-bg.jpg")?.resizableImage(withCapInsets: UIEdgeInsetsMake(0, 15, 0, 15), resizingMode: UIImageResizingMode.stretch)
@@ -42,7 +41,7 @@ class TextPostVC: UIViewController, UITextViewDelegate {
         customView.frame = CGRect(x: 0, y: 0, width: 36, height: 36)
         customView.backgroundColor = AUBURN_RED
         let logo = UIImage(named: "font.png")
-        let imageView = UIImageView(image:logo)
+        let imageView = UIImageView(image: logo)
         imageView.frame = CGRect(x: 0, y: 0, width: 27, height: 27)
         imageView.contentMode = UIViewContentMode.scaleAspectFit
         customView.addSubview(imageView)

@@ -9,6 +9,11 @@
 			<key>isShown</key>
 			<false/>
 		</dict>
+		<key>FDWaveformView.xcscheme</key>
+		<dict>
+			<key>isShown</key>
+			<false/>
+		</dict>
 		<key>Pods-infobomb.xcscheme</key>
 		<dict>
 			<key>isShown</key>
@@ -27,22 +32,27 @@
 	</dict>
 	<key>SuppressBuildableAutocreation</key>
 	<dict>
-		<key>05C1897A7D96890C962C523CEDF0D70D</key>
+		<key>581B578E304C99F668C316407DB4A48F</key>
 		<dict>
 			<key>primary</key>
 			<true/>
 		</dict>
-		<key>2EC57B59857A4CE7A8F5B0DB236B75EB</key>
-		<dict>
-			<key>primary</key>
-			<true/>
-		</dict>
-		<key>5CF69D7B297383A9E56A6A70F0904835</key>
+		<key>68BBA482AA514C10E707CCECFE4E7BAB</key>
 		<dict>
 			<key>primary</key>
 			<true/>
 		</dict>
 		<key>79C040AFDDCE1BCBF6D8B5EB0B85887F</key>
+		<dict>
+			<key>primary</key>
+			<true/>
+		</dict>
+		<key>AF623CD9FA35B53B2F07868556A1DDB3</key>
+		<dict>
+			<key>primary</key>
+			<true/>
+		</dict>
+		<key>C855CFE8EFB31D9059467D75BA5607D6</key>
 		<dict>
 			<key>primary</key>
 			<true/>

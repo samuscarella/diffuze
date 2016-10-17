@@ -19,11 +19,13 @@ import Firebase
 
 class ActivityVC: UIViewController, CLLocationManagerDelegate, UITableViewDelegate, UITableViewDataSource {
     
+    @IBOutlet weak var filterBtn: MaterialButton!
     @IBOutlet weak var burgerBtn: UIBarButtonItem!
     @IBOutlet weak var notificationBtn: UIBarButtonItem!
     @IBOutlet weak var pulseImg: UIImageView!
     @IBOutlet weak var tableView: UITableView!
     @IBOutlet weak var background: UIView!
+    @IBOutlet weak var postMessage: UILabel!
     
     let pulsator = Pulsator()
     
@@ -36,18 +38,37 @@ class ActivityVC: UIViewController, CLLocationManagerDelegate, UITableViewDelega
     
     override func viewDidLoad() {
         super.viewDidLoad()
+        
         UserDefaults.standard.setValue(false, forKey: "_UIConstraintBasedLayoutLogUnsatisfiable")
         self.view.backgroundColor = SMOKY_BLACK
+        /*
+        filterBtn.frame = CGRect(x: 0, y: 0, width: self.view.bounds.width, height: 50)
         //Subclass navigation bar after app is finished and all other non DRY
-        let image = UIImage(named: "metal-bg.jpg")?.resizableImage(withCapInsets: UIEdgeInsetsMake(0, 15, 0, 15), resizingMode: UIImageResizingMode.stretch)
-        self.navigationController!.navigationBar.setBackgroundImage(image, for: .default)
-        self.title = "Activity"
-        self.navigationController!.navigationBar.titleTextAttributes = [NSFontAttributeName: UIFont(name: "TOSCA ZERO", size:36)!, NSForegroundColorAttributeName: LIGHT_GREY]
+        let filterImageView = UIImageView(image: UIImage(named: "funnel"))
+        filterImageView.frame = CGRect(x: 0, y: 0, width: 27, height: 27)
+        filterImageView.contentMode = UIViewContentMode.scaleAspectFit
+        filterBtn.addSubview(filterImageView)
+        filterImageView.center = (filterImageView.superview?.center)!
+         */
+        filterBtn.showsTouchWhenHighlighted = true
         
         self.navigationController?.navigationBar.setBackgroundImage(UIImage(), for: .default)
         self.navigationController?.navigationBar.shadowImage = UIImage()
         self.navigationController?.navigationBar.isTranslucent = true
-
+        
+        let customView = UIView()
+        customView.frame = CGRect(x: 0, y: 0, width: 36, height: 36)
+        customView.backgroundColor = UIColor.white
+        let logo = UIImage(named: "radar-black.png")
+        let imageView = UIImageView(image: logo)
+        imageView.frame = CGRect(x: 0, y: 0, width: 27, height: 27)
+        imageView.contentMode = UIViewContentMode.scaleAspectFit
+        customView.addSubview(imageView)
+        customView.layer.cornerRadius = customView.frame.size.width / 2
+        customView.clipsToBounds = true
+    
+        imageView.center = (imageView.superview?.center)!
+        self.navigationItem.titleView = customView
 
         let button: UIButton = UIButton(type: UIButtonType.custom)
         button.setImage(UIImage(named: "notification.png"), for: UIControlState())
@@ -81,19 +102,19 @@ class ActivityVC: UIViewController, CLLocationManagerDelegate, UITableViewDelega
         
         pulsator.radius = 300.0
         pulsator.backgroundColor = UIColor(red: 255.0, green: 0, blue: 0, alpha: 1).cgColor
-        pulsator.animationDuration = 0.9
-        pulsator.pulseInterval = 5.0
+        pulsator.animationDuration = 1.5
+        pulsator.numPulse = 3
+        pulsator.pulseInterval = 1.0
 //        pulsator.timingFunction = add timer for audio pulse to add more waves
         pulseImg.layer.superlayer?.insertSublayer(pulsator, below: pulseImg.layer)
         pulsator.start()
  
         
-//        tableView.delegate = self
-//        tableView.dataSource = self
-//        tableView.rowHeight = UITableViewAutomaticDimension
-//        tableView.tableFooterView = UIView()
-//        tableView.estimatedRowHeight = 300
-        
+        tableView.delegate = self
+        tableView.dataSource = self
+        tableView.rowHeight = UITableViewAutomaticDimension
+        tableView.tableFooterView = UIView()
+        tableView.estimatedRowHeight = 600
 
         let userID = FIRAuth.auth()?.currentUser?.uid
         var currentUser: NSDictionary = [:]
@@ -157,7 +178,7 @@ class ActivityVC: UIViewController, CLLocationManagerDelegate, UITableViewDelega
                         }
                     }
                 }
-//                            self.tableView.reloadData()
+                self.tableView.reloadData()
             })
         }) { (error) in
             print("CurrentUserError: \(error.localizedDescription)")
@@ -205,7 +226,7 @@ class ActivityVC: UIViewController, CLLocationManagerDelegate, UITableViewDelega
         var post: Post!
         
         post = posts[(indexPath as NSIndexPath).row]
-        
+                
         performSegue(withIdentifier: "PostDetailVC", sender: post)
         
     }
@@ -220,39 +241,45 @@ class ActivityVC: UIViewController, CLLocationManagerDelegate, UITableViewDelega
         
         if posts.count > 0 {
             pulseImg.isHidden = true
-            //pulsator.stop()
+            pulsator.stop()
         }
-        return posts.count
+        return 1
     }
     
+    
     func tableView(_ tableView: UITableView, cellForRowAt indexPath: IndexPath) -> UITableViewCell {
-
-        let post = posts[(indexPath as NSIndexPath).row]
-        var didUpdateLocation = false
         
-        if let cell = tableView.dequeueReusableCell(withIdentifier: "PostCell") as? PostCell {
+        if posts.count > 0 {
+            let post = posts[(indexPath as NSIndexPath).row]
+            var didUpdateLocation = false
+        
+            if let cell = tableView.dequeueReusableCell(withIdentifier: "PostCell") as? PostCell {
             
-            let userLat = currentLocation["latitude"] as? Double
-            let userLong = currentLocation["longitude"] as? Double
-
-            if userLat != nil && userLong != nil {
-                didUpdateLocation = true
+                let userLat = currentLocation["latitude"] as? Double
+                let userLong = currentLocation["longitude"] as? Double
+                
+                if userLat != nil && userLong != nil {
+                    didUpdateLocation = true
+                }
+                if didUpdateLocation {
+                    cell.configureCell(post, currentLocation: currentLocation)
+                }
+                return cell
+            } else {
+                return PostCell()
             }
-            if didUpdateLocation {
-                cell.configureCell(post, currentLocation: currentLocation)
-            }
-            return cell
-        } else {
-            return PostCell()
         }
+            return PostCell()
     }
     
     func tableView(_ tableView: UITableView, heightForRowAt indexPath: IndexPath) -> CGFloat {
         
-        let post = posts[(indexPath as NSIndexPath).row]
+        if posts.count > 0 {
+            let post = posts[(indexPath as NSIndexPath).row]
         
-        if post.type == "text" {
-           return 200
+            if post.type == "text" {
+                return 200
+            }
         }
         return tableView.estimatedRowHeight
         
