@@ -51,27 +51,34 @@ class ImagePostVC: UIViewController, UINavigationControllerDelegate, UITextViewD
         self.navigationController?.navigationBar.isTranslucent = true
 
         chooseImgIcon.isHidden = true
+        
+        let customView = UIView()
+        customView.frame = CGRect(x: 0, y: 0, width: 36, height: 36)
+        
+        let logo: UIImage!
 
         if previousVC == NEW_IMAGE_POST {
+            customView.backgroundColor = GOLDEN_YELLOW
+            logo = UIImage(named: "photo-camera.png")
 //            imageIconView.backgroundColor = GOLDEN_YELLOW
             chooseCategoriesBtn.backgroundColor = GOLDEN_YELLOW
             uploadText.text = "Upload Image"
             noMediaImg.image = UIImage(named: "no-photo-grey")
         } else {
+            customView.backgroundColor = DARK_GREEN
+            logo = UIImage(named: "video-camera.png")
 //            imageIconView.backgroundColor = DARK_GREEN
             chooseCategoriesBtn.backgroundColor = DARK_GREEN
             uploadText.text = "Upload Video"
             noMediaImg.image = UIImage(named: "no-video")
         }
         
-        applyPlaceholderStyle(aTextview: textField!, placeholderText: PLACEHOLDER_TEXT)
-        
-        let customView = UIView()
-        customView.frame = CGRect(x: 0, y: 0, width: 36, height: 36)
-        customView.backgroundColor = GOLDEN_YELLOW
-        let logo = UIImage(named: "photo-camera.png")
         let imageView = UIImageView(image:logo)
-        imageView.frame = CGRect(x: 0, y: 0, width: 27, height: 27)
+        if previousVC == NEW_IMAGE_POST {
+            imageView.frame = CGRect(x: 0, y: 0, width: 27, height: 27)
+        } else {
+            imageView.frame = CGRect(x: 0, y: 0, width: 24, height: 24)
+        }
         imageView.contentMode = UIViewContentMode.scaleAspectFit
         customView.addSubview(imageView)
         customView.layer.cornerRadius = customView.frame.size.width / 2
@@ -80,6 +87,10 @@ class ImagePostVC: UIViewController, UINavigationControllerDelegate, UITextViewD
         imageView.center = (imageView.superview?.center)!
         
         self.navigationItem.titleView = customView
+
+        
+        applyPlaceholderStyle(aTextview: textField!, placeholderText: PLACEHOLDER_TEXT)
+        
         
         let button: UIButton = UIButton(type: UIButtonType.custom)
         button.setImage(UIImage(named: "notification.png"), for: UIControlState())

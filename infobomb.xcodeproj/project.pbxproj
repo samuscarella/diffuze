@@ -34,6 +34,7 @@
 		935C20FF1D7F8AC300C41A47 /* NotoSans-BoldItalic.ttf in Resources */ = {isa = PBXBuildFile; fileRef = 935C20FB1D7F8AC300C41A47 /* NotoSans-BoldItalic.ttf */; };
 		935C21001D7F8AC300C41A47 /* NotoSans-Italic.ttf in Resources */ = {isa = PBXBuildFile; fileRef = 935C20FC1D7F8AC300C41A47 /* NotoSans-Italic.ttf */; };
 		935C21011D7F8AC300C41A47 /* NotoSans-Regular.ttf in Resources */ = {isa = PBXBuildFile; fileRef = 935C20FD1D7F8AC300C41A47 /* NotoSans-Regular.ttf */; };
+		936B24271DB2F011006E30CE /* QuotePostVC.swift in Sources */ = {isa = PBXBuildFile; fileRef = 936B24261DB2F011006E30CE /* QuotePostVC.swift */; };
 		937131F61DACD925006CC35E /* UIImageExtension.swift in Sources */ = {isa = PBXBuildFile; fileRef = 937131F51DACD925006CC35E /* UIImageExtension.swift */; };
 		937131F81DACDB8D006CC35E /* NewPostNavBarView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 937131F71DACDB8D006CC35E /* NewPostNavBarView.swift */; };
 		93770C3C1DA9E37E00A2A134 /* libCloudinary.a in Frameworks */ = {isa = PBXBuildFile; fileRef = 93770C3B1DA9E37E00A2A134 /* libCloudinary.a */; };
@@ -99,6 +100,7 @@
 		935C20FB1D7F8AC300C41A47 /* NotoSans-BoldItalic.ttf */ = {isa = PBXFileReference; lastKnownFileType = file; path = "NotoSans-BoldItalic.ttf"; sourceTree = "<group>"; };
 		935C20FC1D7F8AC300C41A47 /* NotoSans-Italic.ttf */ = {isa = PBXFileReference; lastKnownFileType = file; path = "NotoSans-Italic.ttf"; sourceTree = "<group>"; };
 		935C20FD1D7F8AC300C41A47 /* NotoSans-Regular.ttf */ = {isa = PBXFileReference; lastKnownFileType = file; path = "NotoSans-Regular.ttf"; sourceTree = "<group>"; };
+		936B24261DB2F011006E30CE /* QuotePostVC.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = QuotePostVC.swift; sourceTree = "<group>"; };
 		937131F51DACD925006CC35E /* UIImageExtension.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = UIImageExtension.swift; sourceTree = "<group>"; };
 		937131F71DACDB8D006CC35E /* NewPostNavBarView.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = NewPostNavBarView.swift; sourceTree = "<group>"; };
 		93770C3B1DA9E37E00A2A134 /* libCloudinary.a */ = {isa = PBXFileReference; lastKnownFileType = archive.ar; path = libCloudinary.a; sourceTree = "<group>"; };
@@ -239,6 +241,7 @@
 				933A0AD51DA154C0008E58E6 /* LinkPostVC.swift */,
 				9385D00A1DA9979800AAAAD2 /* ImagePostVC.swift */,
 				93770C3F1DAA718C00A2A134 /* AudioPostVC.swift */,
+				936B24261DB2F011006E30CE /* QuotePostVC.swift */,
 			);
 			name = Controller;
 			sourceTree = "<group>";
@@ -492,6 +495,7 @@
 				939BEEEF1D7E484200F1C954 /* ActivityVC.swift in Sources */,
 				9340CA931D7DDFC800AE1231 /* TransparentPasswordField.swift in Sources */,
 				93AA25EE1D84C4BF002344D3 /* NewPostVC.swift in Sources */,
+				936B24271DB2F011006E30CE /* QuotePostVC.swift in Sources */,
 				9340CA9F1D7E2E4700AE1231 /* UserService.swift in Sources */,
 				93C893021D80F0D4008B792D /* Category.swift in Sources */,
 				93EE29221DA9C9550082FDA5 /* VideoContainerView.swift in Sources */,

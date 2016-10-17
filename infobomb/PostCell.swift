@@ -37,15 +37,15 @@ class PostCell: UITableViewCell {
     }
     
     override func draw(_ rect: CGRect) {
-        profileImg.layer.cornerRadius = profileImg.frame.size.width / 2
-        profileImg.clipsToBounds = true
+      //  profileImg.layer.cornerRadius = profileImg.frame.size.width / 2
+      //  profileImg.clipsToBounds = true
 //        showcaseImg.clipsToBounds = true
     }
     
     func configureCell(_ post: Post, currentLocation: Dictionary<String, AnyObject>?) {
 
         self.post = post
-        self.username.text = post.username
+        /*self.username.text = post.username
         
         if post.type == "text" {
             
@@ -80,6 +80,7 @@ class PostCell: UITableViewCell {
         } else if post.type == "premium" {
             
         }
+ */
         
     }
     

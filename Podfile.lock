@@ -1,5 +1,6 @@
 PODS:
   - Alamofire (4.0.1)
+  - FDWaveformView (2.0.0)
   - Firebase/Auth (3.7.0):
     - Firebase/Core
     - FirebaseAuth (= 3.0.5)
@@ -43,6 +44,7 @@ PODS:
 
 DEPENDENCIES:
   - Alamofire (~> 4.0)
+  - FDWaveformView
   - Firebase/Auth
   - Firebase/Database
   - Firebase/Storage
@@ -51,6 +53,7 @@ DEPENDENCIES:
 
 SPEC CHECKSUMS:
   Alamofire: 7682d43245de14874acd142ec137b144aa1dd335
+  FDWaveformView: 13d70f4d8c536393427c8b4c9e846bf0bcfd16c7
   Firebase: 3875e140d77c7572c6d4852faf94144ffcdb0704
   FirebaseAnalytics: 02d0aed8c6246a9c8683ac3e9825c67ceb657bde
   FirebaseAuth: 75a062bbf2d3c97d1e6e55bbc110e13a6853e25d
@@ -65,6 +68,6 @@ SPEC CHECKSUMS:
   Pulsator: 0df1d24c09354555be8f4c386ba7c4df297690eb
   SwiftLinkPreview: 977461879ae31f9e2d1bf2fafba0553d99eacbb9
 
-PODFILE CHECKSUM: dfcec0d6fed5144a61ad87ac33fd3e9de3bf60d4
+PODFILE CHECKSUM: 4576c3027468f3b49a403fd5971bf17e74084a19
 
 COCOAPODS: 1.1.0.beta.1
