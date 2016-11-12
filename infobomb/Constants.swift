@@ -54,6 +54,7 @@ let USER_NOT_FOUND = 17011
 let PASSWORD_NOT_FOUND = 17009
 
 //Colors
+let BABY_BLUE: UIColor = UIColor(red: 82.0 / 255.0, green: 178.0 / 255.0, blue: 207.0 / 255.0, alpha: 1)
 let RED: UIColor = UIColor(red: 255.0, green: 0, blue: 0, alpha: 1)
 let SHADOW_COLOR: CGFloat = 157.0 / 255.0
 let CRIMSON: UIColor = UIColor(red: 230.0 / 255.0, green: 0.0, blue: 0.0, alpha: 1)

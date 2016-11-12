@@ -24,8 +24,9 @@ class CategoryVC: UIViewController, UITableViewDataSource, UITableViewDelegate, 
     
     let storage = FIRStorage.storage()
     let firebasePost = PostService.ds.REF_POSTS.childByAutoId()
+    let uploadMetadata = FIRStorageMetadata()
+    
     var key: String! = nil
-
     var userID: String!
     var username: String!
     var explosionPlayer: AVAudioPlayer!
@@ -48,6 +49,7 @@ class CategoryVC: UIViewController, UITableViewDataSource, UITableViewDelegate, 
         print("CategoryVC")
         print("\(message)\(previousVC)")
         print("\(postImg)\(previousVC)\n\n\n\n\n\n")
+        print("\(linkObj) = linkObj")
         
         //Subclass navigation bar after app is finished and all other non DRY
         let image = UIImage(named: "metal-bg.jpg")?.resizableImage(withCapInsets: UIEdgeInsetsMake(0, 15, 0, 15), resizingMode: UIImageResizingMode.stretch)
@@ -212,7 +214,11 @@ class CategoryVC: UIViewController, UITableViewDataSource, UITableViewDelegate, 
                 } else if previousVC == AUDIO_POST_VC {
                     self.gatherPostData(postType: "audio", data: linkObj as AnyObject)
                 } else if previousVC == QUOTE_POST_VC {
-                    self.gatherPostData(postType: "quote", data: linkObj as AnyObject)
+                    if linkObj["text"] != nil {
+                        self.gatherPostData(postType: "quoteText", data: linkObj as AnyObject)
+                    } else if linkObj["image"] != nil {
+                        self.gatherPostData(postType: "quoteImg", data: linkObj as AnyObject)
+                    }
                 }
             }
         } else {
@@ -275,6 +281,9 @@ class CategoryVC: UIViewController, UITableViewDataSource, UITableViewDelegate, 
             if let linkUrl = data["url"] as! String? {
                 post["url"] = linkUrl as AnyObject?
             }
+            if let msg = data["message"] as! String? {
+                post["message"] = msg as AnyObject?
+            }
             if let linkImage = data["image"] as! NSData? {
                 //need to store in storage and reference it from path
                 let linkPreviewRef = storageRef.child("link-preview/image_\(NSUUID().uuidString)")
@@ -284,7 +293,6 @@ class CategoryVC: UIViewController, UITableViewDataSource, UITableViewDelegate, 
 
                         print("Failed to upload image to firebase\n\n\n\n\n\n\n\n")
                     } else {
-                        print("HERE")
                         let downloadURL = metadata!.downloadURL()!.absoluteString
                         self.post["image"] = downloadURL as AnyObject?
                         self.postToFirebase()
@@ -321,32 +329,105 @@ class CategoryVC: UIViewController, UITableViewDataSource, UITableViewDelegate, 
             
             post["type"] = postType as AnyObject?
             
+            
             if let videoText = data["text"] as! String? {
                 post["message"] = videoText as AnyObject?
             }
             
             let video = data["video"] as! NSData
+
+            let videoRef = storageRef.child("videos/video_post/video_\(uniqueString)")
             
-            let imageRef = storageRef.child("videos/video_post/video_\(uniqueString)")
-            
-            let uploadTask = imageRef.put(video as Data, metadata: nil) { metadata, error in
+            let uploadTask = videoRef.put(video as Data, metadata: nil) { metadata, error in
                 if (error != nil) {
                     // Uh-oh, an error occurred!
                     print("Failed to upload image to firebase")
                 } else {
-                    print("HERE")
                     let downloadURL = metadata!.downloadURL()!.absoluteString
                     self.post["video"] = downloadURL as AnyObject?
-                    self.postToFirebase()
+                    
+                    if let videoThumbnail = data["thumbnail"] as! NSData? {
+                    
+                        let thumbnailRef = storageRef.child("videos/video_post/thumbnail_\(uniqueString)")
+                    
+                        let uploadTask = thumbnailRef.put(videoThumbnail as Data, metadata: nil) { metadata, error in
+                            if (error != nil) {
+                                // Uh-oh, an error occurred!
+                                print("Failed to upload image to firebase")
+                            } else {
+                                let downloadURL = metadata!.downloadURL()!.absoluteString
+                                self.post["thumbnail"] = downloadURL as AnyObject?
+                                self.postToFirebase()
+                            }
+                        }
+                    }
                 }
             }
-
         } else if postType == "audio" {
             
-        } else if postType == "quote" {
+            post["type"] = postType as AnyObject?
+            post["title"] = data["title"] as! NSString
             
-        }
+            let audio = data["audio"] as! NSData
+            let audioRef = storageRef.child("audio/audio_post/audio_\(uniqueString)")
 
+            uploadMetadata.contentType = "audio/mpeg"
+            
+            let uploadTask = audioRef.put(audio as Data, metadata: uploadMetadata) { metadata, error in
+                if (error != nil) {
+                    print("Failed to upload audio to firebase.")
+                } else {
+                    
+                    let name = "audio/audio_post/\(metadata!.name!)"
+                    let audioRefDownload = storageRef.child(name)
+                    
+                    //WHY THE FUCK DO I HAVE TO MAKE 2 CALLS?!
+                    
+                    // Fetch the download URL
+                    audioRefDownload.downloadURL { (URL, error) -> Void in
+                        if (error != nil) {
+                            print(error)
+                        } else {
+                            let downloadUrlString = "\(URL!)"
+                            self.post["audio"] = downloadUrlString as AnyObject
+                            self.postToFirebase()
+                        }
+                    }
+                }
+            }
+            
+        } else if postType == "quoteText" {
+            
+                post["type"] = "quote" as AnyObject?
+                post["quoteType"] = "text" as AnyObject?
+                
+                if let author = data["author"] {
+                    post["author"] = author as AnyObject?
+                }
+                post["text"] = data["text"] as! NSString
+                self.postToFirebase()
+                
+        } else if postType == "quoteImg" {
+            
+                post["type"] = "quote" as AnyObject?
+                post["quoteType"] = "image" as AnyObject?
+                
+                let image = data["image"] as! NSData
+                
+                let quoteRef = storageRef.child("images/quote_post/image_\(uniqueString)")
+                
+                let uploadTask = quoteRef.put(image as Data, metadata: nil) { metadata, error in
+                    if (error != nil) {
+                        print("Failed to upload image to firebase")
+                    } else {
+                        let downloadURL = metadata!.downloadURL()!.absoluteString
+                        self.post["image"] = downloadURL as AnyObject?
+                        self.postToFirebase()
+                    }
+                }
+
+        }
+        
     }
     
     func postToFirebase() {

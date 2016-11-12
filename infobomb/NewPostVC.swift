@@ -78,16 +78,14 @@ class NewPostVC: UIViewController, CLLocationManagerDelegate {
     
     override func prepare(for segue: UIStoryboardSegue, sender: Any!) {
         
-        if segue.identifier == NEW_IMAGE_POST || segue.identifier == NEW_VIDEO_POST {
+        if segue.identifier == NEW_IMAGE_POST {
             
             let nav = segue.destination as! UINavigationController;
             let mediaView = nav.topViewController as! ImagePostVC
-
-            if (segue.identifier == NEW_IMAGE_POST) {
                 mediaView.previousVC = NEW_IMAGE_POST
-            } else if (segue.identifier == NEW_VIDEO_POST) {
-                mediaView.previousVC = NEW_VIDEO_POST
-            }
+        } else if segue.identifier == NEW_VIDEO_POST {
+            let nav = segue.destination as! UINavigationController;
+            let mediaView = nav.topViewController as! VideoUploadOptionVC
         }
         
     }

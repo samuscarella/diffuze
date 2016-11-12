@@ -29,6 +29,7 @@
 		9340CA9B1D7DED5900AE1231 /* gun-shot.mp3 in Resources */ = {isa = PBXBuildFile; fileRef = 9340CA9A1D7DED5900AE1231 /* gun-shot.mp3 */; };
 		9340CA9D1D7E2BC200AE1231 /* GoogleService-Info.plist in Resources */ = {isa = PBXBuildFile; fileRef = 9340CA9C1D7E2BC200AE1231 /* GoogleService-Info.plist */; };
 		9340CA9F1D7E2E4700AE1231 /* UserService.swift in Sources */ = {isa = PBXBuildFile; fileRef = 9340CA9E1D7E2E4700AE1231 /* UserService.swift */; };
+		9341CDBF1DCF85EB006861D9 /* VideoUploadOptionVC.swift in Sources */ = {isa = PBXBuildFile; fileRef = 9341CDBE1DCF85EB006861D9 /* VideoUploadOptionVC.swift */; };
 		935C20F91D7F36C200C41A47 /* LeftNavVC.swift in Sources */ = {isa = PBXBuildFile; fileRef = 935C20F81D7F36C200C41A47 /* LeftNavVC.swift */; };
 		935C20FE1D7F8AC300C41A47 /* NotoSans-Bold.ttf in Resources */ = {isa = PBXBuildFile; fileRef = 935C20FA1D7F8AC300C41A47 /* NotoSans-Bold.ttf */; };
 		935C20FF1D7F8AC300C41A47 /* NotoSans-BoldItalic.ttf in Resources */ = {isa = PBXBuildFile; fileRef = 935C20FB1D7F8AC300C41A47 /* NotoSans-BoldItalic.ttf */; };
@@ -95,6 +96,7 @@
 		9340CA9A1D7DED5900AE1231 /* gun-shot.mp3 */ = {isa = PBXFileReference; lastKnownFileType = audio.mp3; path = "gun-shot.mp3"; sourceTree = "<group>"; };
 		9340CA9C1D7E2BC200AE1231 /* GoogleService-Info.plist */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = text.plist.xml; path = "GoogleService-Info.plist"; sourceTree = "<group>"; };
 		9340CA9E1D7E2E4700AE1231 /* UserService.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = UserService.swift; sourceTree = "<group>"; };
+		9341CDBE1DCF85EB006861D9 /* VideoUploadOptionVC.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = VideoUploadOptionVC.swift; sourceTree = "<group>"; };
 		935C20F81D7F36C200C41A47 /* LeftNavVC.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = LeftNavVC.swift; sourceTree = "<group>"; };
 		935C20FA1D7F8AC300C41A47 /* NotoSans-Bold.ttf */ = {isa = PBXFileReference; lastKnownFileType = file; path = "NotoSans-Bold.ttf"; sourceTree = "<group>"; };
 		935C20FB1D7F8AC300C41A47 /* NotoSans-BoldItalic.ttf */ = {isa = PBXFileReference; lastKnownFileType = file; path = "NotoSans-BoldItalic.ttf"; sourceTree = "<group>"; };
@@ -242,6 +244,7 @@
 				9385D00A1DA9979800AAAAD2 /* ImagePostVC.swift */,
 				93770C3F1DAA718C00A2A134 /* AudioPostVC.swift */,
 				936B24261DB2F011006E30CE /* QuotePostVC.swift */,
+				9341CDBE1DCF85EB006861D9 /* VideoUploadOptionVC.swift */,
 			);
 			name = Controller;
 			sourceTree = "<group>";
@@ -489,6 +492,7 @@
 				9340CA771D7DB10800AE1231 /* ViewController.swift in Sources */,
 				937131F61DACD925006CC35E /* UIImageExtension.swift in Sources */,
 				93B8E7B31D7EE055005ACC48 /* SWRevealViewController.m in Sources */,
+				9341CDBF1DCF85EB006861D9 /* VideoUploadOptionVC.swift in Sources */,
 				9340CA991D7DE3CA00AE1231 /* LoginButton.swift in Sources */,
 				9385D00B1DA9979800AAAAD2 /* ImagePostVC.swift in Sources */,
 				937E3AE51D85BBD400BB7C01 /* MaterialTextView.swift in Sources */,

@@ -59,5 +59,7 @@
 	</array>
 	<key>UIViewControllerBasedStatusBarAppearance</key>
 	<false/>
+	<key>NSPhotoLibraryUsageDescription</key>
+	<string>InfoBomb needs access to your photo library to post media.</string>
 </dict>
 </plist>

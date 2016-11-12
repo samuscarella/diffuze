@@ -61,7 +61,6 @@ class TextPostVC: UIViewController, UITextViewDelegate {
         
         textField.delegate = self
 
-        
         applyPlaceholderStyle(aTextview: textField!, placeholderText: PLACEHOLDER_TEXT)
         NotificationCenter.default.addObserver(self, selector: #selector(TextPostVC.keyboardWillShow(_:)), name: NSNotification.Name.UIKeyboardWillShow, object: nil)
         NotificationCenter.default.addObserver(self, selector: #selector(TextPostVC.keyboardWillHide(_:)), name: NSNotification.Name.UIKeyboardWillHide, object: nil)
@@ -87,7 +86,6 @@ class TextPostVC: UIViewController, UITextViewDelegate {
 
     //Calls this function when the tap is recognized.
     func dismissKeyboard() {
-        //Causes the view (or one of its embedded text fields) to resign the first responder status.
         view.endEditing(true)
     }
     

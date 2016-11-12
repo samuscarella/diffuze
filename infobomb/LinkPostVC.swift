@@ -25,6 +25,7 @@ class LinkPostVC: UIViewController {
     @IBOutlet weak var chooseCategories: MaterialButton!
     @IBOutlet weak var noPreviewAvailable: MaterialUIView!
     
+    @IBOutlet weak var messageField: MaterialTextView!
     let slp = SwiftLinkPreview()
     
     var request: Request?
@@ -254,6 +255,9 @@ class LinkPostVC: UIViewController {
             if self.linkData {
                 let nav = segue.destination as! UINavigationController;
                 let categoryView = nav.topViewController as! CategoryVC
+                if let message = messageField.text! as String?, messageField.text != "" {
+                    linkObj["message"] = message as AnyObject?
+                }
                 categoryView.previousVC = LINK_POST_VC
                 categoryView.linkObj = self.linkObj
             }
