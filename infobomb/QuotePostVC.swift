@@ -10,6 +10,7 @@ import UIKit
 
 //disable image picker when typing on keyboard and re enable it when keyboard is dismissed
 
+//REFACTOR TO PROMPT USER TO MAKE TEXT QUOTE OR IMAGE QUOTE SIMILAR TO VIDEO UPLOAD
 class QuotePostVC: UIViewController, UINavigationControllerDelegate, UITextViewDelegate, UITextFieldDelegate, UIImagePickerControllerDelegate {
 
     @IBOutlet weak var noImageView: UIView!
@@ -99,6 +100,8 @@ class QuotePostVC: UIViewController, UINavigationControllerDelegate, UITextViewD
                 imagePreview.layer.borderColor = ANTI_FLASH_WHITE.cgColor
                 noImageView.isHidden = true
                 linkObj["image"] = UIImageJPEGRepresentation(pickedImage, 0.25) as AnyObject?
+                linkObj["text"] = nil
+                linkObj["author"] = nil
             }
             
         }
@@ -149,6 +152,7 @@ class QuotePostVC: UIViewController, UINavigationControllerDelegate, UITextViewD
         
         if textField.text != "" {
             imagePreview.image = nil
+            linkObj["image"] = nil
             noImageView.isHidden = false
             return true
         }
@@ -198,7 +202,7 @@ class QuotePostVC: UIViewController, UINavigationControllerDelegate, UITextViewD
     
     override func shouldPerformSegue(withIdentifier identifier: String, sender: Any?) -> Bool {
         
-            if imagePreview.image == nil && (textField.text == "Enter Text Without Quotations..." || authorField.text == "") {
+            if imagePreview.image == nil && (textField.text == "Enter Text Without Quotations..." || textField.text == "") {
                 return false
             } else {
                 return true
@@ -209,23 +213,21 @@ class QuotePostVC: UIViewController, UINavigationControllerDelegate, UITextViewD
         
         if (segue.identifier == QUOTE_POST_VC) {
             
-                let nav = segue.destination as! UINavigationController;
-                let categoryView = nav.topViewController as! CategoryVC
-                if authorField.text != "" {
-                    linkObj["author"] = authorField.text! as AnyObject?
-                }
-                if textField.text != "Enter Text..." {
-                    linkObj["text"] = textField.text! as AnyObject?
-                }
-                if imagePreview.image != nil {
-                    linkObj["image"] = imagePreview.image
-                }
-                categoryView.previousVC = QUOTE_POST_VC
-                categoryView.linkObj = self.linkObj
+            let nav = segue.destination as! UINavigationController
+            let categoryView = nav.topViewController as! CategoryVC
+            
+            if textField.text != "Enter Text Without Quotations..." {
+                linkObj["text"] = textField.text! as NSString?
                 
+                if let author = authorField.text, authorField.text != "" {
+                    linkObj["author"] = author as AnyObject?
+                }
+            }
+            categoryView.previousVC = QUOTE_POST_VC
+            categoryView.linkObj = self.linkObj
+
         }
  
-        
     }
     
     @IBAction func unwindToQuotePost(_ segue: UIStoryboardSegue) {

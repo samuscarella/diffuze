@@ -24,10 +24,27 @@ class Post {
     fileprivate var _likes: Int!
     fileprivate var _dislikes: Int!
     fileprivate var _distance: Int!
+    fileprivate var _title: String?
+    fileprivate var _image: String?
+    fileprivate var _video: String?
+    fileprivate var _thumbnail: String?
+    fileprivate var _shortUrl: String?
 
     
     var message: String? {
         return _message
+    }
+    
+    var image: String? {
+        return _image
+    }
+    
+    var video: String? {
+        return _video
+    }
+    
+    var thumbnail: String? {
+        return _thumbnail
     }
     
     var categories: [String]! {
@@ -70,6 +87,14 @@ class Post {
         return _distance
     }
     
+    var title: String? {
+        return _title
+    }
+    
+    var shortUrl: String? {
+        return _shortUrl
+    }
+    
     var postKey: String {
         return _postKey
     }
@@ -110,6 +135,21 @@ class Post {
         }
         if let distance = dictionary["distance"] as? Int {
             self._distance = distance
+        }
+        if let title = dictionary["title"] as? String {
+            self._title = title
+        }
+        if let shortUrl = dictionary["shortUrl"] as? String {
+            self._shortUrl = shortUrl
+        }
+        if let image = dictionary["image"] as? String {
+            self._image = image
+        }
+        if let video = dictionary["video"] as? String {
+            self._video = video
+        }
+        if let thumbnail = dictionary["thumbnail"] as? String {
+            self._thumbnail = thumbnail
         }
         if let categoryArray = dictionary["categories"] as? NSArray {
             

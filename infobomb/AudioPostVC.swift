@@ -236,7 +236,8 @@ class AudioPostVC: UIViewController, UITextFieldDelegate, AVAudioRecorderDelegat
         }
 
         if let audioURL = audioRecorder.url as NSURL? {
-            linkObj["audio"] = audioURL
+            let data = NSData(contentsOf: audioURL as URL)
+            linkObj["audio"] = data
         }
         
         UIView.animate(withDuration: 0.2, delay: 0, options: .allowAnimatedContent, animations: {
@@ -425,6 +426,7 @@ class AudioPostVC: UIViewController, UITextFieldDelegate, AVAudioRecorderDelegat
     
     func audioRecorderDidFinishRecording(_ recorder: AVAudioRecorder, successfully flag: Bool) {
         if !flag {
+            
         }
     }
     
@@ -445,6 +447,7 @@ class AudioPostVC: UIViewController, UITextFieldDelegate, AVAudioRecorderDelegat
         if (segue.identifier == AUDIO_POST_VC) {
             
             if linkObj["audio"] != nil {
+                linkObj["title"] = titleField.text as AnyObject?
                 let nav = segue.destination as! UINavigationController;
                 let categoryView = nav.topViewController as! CategoryVC
                 categoryView.previousVC = AUDIO_POST_VC

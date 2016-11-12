@@ -51,12 +51,12 @@ class SubscriptionCell: UITableViewCell {
 
             request = Alamofire.request(category.image_path!).validate(contentType: ["image/*"]).response { response in
             
-                if response.error == nil {
-                    let img = UIImage(data: response.data!)!
-                    self.subscriptionImage.image = img
-                    SubscriptionsVC.imageCache.setObject(img, forKey: self.category.image_path! as AnyObject)
+                    if response.error == nil {
+                        let img = UIImage(data: response.data!)!
+                        self.subscriptionImage.image = img
+                        SubscriptionsVC.imageCache.setObject(img, forKey: self.category.image_path! as AnyObject)
+                    }
                 }
-            }
         }
         
         subscriptionRef.child(category.name).observeSingleEvent(of: .value, with: { (snapshot) in

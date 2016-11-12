@@ -32,6 +32,11 @@ class ActivityVC: UIViewController, CLLocationManagerDelegate, UITableViewDelega
     var locationService: LocationService!
     var currentLocation: [String:AnyObject] = [:]
     var posts = [Post]()
+    let userID = FIRAuth.auth()?.currentUser?.uid
+    var currentUser: NSDictionary = [:]
+    let iD = UserService.ds.currentUserID
+    
+    static var imageCache = NSCache<AnyObject, AnyObject>()
     
     var latitude: Double = 0.0
     var longitude: Double = 0.0
@@ -41,6 +46,8 @@ class ActivityVC: UIViewController, CLLocationManagerDelegate, UITableViewDelega
         
         UserDefaults.standard.setValue(false, forKey: "_UIConstraintBasedLayoutLogUnsatisfiable")
         self.view.backgroundColor = SMOKY_BLACK
+        
+        UIApplication.shared.statusBarStyle = .lightContent
         /*
         filterBtn.frame = CGRect(x: 0, y: 0, width: self.view.bounds.width, height: 50)
         //Subclass navigation bar after app is finished and all other non DRY
@@ -112,17 +119,15 @@ class ActivityVC: UIViewController, CLLocationManagerDelegate, UITableViewDelega
         
         tableView.delegate = self
         tableView.dataSource = self
-        tableView.rowHeight = UITableViewAutomaticDimension
         tableView.tableFooterView = UIView()
-        tableView.estimatedRowHeight = 600
+        tableView.rowHeight = UITableViewAutomaticDimension
+        tableView.estimatedRowHeight = 300
+        tableView.isHidden = true
 
-        let userID = FIRAuth.auth()?.currentUser?.uid
-        var currentUser: NSDictionary = [:]
-        let iD = UserService.ds.currentUserID
         UserService.ds.REF_USERS.child(iD).observeSingleEvent(of: FIRDataEventType.value, with: { (snapshot) in
             // Get user value
             
-            currentUser = (snapshot.value as? NSDictionary)!
+            self.currentUser = (snapshot.value as? NSDictionary)!
             
             PostService.ds.REF_ACTIVE_POSTS.observeSingleEvent(of: FIRDataEventType.value, with: { snapshot in
                 print("Got snapshot...")
@@ -133,7 +138,7 @@ class ActivityVC: UIViewController, CLLocationManagerDelegate, UITableViewDelega
                         if let postDict = post.value as?  Dictionary<String, AnyObject> {
                             let key = post.key
                             //print(currentUser)
-                            if let userSubscriptions = currentUser["subscriptions"] as? NSDictionary {
+                            if let userSubscriptions = self.currentUser["subscriptions"] as? NSDictionary {
                                 
                                 let postCategories = postDict["categories"] as! NSDictionary
                                 var isUserSubscribed = false
@@ -146,13 +151,13 @@ class ActivityVC: UIViewController, CLLocationManagerDelegate, UITableViewDelega
                                     }
                                     if isUserSubscribed { break }
                                 }
-                                if isUserSubscribed && currentUser["user_ref"] as? String != postDict["user_id"] as? String {
+                                if isUserSubscribed && self.currentUser["user_ref"] as? String != postDict["user_id"] as? String {
                                     print(post)
 
                                     let postLat = Double((postDict["latitude"] as? Double)!)
                                     let postLong = Double((postDict["longitude"] as? Double)!)
-                                    let userLat = Double((currentUser["latitude"] as? Double)!)
-                                    let userLong = Double((currentUser["longitude"] as? Double)!)
+                                    let userLat = Double((self.currentUser["latitude"] as? Double)!)
+                                    let userLong = Double((self.currentUser["longitude"] as? Double)!)
                                     
                                     let postDistance = postDict["distance"] as? Int
                                     let postLocation = CLLocation(latitude: postLat, longitude: postLong)
@@ -178,7 +183,10 @@ class ActivityVC: UIViewController, CLLocationManagerDelegate, UITableViewDelega
                         }
                     }
                 }
-                self.tableView.reloadData()
+                if self.posts.count > 0 {
+                    self.tableView.reloadData()
+                    self.tableView.isHidden = false
+                }
             })
         }) { (error) in
             print("CurrentUserError: \(error.localizedDescription)")
@@ -243,7 +251,7 @@ class ActivityVC: UIViewController, CLLocationManagerDelegate, UITableViewDelega
             pulseImg.isHidden = true
             pulsator.stop()
         }
-        return 1
+        return posts.count
     }
     
     
@@ -251,19 +259,24 @@ class ActivityVC: UIViewController, CLLocationManagerDelegate, UITableViewDelega
         
         if posts.count > 0 {
             let post = posts[(indexPath as NSIndexPath).row]
-            var didUpdateLocation = false
         
             if let cell = tableView.dequeueReusableCell(withIdentifier: "PostCell") as? PostCell {
+                
+                cell.request?.cancel()
             
                 let userLat = currentLocation["latitude"] as? Double
                 let userLong = currentLocation["longitude"] as? Double
                 
-                if userLat != nil && userLong != nil {
-                    didUpdateLocation = true
+                var img: UIImage?
+                
+                if let url = post.image {
+                    img = ActivityVC.imageCache.object(forKey: url as AnyObject) as? UIImage
+                } else if let url = post.thumbnail {
+                    img = ActivityVC.imageCache.object(forKey: url as AnyObject) as? UIImage
                 }
-                if didUpdateLocation {
-                    cell.configureCell(post, currentLocation: currentLocation)
-                }
+                
+                cell.configureCell(post, currentLocation: currentLocation, image: img)
+                
                 return cell
             } else {
                 return PostCell()
@@ -278,10 +291,15 @@ class ActivityVC: UIViewController, CLLocationManagerDelegate, UITableViewDelega
             let post = posts[(indexPath as NSIndexPath).row]
         
             if post.type == "text" {
-                return 200
+                return UITableViewAutomaticDimension
             }
         }
-        return tableView.estimatedRowHeight
+        return UITableViewAutomaticDimension
+        
+    }
+    
+    func tableView(_ tableView: UITableView, didSelectRowAt indexPath: IndexPath) {
+        self.performSegue(withIdentifier: "PostDetailVC", sender: posts[indexPath.row])
         
     }
     
@@ -295,7 +313,16 @@ class ActivityVC: UIViewController, CLLocationManagerDelegate, UITableViewDelega
         animation.toValue = NSValue(cgPoint: CGPoint(x: pulseImg.center.x + 5, y: pulseImg.center.y))
         pulseImg.layer.add(animation, forKey: "position")
     }
-
+    
+    func heightForView(_ label:UILabel, text: String, font:UIFont) -> CGFloat {
+        label.numberOfLines = 0
+        label.lineBreakMode = NSLineBreakMode.byWordWrapping
+        label.font = font
+        label.text = text
+        label.sizeToFit()
+        
+        return label.frame.height
+    }
     
 
     func notificationBtnPressed() {

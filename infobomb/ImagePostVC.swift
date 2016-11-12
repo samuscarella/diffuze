@@ -145,16 +145,30 @@ class ImagePostVC: UIViewController, UINavigationControllerDelegate, UITextViewD
             
             if let videoURL = info["UIImagePickerControllerMediaURL"] as? NSURL {
              
-                player = AVPlayer(url: videoURL as URL)
-                self.videoLayer = AVPlayerLayer(player: player)
-                self.videoLayer?.videoGravity = AVLayerVideoGravityResizeAspectFill
-                self.videoLayer?.frame = videoView.bounds
-                self.videoView.layer.addSublayer(videoLayer!)
-                self.videoView.playerLayer = videoLayer
-                self.videoView.layer.borderWidth = 1
-                self.videoView.layer.borderColor = ANTI_FLASH_WHITE.cgColor
-                self.videoView.bringSubview(toFront: self.chooseMediaIcon)
-                self.videoView.isHidden = false
+                let asset = AVURLAsset(url: videoURL as URL, options: nil)
+                let imgGenerator = AVAssetImageGenerator(asset: asset)
+                
+                var imgPreview: NSData?
+                
+                do {
+                    let cgImage = try imgGenerator.copyCGImage(at: CMTimeMake(0, 1), actualTime: nil)
+                    let uiImage = UIImage(cgImage: cgImage, scale: CGFloat(1.0), orientation: .right)
+                    self.imageView.image = uiImage
+                    self.imageView.clipsToBounds = true
+                    imgPreview = UIImagePNGRepresentation(uiImage) as NSData?
+                    self.linkObj["thumbnail"] = imgPreview
+                } catch let err as NSError {
+                    print(err.debugDescription)
+                }
+                
+//                player = AVPlayer(url: videoURL as URL)
+//                self.videoLayer = AVPlayerLayer(player: player)
+//                self.videoLayer?.videoGravity = AVLayerVideoGravityResizeAspectFill
+//                self.videoLayer?.frame = videoView.bounds
+//                self.videoView.layer.addSublayer(videoLayer!)
+//                self.videoView.playerLayer = videoLayer
+//                self.videoView.bringSubview(toFront: self.chooseMediaIcon)
+//                self.videoView.isHidden = false
                 if let videoData = NSData(contentsOf: videoURL as URL) {
                     self.linkObj["video"] = videoData
                 }
@@ -247,7 +261,11 @@ class ImagePostVC: UIViewController, UINavigationControllerDelegate, UITextViewD
     }
     
     @IBAction func backBtnPressed(_ sender: AnyObject) {
-        self.performSegue(withIdentifier: "unwindToNewPost", sender: self)
+        if previousVC == NEW_IMAGE_POST {
+            self.performSegue(withIdentifier: "unwindToNewPost", sender: self)
+        } else if previousVC == NEW_VIDEO_POST {
+            self.performSegue(withIdentifier: "unwindToVideoUploadOption", sender: self)
+        }
     }
     
     override func shouldPerformSegue(withIdentifier identifier: String, sender: Any?) -> Bool {
@@ -302,6 +320,4 @@ class ImagePostVC: UIViewController, UINavigationControllerDelegate, UITextViewD
         
     }
 
-    
-    
 }
