@@ -10,9 +10,8 @@ import UIKit
 import CoreLocation
 import Pulsator
 import Firebase
-//
-
-//add radar as the location based feed and activity feed will relate to users following content
+import AVFoundation
+import GeoFire
 
 //private var latitude: Double = 0.0
 //private var longitude: Double = 0.0
@@ -40,6 +39,9 @@ class ActivityVC: UIViewController, CLLocationManagerDelegate, UITableViewDelega
     
     var latitude: Double = 0.0
     var longitude: Double = 0.0
+    var audioPlayerItem: AVPlayerItem?
+    var audioPlayer: AVPlayer?
+
     
     override func viewDidLoad() {
         super.viewDidLoad()
@@ -73,10 +75,12 @@ class ActivityVC: UIViewController, CLLocationManagerDelegate, UITableViewDelega
         customView.addSubview(imageView)
         customView.layer.cornerRadius = customView.frame.size.width / 2
         customView.clipsToBounds = true
-    
+        
         imageView.center = (imageView.superview?.center)!
         self.navigationItem.titleView = customView
-
+        
+       filterBtn.imageEdgeInsets = UIEdgeInsetsMake(5,5,5,5);
+        
         let button: UIButton = UIButton(type: UIButtonType.custom)
         button.setImage(UIImage(named: "notification.png"), for: UIControlState())
         button.addTarget(self, action: #selector(ActivityVC.notificationBtnPressed), for: UIControlEvents.touchUpInside)
@@ -91,6 +95,7 @@ class ActivityVC: UIViewController, CLLocationManagerDelegate, UITableViewDelega
         self.navigationItem.leftBarButtonItem = leftBarButton
         
         locationService = LocationService()
+        
 ////        locationService.startTracking()
 //        locationService.addObserver(self, forKeyPath: "latitude", options: .New, context: &latitude)
 //        locationService.addObserver(self, forKeyPath: "longitude", options: .New, context: &longitude)
@@ -107,6 +112,7 @@ class ActivityVC: UIViewController, CLLocationManagerDelegate, UITableViewDelega
 //        NSNotificationCenter.defaultCenter().addObserver(self, selector: #selector(ActivityVC.refreshTableView), name: "userUpdatedLocation", object: nil)
         NotificationCenter.default.addObserver(locationService, selector: #selector(locationService.stopUpdatingLocation), name: NSNotification.Name(rawValue: "userSignedOut"), object: nil)
         
+        
         pulsator.radius = 300.0
         pulsator.backgroundColor = UIColor(red: 255.0, green: 0, blue: 0, alpha: 1).cgColor
         pulsator.animationDuration = 1.5
@@ -116,7 +122,6 @@ class ActivityVC: UIViewController, CLLocationManagerDelegate, UITableViewDelega
         pulseImg.layer.superlayer?.insertSublayer(pulsator, below: pulseImg.layer)
         pulsator.start()
  
-        
         tableView.delegate = self
         tableView.dataSource = self
         tableView.tableFooterView = UIView()
@@ -216,7 +221,6 @@ class ActivityVC: UIViewController, CLLocationManagerDelegate, UITableViewDelega
 //    }
 
     
-    
     override func viewDidLayoutSubviews() {
         super.viewDidLayoutSubviews()
         
@@ -227,7 +231,9 @@ class ActivityVC: UIViewController, CLLocationManagerDelegate, UITableViewDelega
         shake()
     }
     
-    
+    override func viewWillDisappear(_ animated: Bool) {
+        NotificationCenter.default.removeObserver(self)
+    }
     
     private func tableView(_ collectionView: UICollectionView, didSelectItemAtIndexPath indexPath: IndexPath) {
         
@@ -238,8 +244,6 @@ class ActivityVC: UIViewController, CLLocationManagerDelegate, UITableViewDelega
         performSegue(withIdentifier: "PostDetailVC", sender: post)
         
     }
-
-    
     
     func numberOfSections(in tableView: UITableView) -> Int {
         return 1
@@ -260,10 +264,10 @@ class ActivityVC: UIViewController, CLLocationManagerDelegate, UITableViewDelega
         if posts.count > 0 {
             let post = posts[(indexPath as NSIndexPath).row]
         
-            if let cell = tableView.dequeueReusableCell(withIdentifier: "PostCell") as? PostCell {
+            if let cell = tableView.dequeueReusableCell(withIdentifier: "PostCell", for: indexPath) as? PostCell {
                 
                 cell.request?.cancel()
-            
+                
                 let userLat = currentLocation["latitude"] as? Double
                 let userLong = currentLocation["longitude"] as? Double
                 
@@ -276,7 +280,7 @@ class ActivityVC: UIViewController, CLLocationManagerDelegate, UITableViewDelega
                 }
                 
                 cell.configureCell(post, currentLocation: currentLocation, image: img)
-                
+
                 return cell
             } else {
                 return PostCell()
@@ -300,9 +304,23 @@ class ActivityVC: UIViewController, CLLocationManagerDelegate, UITableViewDelega
     
     func tableView(_ tableView: UITableView, didSelectRowAt indexPath: IndexPath) {
         self.performSegue(withIdentifier: "PostDetailVC", sender: posts[indexPath.row])
-        
     }
     
+    func finishedPlaying(myNotification:NSNotification) {
+//        playAudioBtn.setImage(UIImage(named: "play-btn.png"), for: UIControlState.normal)
+        let stoppedPlayerItem: AVPlayerItem = myNotification.object as! AVPlayerItem
+        stoppedPlayerItem.seek(to: kCMTimeZero)
+    }
+    
+    func playButtonTapped(sender: AnyObject) {
+                if audioPlayer?.rate == 0 {
+                    audioPlayer!.play()
+//                                playAudioBtn.setImage(UIImage(named: "pause-button.png"), for: UIControlState.normal)
+                } else {
+                    audioPlayer!.pause()
+//   playAudioBtn.setImage(UIImage(named: "play-btn.png"), for: UIControlState.normal)
+                }
+    }
     
     func shake() {
         let animation = CABasicAnimation(keyPath: "position")
@@ -324,7 +342,7 @@ class ActivityVC: UIViewController, CLLocationManagerDelegate, UITableViewDelega
         return label.frame.height
     }
     
-
+    
     func notificationBtnPressed() {
         
     }
@@ -333,7 +351,6 @@ class ActivityVC: UIViewController, CLLocationManagerDelegate, UITableViewDelega
         
     }
 
-    
     @IBAction func unwindToActivityVC(_ segue: UIStoryboardSegue) {
         
     }

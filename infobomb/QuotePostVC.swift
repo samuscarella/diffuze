@@ -103,7 +103,6 @@ class QuotePostVC: UIViewController, UINavigationControllerDelegate, UITextViewD
                 linkObj["text"] = nil
                 linkObj["author"] = nil
             }
-            
         }
     }
 
@@ -216,11 +215,11 @@ class QuotePostVC: UIViewController, UINavigationControllerDelegate, UITextViewD
             let nav = segue.destination as! UINavigationController
             let categoryView = nav.topViewController as! CategoryVC
             
-            if textField.text != "Enter Text Without Quotations..." {
-                linkObj["text"] = textField.text! as NSString?
+            if textField.text != "Enter Text Without Quotations..." && textField.text != "" {
+                linkObj["text"] = textField.text! as NSString
                 
                 if let author = authorField.text, authorField.text != "" {
-                    linkObj["author"] = author as AnyObject?
+                    linkObj["author"] = author as NSString?
                 }
             }
             categoryView.previousVC = QUOTE_POST_VC

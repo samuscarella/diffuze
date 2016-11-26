@@ -134,8 +134,6 @@ class ImagePostVC: UIViewController, UINavigationControllerDelegate, UITextViewD
                 imageView.contentMode = .scaleAspectFill
                 imageView.image = pickedImage
                 imageView.clipsToBounds = true
-                imageView.layer.borderWidth = 1
-                imageView.layer.borderColor = ANTI_FLASH_WHITE.cgColor
                 chooseImgIcon.isHidden = false
                 noImageView.isHidden = true
                 linkObj["image"] = UIImageJPEGRepresentation(pickedImage, 0.25) as AnyObject?
