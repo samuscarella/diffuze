@@ -45,19 +45,34 @@ class CategoryVC: UIViewController, UITableViewDataSource, UITableViewDelegate, 
     override func viewDidLoad() {
         super.viewDidLoad()
         UserDefaults.standard.setValue(false, forKey: "_UIConstraintBasedLayoutLogUnsatisfiable")
-
-        print("CategoryVC")
-        print("\(message)\(previousVC)")
-        print("\(postImg)\(previousVC)\n\n\n\n\n\n")
-        print("\(linkObj) = linkObj")
         
-        //Subclass navigation bar after app is finished and all other non DRY
-        let image = UIImage(named: "metal-bg.jpg")?.resizableImage(withCapInsets: UIEdgeInsetsMake(0, 15, 0, 15), resizingMode: UIImageResizingMode.stretch)
-        self.navigationController?.navigationBar.setBackgroundImage(image, for: .default)
-        self.title = "Pick Categories"
-        self.navigationController?.navigationBar.titleTextAttributes = [NSFontAttributeName: UIFont(name: "TOSCA ZERO", size: 30)!, NSForegroundColorAttributeName: LIGHT_GREY]
+        UIApplication.shared.statusBarStyle = .lightContent
         
-        createBtn.setTitleColor(ANTI_FLASH_WHITE, for: .normal)
+        self.navigationController?.navigationBar.setBackgroundImage(UIImage(), for: .default)
+        self.navigationController?.navigationBar.shadowImage = UIImage()
+        self.navigationController?.navigationBar.isTranslucent = true
+        
+        let customView = UIView()
+        customView.frame = CGRect(x: 0, y: 0, width: 36, height: 36)
+        customView.backgroundColor = UIColor.white
+        let logo = UIImage(named: "categories-icon.png")
+        let imageView = UIImageView(image: logo)
+        imageView.frame = CGRect(x: 0, y: 0, width: 24, height: 24)
+        imageView.contentMode = UIViewContentMode.scaleAspectFit
+        customView.addSubview(imageView)
+        customView.layer.cornerRadius = customView.frame.size.width / 2
+        customView.clipsToBounds = true
+        
+        imageView.center = (imageView.superview?.center)!
+        self.navigationItem.titleView = customView
+        
+        let button: UIButton = UIButton(type: UIButtonType.custom)
+        button.setImage(UIImage(named: "notification.png"), for: UIControlState())
+        button.addTarget(self, action: #selector(ActivityVC.notificationBtnPressed), for: UIControlEvents.touchUpInside)
+        button.frame = CGRect(x: 0, y: 0, width: 27, height: 27)
+        let rightBarButton = UIBarButtonItem(customView: button)
+        self.navigationItem.rightBarButtonItem = rightBarButton
+        
 
         if previousVC == TEXT_POST_VC {
             createBtn.backgroundColor = AUBURN_RED
@@ -118,7 +133,7 @@ class CategoryVC: UIViewController, UITableViewDataSource, UITableViewDelegate, 
 //            print("LongitudeOfUser: \(longitude)")
 //        }
 //    }
-
+    
     
     func tableView(_ tableView: UITableView, heightForRowAt indexPath: IndexPath) -> CGFloat {
         return 50.0
@@ -204,7 +219,7 @@ class CategoryVC: UIViewController, UITableViewDataSource, UITableViewDelegate, 
             } else if CLLocationManager.authorizationStatus() == CLAuthorizationStatus.authorizedWhenInUse || CLLocationManager.authorizationStatus() == CLAuthorizationStatus.notDetermined {
                 
                 if previousVC == TEXT_POST_VC {
-                    self.gatherPostData(postType: "text", data: message! as AnyObject)
+                    self.gatherPostData(postType: "text", data: linkObj as AnyObject)
                 } else if previousVC == LINK_POST_VC {
                     self.gatherPostData(postType: "link", data: linkObj as AnyObject)
                 } else if previousVC == IMAGE_POST_VC {
@@ -233,7 +248,7 @@ class CategoryVC: UIViewController, UITableViewDataSource, UITableViewDelegate, 
         
         var selectedCategories: [String:AnyObject] = [:]
         for(_, value) in checked.enumerated() {
-            for (_, val) in value {
+            for(_, val) in value {
                 selectedCategories[val] = true as AnyObject?
             }
         }
@@ -425,7 +440,6 @@ class CategoryVC: UIViewController, UITableViewDataSource, UITableViewDelegate, 
                         self.postToFirebase()
                     }
                 }
-
         }
         
     }
@@ -476,7 +490,7 @@ class CategoryVC: UIViewController, UITableViewDataSource, UITableViewDelegate, 
     @IBAction func backBtnPressed(_ sender: AnyObject) {
         
         if previousVC == TEXT_POST_VC {
-//            locationService.stopUpdatingLocation()
+            //locationService.stopUpdatingLocation()
             self.performSegue(withIdentifier: "unwindToTextPost", sender: self)
         } else if previousVC == LINK_POST_VC {
             //locationService.stopUpdatingLocation()
@@ -490,9 +504,12 @@ class CategoryVC: UIViewController, UITableViewDataSource, UITableViewDelegate, 
         } else if previousVC == QUOTE_POST_VC {
             self.performSegue(withIdentifier: "unwindToQuotePost", sender: self)
         }
+    
+    }
+    
+    func notificationBtnPressed() {
         
     }
-
 
     func playExplosion() {
         
@@ -510,5 +527,24 @@ class CategoryVC: UIViewController, UITableViewDataSource, UITableViewDelegate, 
         }
     }
     
+    override func shouldPerformSegue(withIdentifier identifier: String, sender: Any?) -> Bool {
+        
+        if checked.count > 0 && checked.count < 3 {
+            return true
+        }
+        return false
+    }
     
+    override func prepare(for segue: UIStoryboardSegue, sender: Any!) {
+        
+        if (segue.identifier == BOMB_VC) {
+            
+            let bombVC = segue.destination as! BombVC
+            bombVC.bombData = linkObj
+        }
+        
+    }
+
 }
+    
+

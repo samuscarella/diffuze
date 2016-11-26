@@ -12,12 +12,12 @@ import Firebase
 
 class UserService {
     
-        static let ds = UserService()
+    static let ds = UserService()
     
-        fileprivate var _REF_BASE = URL_BASE
-        fileprivate var _REF_USERS = URL_BASE.child("users")
-        fileprivate var _REF_USER_POSTS = URL_BASE.child("user-posts")
-
+    fileprivate var _REF_BASE = URL_BASE
+    fileprivate var _REF_USERS = URL_BASE.child("users")
+    fileprivate var _REF_USER_LOCATIONS = URL_BASE.child("user-locations")
+    fileprivate var _REF_USER_POSTS = URL_BASE.child("user-posts")
     
     var REF_BASE: FIRDatabaseReference {
         return _REF_BASE
@@ -25,6 +25,10 @@ class UserService {
     
     var REF_USERS: FIRDatabaseReference {
         return _REF_USERS
+    }
+    
+    var REF_USER_LOCATIONS: FIRDatabaseReference {
+        return _REF_USER_LOCATIONS
     }
     
     var REF_USER_POSTS: FIRDatabaseReference {

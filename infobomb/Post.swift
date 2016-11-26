@@ -12,6 +12,7 @@ import Firebase
 class Post {
     
     fileprivate var _message: String?
+    fileprivate var _text: String?
     fileprivate var _type: String!
     fileprivate var _categories: [String]!
     fileprivate var _postKey: String!
@@ -27,12 +28,19 @@ class Post {
     fileprivate var _title: String?
     fileprivate var _image: String?
     fileprivate var _video: String?
+    fileprivate var _audio: String?
+    fileprivate var _author: String?
+    fileprivate var _quoteType: String?
     fileprivate var _thumbnail: String?
     fileprivate var _shortUrl: String?
 
     
     var message: String? {
         return _message
+    }
+    
+    var text: String? {
+        return _text
     }
     
     var image: String? {
@@ -43,12 +51,24 @@ class Post {
         return _video
     }
     
+    var audio: String? {
+        return _audio
+    }
+    
     var thumbnail: String? {
         return _thumbnail
     }
     
     var categories: [String]! {
         return _categories
+    }
+    
+    var author: String? {
+        return _author
+    }
+    
+    var quoteType: String? {
+        return _quoteType
     }
     
     var type: String {
@@ -109,6 +129,9 @@ class Post {
         if let message = dictionary["message"] as? String {
             self._message = message
         }
+        if let text = dictionary["text"] as? String {
+            self._text = text
+        }
         if let type = dictionary["type"] as? String {
             self._type = type
         }
@@ -142,11 +165,20 @@ class Post {
         if let shortUrl = dictionary["shortUrl"] as? String {
             self._shortUrl = shortUrl
         }
+        if let author = dictionary["author"] as? String {
+            self._author = author
+        }
         if let image = dictionary["image"] as? String {
             self._image = image
         }
         if let video = dictionary["video"] as? String {
             self._video = video
+        }
+        if let audio = dictionary["audio"] as? String {
+            self._audio = audio
+        }
+        if let quoteType = dictionary["quoteType"] as? String {
+            self._quoteType = quoteType
         }
         if let thumbnail = dictionary["thumbnail"] as? String {
             self._thumbnail = thumbnail

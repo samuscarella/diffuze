@@ -12,7 +12,7 @@ import Firebase
 
 /////////////////////////////////Constants
 
-//db
+//DB
 let URL_BASE = FIRDatabase.database().reference()
 let storage = FIRStorage.storage()
 let storageRef = storage.reference(forURL: "gs://infobomb-9b66c.appspot.com")
@@ -20,10 +20,47 @@ let REF_IMAGES_BUCKET = storageRef.child("images")
 let REF_VIDEO_BUCKET = storageRef.child("video")
 let REF_AUDIO_BUCKET = storageRef.child("audio")
 
-//development
+//Development
 let DALLAS_LATITUDE = 32.85477263390352
 let DALLAS_LONGITUDE = -96.74635749319265
+
+let AUSTIN_LATITUDE = 30.2672
+let AUSTIN_LONGITUDE = 97.7431
+
+let TULSA_LATITUDE = 36.1540
+let TULSA_LONGITUDE = 95.9928
+
+let MEMPHIS_LATITUDE = 35.1495
+let MEMPHIS_LONGITUDE = 90.0490
+
+let DENVER_LATITUDE = 39.7392
+let DENVER_LONGITUDE = 104.9903
+
+let DETROIT_LATITUDE = 42.3314
+let DETROIT_LONGITUDE = 83.0458
+
+let ALBUQUERQUE_LATITUDE = 35.0853
+let ALBUQUERQUE_LONGITUDE = 106.6056
+
+let CINCINNATI_LATITUDE = 39.1031
+let CINCINNATI_LONGITUDE = 84.5120
+
+let PHEONIX_LATITUDE = 33.4484
+let PHEONIX_LONGITUDE = 112.0740
+
+let LOS_ANGELES_LATITUDE = 34.0522
+let LOS_ANGELES_LONGITUDE = 118.2437
+
+let SAN_FRANCISCO_LATITUDE = 37.7749
+let SAN_FRANCISCO_LONGITUDE = 122.4194
+
 let PLACEHOLDER_TEXT = "Enter Text..."
+
+//Post Constraints
+let POST_IMAGE_HEIGHT: CGFloat = 180
+let POST_LINK_URL_HEIGHT: CGFloat = 20
+let POST_MESSAGE_HORIZONTAL_MARGINS: CGFloat = 8
+let POST_MESSAGE_TOP_MARGIN: CGFloat = 3
 
 //Scroll View
 let FLT_MAX = 1000
@@ -48,6 +85,7 @@ let IMAGE_POST_VC = "ImagePostVC"
 let NEW_IMAGE_POST = "newImagePost"
 let NEW_VIDEO_POST = "newVideoPost"
 let QUOTE_POST_VC = "QuotePostVC"
+let BOMB_VC = "BombVC"
 
 //Status Codes
 let USER_NOT_FOUND = 17011

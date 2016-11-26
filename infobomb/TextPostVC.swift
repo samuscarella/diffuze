@@ -20,6 +20,7 @@ class TextPostVC: UIViewController, UITextViewDelegate {
     let PLACEHOLDER_TEXT = "Enter Text..."
     
     var message: String!
+    var linkObj: [String:AnyObject] = [:]
     
     override func viewDidLoad() {
         super.viewDidLoad()
@@ -74,11 +75,6 @@ class TextPostVC: UIViewController, UITextViewDelegate {
         self.chooseCategoriesBtnBottomConstraint.constant = 0
     }
     
-    override func viewWillDisappear(_ animated: Bool) {
-        super.viewWillDisappear(animated)
-        UIApplication.shared.statusBarStyle = UIStatusBarStyle.default
-        
-    }
     
     override var preferredStatusBarStyle: UIStatusBarStyle {
             return .lightContent
@@ -203,12 +199,13 @@ class TextPostVC: UIViewController, UITextViewDelegate {
         if (segue.identifier == TEXT_POST_VC) {
             
             if let message = textField.text, message != "" {
+                self.linkObj["message"] = message as AnyObject?
                 self.chooseCategoriesBtnBottomConstraint.constant = 0
                 self.chooseCategoriesBtn.updateConstraints()
-                let nav = segue.destination as! UINavigationController;
+                let nav = segue.destination as! UINavigationController
                 let categoryView = nav.topViewController as! CategoryVC
                 categoryView.previousVC = TEXT_POST_VC
-                categoryView.message = message
+                categoryView.linkObj = linkObj
             }
         }
     }

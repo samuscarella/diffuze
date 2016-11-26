@@ -19,7 +19,6 @@ class LocationService: NSObject, CLLocationManagerDelegate {
     var locationManager: CLLocationManager!
     var currentLocation: CLLocation!
     
-    
     func startTracking() {
         
         locationManager = CLLocationManager()

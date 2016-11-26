@@ -19,23 +19,7 @@
                         <rect key="frame" x="0.0" y="0.0" width="600" height="667"/>
                         <autoresizingMask key="autoresizingMask" widthSizable="YES" heightSizable="YES"/>
                         <subviews>
-                            <imageView userInteractionEnabled="NO" contentMode="scaleAspectFit" horizontalHuggingPriority="251" verticalHuggingPriority="251" misplaced="YES" image="Infobomb_logo" translatesAutoresizingMaskIntoConstraints="NO" id="TVH-1o-rU3">
-                                <frame key="frameInset" minX="161" minY="122" width="277" height="58"/>
-                                <constraints>
-                                    <constraint firstAttribute="height" constant="58" id="AiX-TB-rke"/>
-                                    <constraint firstAttribute="height" constant="83" id="IZg-RO-JlN"/>
-                                    <constraint firstAttribute="width" constant="390" id="Sve-GO-Beq"/>
-                                    <constraint firstAttribute="width" constant="277" id="i0l-hW-06U"/>
-                                </constraints>
-                                <variation key="default">
-                                    <mask key="constraints">
-                                        <exclude reference="IZg-RO-JlN"/>
-                                        <exclude reference="Sve-GO-Beq"/>
-                                    </mask>
-                                </variation>
-                            </imageView>
-                            <imageView userInteractionEnabled="NO" contentMode="scaleAspectFill" horizontalHuggingPriority="251" verticalHuggingPriority="251" misplaced="YES" image="exploding-sun" translatesAutoresizingMaskIntoConstraints="NO" id="0ep-uN-wvT">
-                                <frame key="frameInset" minX="177" minY="235" width="245" height="246"/>
+                            <imageView userInteractionEnabled="NO" contentMode="scaleAspectFill" horizontalHuggingPriority="251" verticalHuggingPriority="251" image="exploding-sun" translatesAutoresizingMaskIntoConstraints="NO" id="0ep-uN-wvT">
                                 <constraints>
                                     <constraint firstAttribute="height" constant="314" id="2MA-hZ-6u0"/>
                                     <constraint firstAttribute="height" constant="110" id="H1a-iS-8XI"/>
@@ -65,6 +49,12 @@
                                     </mask>
                                 </variation>
                             </imageView>
+                            <imageView userInteractionEnabled="NO" contentMode="scaleAspectFit" horizontalHuggingPriority="251" verticalHuggingPriority="251" image="infobomb-logo" translatesAutoresizingMaskIntoConstraints="NO" id="9ip-jY-o7A">
+                                <constraints>
+                                    <constraint firstAttribute="width" constant="273" id="hJb-Fo-7fM"/>
+                                    <constraint firstAttribute="height" constant="70" id="tCi-US-vqQ"/>
+                                </constraints>
+                            </imageView>
                         </subviews>
                         <color key="backgroundColor" white="0.0" alpha="1" colorSpace="calibratedWhite"/>
                         <constraints>
@@ -72,22 +62,19 @@
                             <constraint firstItem="0ep-uN-wvT" firstAttribute="leading" secondItem="Ze5-6b-2t3" secondAttribute="leading" id="6il-kP-eJu"/>
                             <constraint firstAttribute="trailing" secondItem="0ep-uN-wvT" secondAttribute="trailing" id="7im-gx-LlB"/>
                             <constraint firstItem="xb3-aO-Qok" firstAttribute="top" secondItem="0ep-uN-wvT" secondAttribute="bottom" constant="70" id="9pD-0t-IN5"/>
+                            <constraint firstItem="0ep-uN-wvT" firstAttribute="top" secondItem="9ip-jY-o7A" secondAttribute="bottom" constant="37" id="CnN-6r-nfD"/>
+                            <constraint firstItem="9ip-jY-o7A" firstAttribute="centerX" secondItem="Ze5-6b-2t3" secondAttribute="centerX" id="Iza-5i-1ta"/>
                             <constraint firstItem="xb3-aO-Qok" firstAttribute="top" secondItem="0ep-uN-wvT" secondAttribute="bottom" constant="70" id="JLr-4X-gGU"/>
-                            <constraint firstItem="TVH-1o-rU3" firstAttribute="top" secondItem="Llm-lL-Icb" secondAttribute="bottom" constant="100" id="Oyg-fb-uhv"/>
                             <constraint firstItem="0ep-uN-wvT" firstAttribute="centerX" secondItem="Ze5-6b-2t3" secondAttribute="centerX" id="PDT-NV-l8e"/>
                             <constraint firstItem="0ep-uN-wvT" firstAttribute="centerX" secondItem="Ze5-6b-2t3" secondAttribute="centerX" id="PQf-7Y-iAn"/>
                             <constraint firstAttribute="trailingMargin" secondItem="0ep-uN-wvT" secondAttribute="trailing" constant="158" id="QYa-95-LRS"/>
                             <constraint firstItem="xb3-aO-Qok" firstAttribute="top" secondItem="0ep-uN-wvT" secondAttribute="bottom" constant="-10" id="Y7e-dJ-xPn"/>
-                            <constraint firstItem="0ep-uN-wvT" firstAttribute="top" secondItem="TVH-1o-rU3" secondAttribute="bottom" constant="49" id="bNR-VJ-9Zk"/>
                             <constraint firstItem="xb3-aO-Qok" firstAttribute="top" secondItem="0ep-uN-wvT" secondAttribute="bottom" id="eGU-W7-WFg"/>
-                            <constraint firstItem="TVH-1o-rU3" firstAttribute="centerX" secondItem="Ze5-6b-2t3" secondAttribute="centerX" id="eTh-8n-BJ7"/>
                             <constraint firstItem="0ep-uN-wvT" firstAttribute="centerX" secondItem="Ze5-6b-2t3" secondAttribute="centerX" id="k1e-UI-cva"/>
                             <constraint firstItem="0ep-uN-wvT" firstAttribute="centerX" secondItem="Ze5-6b-2t3" secondAttribute="centerX" id="kSy-EM-Nhm"/>
                             <constraint firstItem="0ep-uN-wvT" firstAttribute="leading" secondItem="Ze5-6b-2t3" secondAttribute="leadingMargin" id="mAa-po-plO"/>
                             <constraint firstItem="0ep-uN-wvT" firstAttribute="leading" secondItem="Ze5-6b-2t3" secondAttribute="leadingMargin" constant="157" id="nv0-o3-Aze"/>
-                            <constraint firstItem="0ep-uN-wvT" firstAttribute="top" secondItem="TVH-1o-rU3" secondAttribute="bottom" constant="45" id="phb-H7-4Ns"/>
                             <constraint firstItem="xb3-aO-Qok" firstAttribute="top" secondItem="0ep-uN-wvT" secondAttribute="bottom" constant="119" id="qEe-ck-cag"/>
-                            <constraint firstItem="0ep-uN-wvT" firstAttribute="top" secondItem="TVH-1o-rU3" secondAttribute="bottom" constant="55" id="sSd-OW-Pxm"/>
                             <constraint firstAttribute="trailingMargin" secondItem="0ep-uN-wvT" secondAttribute="trailing" id="uit-K1-kao"/>
                             <constraint firstAttribute="trailing" secondItem="0ep-uN-wvT" secondAttribute="trailing" id="uuI-qb-NbA"/>
                             <constraint firstItem="0ep-uN-wvT" firstAttribute="leading" secondItem="Ze5-6b-2t3" secondAttribute="leading" id="vuj-Wd-kjv"/>
@@ -100,12 +87,10 @@
                                 <exclude reference="7im-gx-LlB"/>
                                 <exclude reference="PDT-NV-l8e"/>
                                 <exclude reference="QYa-95-LRS"/>
-                                <exclude reference="bNR-VJ-9Zk"/>
                                 <exclude reference="k1e-UI-cva"/>
                                 <exclude reference="kSy-EM-Nhm"/>
                                 <exclude reference="mAa-po-plO"/>
                                 <exclude reference="nv0-o3-Aze"/>
-                                <exclude reference="phb-H7-4Ns"/>
                                 <exclude reference="uit-K1-kao"/>
                                 <exclude reference="uuI-qb-NbA"/>
                                 <exclude reference="vuj-Wd-kjv"/>
@@ -122,11 +107,11 @@
                 </viewController>
                 <placeholder placeholderIdentifier="IBFirstResponder" id="iYj-Kq-Ea1" userLabel="First Responder" sceneMemberID="firstResponder"/>
             </objects>
-            <point key="canvasLocation" x="-514" y="302"/>
+            <point key="canvasLocation" x="-589" y="298"/>
         </scene>
     </scenes>
     <resources>
-        <image name="Infobomb_logo" width="1350" height="275"/>
         <image name="exploding-sun" width="388" height="379"/>
+        <image name="infobomb-logo" width="700" height="180"/>
     </resources>
 </document>

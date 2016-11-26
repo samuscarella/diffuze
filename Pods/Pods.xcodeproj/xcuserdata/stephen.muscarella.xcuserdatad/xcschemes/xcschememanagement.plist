@@ -14,6 +14,21 @@
 			<key>isShown</key>
 			<false/>
 		</dict>
+		<key>GTMSessionFetcher.xcscheme</key>
+		<dict>
+			<key>isShown</key>
+			<false/>
+		</dict>
+		<key>GeoFire.xcscheme</key>
+		<dict>
+			<key>isShown</key>
+			<false/>
+		</dict>
+		<key>GoogleToolboxForMac.xcscheme</key>
+		<dict>
+			<key>isShown</key>
+			<false/>
+		</dict>
 		<key>Pods-infobomb.xcscheme</key>
 		<dict>
 			<key>isShown</key>
@@ -32,12 +47,12 @@
 	</dict>
 	<key>SuppressBuildableAutocreation</key>
 	<dict>
-		<key>05C1897A7D96890C962C523CEDF0D70D</key>
+		<key>0B85DB73F17472A25479308DABC28FC4</key>
 		<dict>
 			<key>primary</key>
 			<true/>
 		</dict>
-		<key>2EC57B59857A4CE7A8F5B0DB236B75EB</key>
+		<key>23BA9083ED0D2392A167A8AFA04427FA</key>
 		<dict>
 			<key>primary</key>
 			<true/>
@@ -47,12 +62,12 @@
 			<key>primary</key>
 			<true/>
 		</dict>
-		<key>5CF69D7B297383A9E56A6A70F0904835</key>
+		<key>5F42D3ECC4D65E8D29B5D602286867EF</key>
 		<dict>
 			<key>primary</key>
 			<true/>
 		</dict>
-		<key>68BBA482AA514C10E707CCECFE4E7BAB</key>
+		<key>794E86CD515B1AA80D99AD06CFF6DCE4</key>
 		<dict>
 			<key>primary</key>
 			<true/>
@@ -62,12 +77,12 @@
 			<key>primary</key>
 			<true/>
 		</dict>
-		<key>AF623CD9FA35B53B2F07868556A1DDB3</key>
+		<key>A6DE40703869701B95B9379764D0763E</key>
 		<dict>
 			<key>primary</key>
 			<true/>
 		</dict>
-		<key>C855CFE8EFB31D9059467D75BA5607D6</key>
+		<key>C460E0D71D60304476DF3458E74A505F</key>
 		<dict>
 			<key>primary</key>
 			<true/>
