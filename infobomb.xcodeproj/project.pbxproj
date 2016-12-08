@@ -79,7 +79,6 @@
 		93D179DF1DF4F842005C1EE7 /* SettingsVC.swift in Sources */ = {isa = PBXBuildFile; fileRef = 93D179DE1DF4F842005C1EE7 /* SettingsVC.swift */; };
 		93D179E11DF5F143005C1EE7 /* FollowerCell.swift in Sources */ = {isa = PBXBuildFile; fileRef = 93D179E01DF5F143005C1EE7 /* FollowerCell.swift */; };
 		93EE29221DA9C9550082FDA5 /* VideoContainerView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 93EE29211DA9C9550082FDA5 /* VideoContainerView.swift */; };
-		93EE88F41DF25A2C00464129 /* Radar_Display_1_ALPHA.mov in Resources */ = {isa = PBXBuildFile; fileRef = 93EE88F31DF25A2C00464129 /* Radar_Display_1_ALPHA.mov */; };
 		93EE89011DF28E2600464129 /* animated-green-checkmark.gif in Resources */ = {isa = PBXBuildFile; fileRef = 93EE89001DF28E2600464129 /* animated-green-checkmark.gif */; };
 		93EFD5771D7F9EDE00455DF0 /* SubscriptionsVC.swift in Sources */ = {isa = PBXBuildFile; fileRef = 93EFD5761D7F9EDE00455DF0 /* SubscriptionsVC.swift */; };
 		93EFD5791D7FAD2000455DF0 /* PremiumVC.swift in Sources */ = {isa = PBXBuildFile; fileRef = 93EFD5781D7FAD2000455DF0 /* PremiumVC.swift */; };
@@ -168,7 +167,6 @@
 		93EE29351DA9E2010082FDA5 /* Cloudinary.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = Cloudinary.h; sourceTree = "<group>"; };
 		93EE29361DA9E2010082FDA5 /* CLTransformation.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = CLTransformation.h; sourceTree = "<group>"; };
 		93EE29371DA9E2010082FDA5 /* CLUploader.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = CLUploader.h; sourceTree = "<group>"; };
-		93EE88F31DF25A2C00464129 /* Radar_Display_1_ALPHA.mov */ = {isa = PBXFileReference; lastKnownFileType = video.quicktime; path = Radar_Display_1_ALPHA.mov; sourceTree = "<group>"; };
 		93EE89001DF28E2600464129 /* animated-green-checkmark.gif */ = {isa = PBXFileReference; lastKnownFileType = image.gif; path = "animated-green-checkmark.gif"; sourceTree = "<group>"; };
 		93EFD5761D7F9EDE00455DF0 /* SubscriptionsVC.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = SubscriptionsVC.swift; sourceTree = "<group>"; };
 		93EFD5781D7FAD2000455DF0 /* PremiumVC.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = PremiumVC.swift; sourceTree = "<group>"; };
@@ -342,7 +340,6 @@
 				935C20FD1D7F8AC300C41A47 /* NotoSans-Regular.ttf */,
 				93089D5A1DD8E7140047587C /* oilbats.basic.ttf */,
 				9340CA9A1D7DED5900AE1231 /* gun-shot.mp3 */,
-				93EE88F31DF25A2C00464129 /* Radar_Display_1_ALPHA.mov */,
 				9340CA8E1D7DD15A00AE1231 /* blast.mp3 */,
 				9340CA8C1D7DB64200AE1231 /* tosca_zero.otf */,
 				9385B14E1DE8BAF7004087E9 /* radar-spinner.gif */,
@@ -460,7 +457,6 @@
 				9340CA7F1D7DB10800AE1231 /* LaunchScreen.storyboard in Resources */,
 				9340CA9B1D7DED5900AE1231 /* gun-shot.mp3 in Resources */,
 				935C21011D7F8AC300C41A47 /* NotoSans-Regular.ttf in Resources */,
-				93EE88F41DF25A2C00464129 /* Radar_Display_1_ALPHA.mov in Resources */,
 				93AA25F51D859561002344D3 /* radar.mp3 in Resources */,
 				935C20FF1D7F8AC300C41A47 /* NotoSans-BoldItalic.ttf in Resources */,
 				9385B14F1DE8BAF7004087E9 /* radar-spinner.gif in Resources */,
