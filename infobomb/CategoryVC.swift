@@ -31,14 +31,14 @@ class CategoryVC: UIViewController, UITableViewDataSource, UITableViewDelegate, 
     var username: String!
     var explosionPlayer: AVAudioPlayer!
     var categories = [Category]()
-    var checked: [[String:String]] = []
+    var checked = [String]()
     var message: String?
     var linkObj: [String:AnyObject] = [:]
     var previousVC: String!
     var locationService: LocationService!
     var post = [String:AnyObject]()
     var postImg: Data?
-
+    
 //    var locationManager: CLLocationManager!
 //    var currentLocation: CLLocation!
     
@@ -88,8 +88,12 @@ class CategoryVC: UIViewController, UITableViewDataSource, UITableViewDelegate, 
             createBtn.backgroundColor = PURPLE
         }
         
+        if FIRAuth.auth()?.currentUser != nil {
+            username = FIRAuth.auth()?.currentUser?.displayName
+        } else {
+           print("No user is signed in and this shouldnt be saying this.")
+        }
         userID = UserService.ds.currentUserID
-        username = UserService.ds.currentUserUsername
         key = firebasePost.key
 
         tableView.delegate = self
@@ -173,29 +177,22 @@ class CategoryVC: UIViewController, UITableViewDataSource, UITableViewDelegate, 
             var doesItExist = false
             
             if checked.count == 0 {
-                let cat = [
-                    category.categoryKey:category.name
-                ]
-                checked.append(cat)
+                checked.append(category.name)
                 cell.accessoryType = .checkmark
             } else if checked.count > 0 {
-                for(index, value) in checked.enumerated() {
+                for i in 0...checked.count - 1 {
 //                    print(value)
-                    if let _ = value[category.categoryKey] {
+                    if checked[i] == category.name {
                         doesItExist = true
-                        checked.remove(at: index)
+                        checked.remove(at: i)
                         cell.accessoryType = .none
                         break
                     }
                 }
                 if doesItExist == false {
-                    let cat = [
-                        category.categoryKey: category.name
-                    ]
-                    checked.append(cat)
+                    checked.append(category.name)
                     cell.accessoryType = .checkmark
                 }
-
             }
             print(checked)
         }
@@ -210,283 +207,273 @@ class CategoryVC: UIViewController, UITableViewDataSource, UITableViewDelegate, 
     }
     
     
-    @IBAction func createPostBtnPressed(_ sender: AnyObject) {
-        
-        if checked.count > 0 {
-
-            if CLLocationManager.authorizationStatus() == CLAuthorizationStatus.denied {
-                print("You have to allow location to make a post!")
-            } else if CLLocationManager.authorizationStatus() == CLAuthorizationStatus.authorizedWhenInUse || CLLocationManager.authorizationStatus() == CLAuthorizationStatus.notDetermined {
-                
-                if previousVC == TEXT_POST_VC {
-                    self.gatherPostData(postType: "text", data: linkObj as AnyObject)
-                } else if previousVC == LINK_POST_VC {
-                    self.gatherPostData(postType: "link", data: linkObj as AnyObject)
-                } else if previousVC == IMAGE_POST_VC {
-                    self.gatherPostData(postType: "image", data: linkObj as AnyObject)
-                } else if previousVC == VIDEO_POST_VC {
-                    self.gatherPostData(postType: "video", data: linkObj as AnyObject)
-                } else if previousVC == AUDIO_POST_VC {
-                    self.gatherPostData(postType: "audio", data: linkObj as AnyObject)
-                } else if previousVC == QUOTE_POST_VC {
-                    if linkObj["text"] != nil {
-                        self.gatherPostData(postType: "quoteText", data: linkObj as AnyObject)
-                    } else if linkObj["image"] != nil {
-                        self.gatherPostData(postType: "quoteImg", data: linkObj as AnyObject)
-                    }
-                }
-            }
-        } else {
-            print("Please pick at least one category!")
-        }
-    }
-    
-    func gatherPostData(postType: String, data: AnyObject) {
-        
-        
-        let storageRef = storage.reference(forURL: "gs://infobomb-9b66c.appspot.com")
-        
-        var selectedCategories: [String:AnyObject] = [:]
-        for(_, value) in checked.enumerated() {
-            for(_, val) in value {
-                selectedCategories[val] = true as AnyObject?
-            }
-        }
-        
-        post = [
-            "user_id": userID as AnyObject,
-            "username": username as AnyObject,
-            "post_ref": key as AnyObject,
-            "categories": selectedCategories as AnyObject,
-            "active": true as AnyObject,
-            "likes": 0 as AnyObject,
-            "dislikes": 0 as AnyObject,
-            "shares": 0 as AnyObject,
-            "latitude": DALLAS_LATITUDE as AnyObject,
-            "longitude": DALLAS_LONGITUDE as AnyObject,
-            "distance": 1000.0 as AnyObject,
-            "usersInRadius": 0 as AnyObject,
-            "created_at": FIRServerValue.timestamp() as AnyObject
-        ]
-        
-        let uniqueString = NSUUID().uuidString
-        
-        if postType == "text" {
-            
-            post["type"] = postType as AnyObject?
-
-            if let message = data as? String {
-                post["message"] = message as AnyObject?
-            }
-            self.postToFirebase()
-            
-        } else if postType == "link" {
-            
-            post["type"] = postType as AnyObject?
-            
-            if let linkTitle = data["title"] as! String? {
-                post["title"] = linkTitle as AnyObject?
-            }
-            if let linkDescription = data["description"] as! String? {
-                post["description"] = linkDescription as AnyObject?
-            }
-            if let linkShortUrl = data["canonicalUrl"] as! String? {
-                post["shortUrl"] = linkShortUrl as AnyObject?
-            }
-            if let linkUrl = data["url"] as! String? {
-                post["url"] = linkUrl as AnyObject?
-            }
-            if let msg = data["message"] as! String? {
-                post["message"] = msg as AnyObject?
-            }
-            if let linkImage = data["image"] as! NSData? {
-                //need to store in storage and reference it from path
-                let linkPreviewRef = storageRef.child("link-preview/image_\(NSUUID().uuidString)")
-                // Upload the file to the path "images/rivers.jpg"
-                let uploadTask = linkPreviewRef.put(linkImage as Data, metadata: nil) { metadata, error in
-                    if (error != nil) {
-
-                        print("Failed to upload image to firebase\n\n\n\n\n\n\n\n")
-                    } else {
-                        let downloadURL = metadata!.downloadURL()!.absoluteString
-                        self.post["image"] = downloadURL as AnyObject?
-                        self.postToFirebase()
-                    }
-                }
-                return
-            }
-            self.postToFirebase()
-            
-        } else if postType == "image" {
-            
-            post["type"] = postType as AnyObject?
-            
-            if let imageText = data["text"] as! String? {
-                post["message"] = imageText as AnyObject?
-            }
-            
-            let image = data["image"] as! NSData
-            
-            let imageRef = storageRef.child("images/image_post/image_\(uniqueString)")
-            
-                let uploadTask = imageRef.put(image as Data, metadata: nil) { metadata, error in
-                    if (error != nil) {
-                        // Uh-oh, an error occurred!
-                        print("Failed to upload image to firebase")
-                    } else {
-                        print("HERE")
-                        let downloadURL = metadata!.downloadURL()!.absoluteString
-                        self.post["image"] = downloadURL as AnyObject?
-                        self.postToFirebase()
-                    }
-                }
-        } else if postType == "video" {
-            
-            post["type"] = postType as AnyObject?
-            
-            
-            if let videoText = data["text"] as! String? {
-                post["message"] = videoText as AnyObject?
-            }
-            
-            let video = data["video"] as! NSData
-
-            let videoRef = storageRef.child("videos/video_post/video_\(uniqueString)")
-            
-            let uploadTask = videoRef.put(video as Data, metadata: nil) { metadata, error in
-                if (error != nil) {
-                    // Uh-oh, an error occurred!
-                    print("Failed to upload image to firebase")
-                } else {
-                    let downloadURL = metadata!.downloadURL()!.absoluteString
-                    self.post["video"] = downloadURL as AnyObject?
-                    
-                    if let videoThumbnail = data["thumbnail"] as! NSData? {
-                    
-                        let thumbnailRef = storageRef.child("videos/video_post/thumbnail_\(uniqueString)")
-                    
-                        let uploadTask = thumbnailRef.put(videoThumbnail as Data, metadata: nil) { metadata, error in
-                            if (error != nil) {
-                                // Uh-oh, an error occurred!
-                                print("Failed to upload image to firebase")
-                            } else {
-                                let downloadURL = metadata!.downloadURL()!.absoluteString
-                                self.post["thumbnail"] = downloadURL as AnyObject?
-                                self.postToFirebase()
-                            }
-                        }
-                    }
-                }
-            }
-        } else if postType == "audio" {
-            
-            post["type"] = postType as AnyObject?
-            post["title"] = data["title"] as! NSString
-            
-            let audio = data["audio"] as! NSData
-            let audioRef = storageRef.child("audio/audio_post/audio_\(uniqueString)")
-
-            uploadMetadata.contentType = "audio/mpeg"
-            
-            let uploadTask = audioRef.put(audio as Data, metadata: uploadMetadata) { metadata, error in
-                if (error != nil) {
-                    print("Failed to upload audio to firebase.")
-                } else {
-                    
-                    let name = "audio/audio_post/\(metadata!.name!)"
-                    let audioRefDownload = storageRef.child(name)
-                    
-                    //WHY THE FUCK DO I HAVE TO MAKE 2 CALLS?!
-                    
-                    // Fetch the download URL
-                    audioRefDownload.downloadURL { (URL, error) -> Void in
-                        if (error != nil) {
-                            print(error)
-                        } else {
-                            let downloadUrlString = "\(URL!)"
-                            self.post["audio"] = downloadUrlString as AnyObject
-                            self.postToFirebase()
-                        }
-                    }
-                }
-            }
-            
-        } else if postType == "quoteText" {
-            
-                post["type"] = "quote" as AnyObject?
-                post["quoteType"] = "text" as AnyObject?
-                
-                if let author = data["author"] {
-                    post["author"] = author as AnyObject?
-                }
-                post["text"] = data["text"] as! NSString
-                self.postToFirebase()
-                
-        } else if postType == "quoteImg" {
-            
-                post["type"] = "quote" as AnyObject?
-                post["quoteType"] = "image" as AnyObject?
-                
-                let image = data["image"] as! NSData
-                
-                let quoteRef = storageRef.child("images/quote_post/image_\(uniqueString)")
-                
-                let uploadTask = quoteRef.put(image as Data, metadata: nil) { metadata, error in
-                    if (error != nil) {
-                        print("Failed to upload image to firebase")
-                    } else {
-                        let downloadURL = metadata!.downloadURL()!.absoluteString
-                        self.post["image"] = downloadURL as AnyObject?
-                        self.postToFirebase()
-                    }
-                }
-        }
-        
-    }
-    
-    func postToFirebase() {
-        
-        let activeFirebasePost = PostService.ds.REF_ACTIVE_POSTS.child(key)
-        let userPosts = UserService.ds.REF_USER_POSTS.child(userID).child(key)
-        let postCategoryRef = PostService.ds.REF_POSTS.child(key).child("categories")
-
-        
-        activeFirebasePost.setValue(post)
-        firebasePost.setValue(post)
-        userPosts.setValue(post)
-        
-        for(_, value) in checked.enumerated() {
-            for (_, val) in value {
-                let selectedCategory = [
-                    val: true
-                ]
-                postCategoryRef.updateChildValues(selectedCategory)
-                userPosts.child("categories").updateChildValues(selectedCategory)
-                activeFirebasePost.child("categories").updateChildValues(selectedCategory)
-            }
-        }
-        
-        let userPostsRef = UserService.ds.REF_USER_CURRENT.child("posts")
-        let userPost = [
-            key: true
-        ]
-        userPostsRef.updateChildValues(userPost)
-        
-        let url = URL(string: "https://nameless-chamber-44579.herokuapp.com/post")!
-        Alamofire.request(url, method: .post, parameters: post).validate().responseJSON { response in
-            switch response.result {
-            case .success( _):
-                print(response.result.value!)
-                print("Validation Successful")
-                self.playExplosion()
-            case .failure(let error):
-                print("POST REQUEST ERROR: \(error)")
-            }
-        }
-
-    }
-    
-
+//    @IBAction func createPostBtnPressed(_ sender: AnyObject) {
+//        
+//        if checked.count > 0 {
+//
+//            if CLLocationManager.authorizationStatus() == CLAuthorizationStatus.denied {
+//                print("You have to allow location to make a post!")
+//            } else if CLLocationManager.authorizationStatus() == CLAuthorizationStatus.authorizedWhenInUse || CLLocationManager.authorizationStatus() == CLAuthorizationStatus.notDetermined {
+//                
+//                if previousVC == TEXT_POST_VC {
+//                    self.gatherPostData(postType: "text", data: linkObj as AnyObject)
+//                } else if previousVC == LINK_POST_VC {
+//                    self.gatherPostData(postType: "link", data: linkObj as AnyObject)
+//                } else if previousVC == IMAGE_POST_VC {
+//                    self.gatherPostData(postType: "image", data: linkObj as AnyObject)
+//                } else if previousVC == VIDEO_POST_VC {
+//                    self.gatherPostData(postType: "video", data: linkObj as AnyObject)
+//                } else if previousVC == AUDIO_POST_VC {
+//                    self.gatherPostData(postType: "audio", data: linkObj as AnyObject)
+//                } else if previousVC == QUOTE_POST_VC {
+//                    if linkObj["text"] != nil {
+//                        self.gatherPostData(postType: "quoteText", data: linkObj as AnyObject)
+//                    } else if linkObj["image"] != nil {
+//                        self.gatherPostData(postType: "quoteImg", data: linkObj as AnyObject)
+//                    }
+//                }
+//            }
+//        } else {
+//            print("Please pick at least one category!")
+//        }
+//    }
+//    
+//    func gatherPostData(postType: String, data: AnyObject) {
+//        
+//        
+//        let storageRef = storage.reference(forURL: "gs://infobomb-9b66c.appspot.com")
+//        var selectedCategories: [String:AnyObject] = [:]
+//
+//        
+//        post = [
+//            "user_id": userID as AnyObject,
+//            "username": username as AnyObject,
+//            "post_ref": key as AnyObject,
+//            "active": true as AnyObject,
+//            "likes": 0 as AnyObject,
+//            "dislikes": 0 as AnyObject,
+//            "shares": 0 as AnyObject,
+//            "latitude": DALLAS_LATITUDE as AnyObject,
+//            "longitude": DALLAS_LONGITUDE as AnyObject,
+//            "distance": 1000.0 as AnyObject,
+//            "usersInRadius": 0 as AnyObject,
+//            "created_at": FIRServerValue.timestamp() as AnyObject
+//        ]
+//        
+//        let uniqueString = NSUUID().uuidString
+//        
+//        if postType == "text" {
+//            
+//            post["type"] = postType as AnyObject?
+//
+//            if let message = data as? String {
+//                post["message"] = message as AnyObject?
+//            }
+//            self.postToFirebase()
+//            
+//        } else if postType == "link" {
+//            
+//            post["type"] = postType as AnyObject?
+//            
+//            if let linkTitle = data["title"] as! String? {
+//                post["title"] = linkTitle as AnyObject?
+//            }
+//            if let linkDescription = data["description"] as! String? {
+//                post["description"] = linkDescription as AnyObject?
+//            }
+//            if let linkShortUrl = data["canonicalUrl"] as! String? {
+//                post["shortUrl"] = linkShortUrl as AnyObject?
+//            }
+//            if let linkUrl = data["url"] as! String? {
+//                post["url"] = linkUrl as AnyObject?
+//            }
+//            if let msg = data["message"] as! String? {
+//                post["message"] = msg as AnyObject?
+//            }
+//            if let linkImage = data["image"] as! NSData? {
+//                //need to store in storage and reference it from path
+//                let linkPreviewRef = storageRef.child("link-preview/image_\(NSUUID().uuidString)")
+//                // Upload the file to the path "images/rivers.jpg"
+//                let uploadTask = linkPreviewRef.put(linkImage as Data, metadata: nil) { metadata, error in
+//                    if (error != nil) {
+//
+//                        print("Failed to upload image to firebase\n\n\n\n\n\n\n\n")
+//                    } else {
+//                        let downloadURL = metadata!.downloadURL()!.absoluteString
+//                        self.post["image"] = downloadURL as AnyObject?
+//                        self.postToFirebase()
+//                    }
+//                }
+//                return
+//            }
+//            self.postToFirebase()
+//            
+//        } else if postType == "image" {
+//            
+//            post["type"] = postType as AnyObject?
+//            
+//            if let imageText = data["text"] as! String? {
+//                post["message"] = imageText as AnyObject?
+//            }
+//            
+//            let image = data["image"] as! NSData
+//            
+//            let imageRef = storageRef.child("images/image_post/image_\(uniqueString)")
+//            
+//                let uploadTask = imageRef.put(image as Data, metadata: nil) { metadata, error in
+//                    if (error != nil) {
+//                        // Uh-oh, an error occurred!
+//                        print("Failed to upload image to firebase")
+//                    } else {
+//                        print("HERE")
+//                        let downloadURL = metadata!.downloadURL()!.absoluteString
+//                        self.post["image"] = downloadURL as AnyObject?
+//                        self.postToFirebase()
+//                    }
+//                }
+//        } else if postType == "video" {
+//            
+//            post["type"] = postType as AnyObject?
+//            
+//            
+//            if let videoText = data["text"] as! String? {
+//                post["message"] = videoText as AnyObject?
+//            }
+//            
+//            let video = data["video"] as! NSData
+//
+//            let videoRef = storageRef.child("videos/video_post/video_\(uniqueString)")
+//            
+//            let uploadTask = videoRef.put(video as Data, metadata: nil) { metadata, error in
+//                if (error != nil) {
+//                    // Uh-oh, an error occurred!
+//                    print("Failed to upload image to firebase")
+//                } else {
+//                    let downloadURL = metadata!.downloadURL()!.absoluteString
+//                    self.post["video"] = downloadURL as AnyObject?
+//                    
+//                    if let videoThumbnail = data["thumbnail"] as! NSData? {
+//                    
+//                        let thumbnailRef = storageRef.child("videos/video_post/thumbnail_\(uniqueString)")
+//                    
+//                        let uploadTask = thumbnailRef.put(videoThumbnail as Data, metadata: nil) { metadata, error in
+//                            if (error != nil) {
+//                                // Uh-oh, an error occurred!
+//                                print("Failed to upload image to firebase")
+//                            } else {
+//                                let downloadURL = metadata!.downloadURL()!.absoluteString
+//                                self.post["thumbnail"] = downloadURL as AnyObject?
+//                                self.postToFirebase()
+//                            }
+//                        }
+//                    }
+//                }
+//            }
+//        } else if postType == "audio" {
+//            
+//            post["type"] = postType as AnyObject?
+//            post["title"] = data["title"] as! NSString
+//            
+//            let audio = data["audio"] as! NSData
+//            let audioRef = storageRef.child("audio/audio_post/audio_\(uniqueString)")
+//
+//            uploadMetadata.contentType = "audio/mpeg"
+//            
+//            let uploadTask = audioRef.put(audio as Data, metadata: uploadMetadata) { metadata, error in
+//                if (error != nil) {
+//                    print("Failed to upload audio to firebase.")
+//                } else {
+//                    
+//                    let name = "audio/audio_post/\(metadata!.name!)"
+//                    let audioRefDownload = storageRef.child(name)
+//                    
+//                    //WHY THE FUCK DO I HAVE TO MAKE 2 CALLS?!
+//                    
+//                    // Fetch the download URL
+//                    audioRefDownload.downloadURL { (URL, error) -> Void in
+//                        if (error != nil) {
+//                            print(error)
+//                        } else {
+//                            let downloadUrlString = "\(URL!)"
+//                            self.post["audio"] = downloadUrlString as AnyObject
+//                            self.postToFirebase()
+//                        }
+//                    }
+//                }
+//            }
+//            
+//        } else if postType == "quoteText" {
+//            
+//                post["type"] = "quote" as AnyObject?
+//                post["quoteType"] = "text" as AnyObject?
+//                
+//                if let author = data["author"] {
+//                    post["author"] = author as AnyObject?
+//                }
+//                post["text"] = data["text"] as! NSString
+//                self.postToFirebase()
+//                
+//        } else if postType == "quoteImg" {
+//            
+//                post["type"] = "quote" as AnyObject?
+//                post["quoteType"] = "image" as AnyObject?
+//                
+//                let image = data["image"] as! NSData
+//                
+//                let quoteRef = storageRef.child("images/quote_post/image_\(uniqueString)")
+//                
+//                let uploadTask = quoteRef.put(image as Data, metadata: nil) { metadata, error in
+//                    if (error != nil) {
+//                        print("Failed to upload image to firebase")
+//                    } else {
+//                        let downloadURL = metadata!.downloadURL()!.absoluteString
+//                        self.post["image"] = downloadURL as AnyObject?
+//                        self.postToFirebase()
+//                    }
+//                }
+//        }
+//        
+//    }
+//    
+//    func postToFirebase() {
+//        
+//        let activeFirebasePost = PostService.ds.REF_ACTIVE_POSTS.child(key)
+//        let userPostRef = UserService.ds.REF_USER_POSTS.child(userID).child(key)
+//        let postRef = PostService.ds.REF_POSTS.child(key)
+//
+//        activeFirebasePost.setValue(post)
+//        firebasePost.setValue(post)
+//        userPostRef.setValue(post)
+//        
+//        for check in checked {
+//            let selectedCategory = [
+//                check: true
+//            ]
+//            postRef.child("categories").updateChildValues(selectedCategory)
+//            userPostRef.child("categories").updateChildValues(selectedCategory)
+//            activeFirebasePost.child("categories").updateChildValues(selectedCategory)
+//        }
+//        
+//        let userPostsRef = UserService.ds.REF_USER_CURRENT.child("posts")
+//        let userPost = [
+//            key: true
+//        ]
+//        userPostsRef.updateChildValues(userPost)
+//        
+//        let url = URL(string: "https://nameless-chamber-44579.herokuapp.com/post")!
+//        Alamofire.request(url, method: .post, parameters: post).validate().responseJSON { response in
+//            switch response.result {
+//            case .success( _):
+//                print(response.result.value!)
+//                print("Validation Successful")
+//                self.playExplosion()
+//            case .failure(let error):
+//                print("POST REQUEST ERROR: \(error)")
+//            }
+//        }
+//    }
+//    
+//
     @IBAction func backBtnPressed(_ sender: AnyObject) {
         
         if previousVC == TEXT_POST_VC {
@@ -540,7 +527,9 @@ class CategoryVC: UIViewController, UITableViewDataSource, UITableViewDelegate, 
         if (segue.identifier == BOMB_VC) {
             
             let bombVC = segue.destination as! BombVC
+            bombVC.checked = self.checked
             bombVC.bombData = linkObj
+            bombVC.previousVC = previousVC
         }
         
     }

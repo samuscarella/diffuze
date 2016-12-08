@@ -19,12 +19,10 @@ import GeoFire
 class ActivityVC: UIViewController, CLLocationManagerDelegate, UITableViewDelegate, UITableViewDataSource {
     
     @IBOutlet weak var filterBtn: MaterialButton!
-    @IBOutlet weak var burgerBtn: UIBarButtonItem!
     @IBOutlet weak var notificationBtn: UIBarButtonItem!
     @IBOutlet weak var pulseImg: UIImageView!
     @IBOutlet weak var tableView: UITableView!
     @IBOutlet weak var background: UIView!
-    @IBOutlet weak var postMessage: UILabel!
     
     let pulsator = Pulsator()
     
@@ -41,8 +39,9 @@ class ActivityVC: UIViewController, CLLocationManagerDelegate, UITableViewDelega
     var longitude: Double = 0.0
     var audioPlayerItem: AVPlayerItem?
     var audioPlayer: AVPlayer?
+    var followingImage: UIImage!
+    var notFollowingImage: UIImage!
 
-    
     override func viewDidLoad() {
         super.viewDidLoad()
         
@@ -50,16 +49,10 @@ class ActivityVC: UIViewController, CLLocationManagerDelegate, UITableViewDelega
         self.view.backgroundColor = SMOKY_BLACK
         
         UIApplication.shared.statusBarStyle = .lightContent
-        /*
-        filterBtn.frame = CGRect(x: 0, y: 0, width: self.view.bounds.width, height: 50)
-        //Subclass navigation bar after app is finished and all other non DRY
-        let filterImageView = UIImageView(image: UIImage(named: "funnel"))
-        filterImageView.frame = CGRect(x: 0, y: 0, width: 27, height: 27)
-        filterImageView.contentMode = UIViewContentMode.scaleAspectFit
-        filterBtn.addSubview(filterImageView)
-        filterImageView.center = (filterImageView.superview?.center)!
-         */
         filterBtn.showsTouchWhenHighlighted = true
+        
+        followingImage = UIImage(named: "following-blue")
+        notFollowingImage = UIImage(named: "follower-grey")
         
         self.navigationController?.navigationBar.setBackgroundImage(UIImage(), for: .default)
         self.navigationController?.navigationBar.shadowImage = UIImage()
@@ -93,7 +86,6 @@ class ActivityVC: UIViewController, CLLocationManagerDelegate, UITableViewDelega
         menuButton.frame = CGRect(x: 0, y: 0, width: 60, height: 30)
         let leftBarButton = UIBarButtonItem(customView: menuButton)
         self.navigationItem.leftBarButtonItem = leftBarButton
-        
         locationService = LocationService()
         
 ////        locationService.startTracking()
@@ -115,9 +107,9 @@ class ActivityVC: UIViewController, CLLocationManagerDelegate, UITableViewDelega
         
         pulsator.radius = 300.0
         pulsator.backgroundColor = UIColor(red: 255.0, green: 0, blue: 0, alpha: 1).cgColor
-        pulsator.animationDuration = 1.5
-        pulsator.numPulse = 3
-        pulsator.pulseInterval = 1.0
+        pulsator.animationDuration = 2
+        pulsator.numPulse = 4
+        pulsator.pulseInterval = 0
 //        pulsator.timingFunction = add timer for audio pulse to add more waves
         pulseImg.layer.superlayer?.insertSublayer(pulsator, below: pulseImg.layer)
         pulsator.start()
@@ -128,74 +120,56 @@ class ActivityVC: UIViewController, CLLocationManagerDelegate, UITableViewDelega
         tableView.rowHeight = UITableViewAutomaticDimension
         tableView.estimatedRowHeight = 300
         tableView.isHidden = true
-
-        UserService.ds.REF_USERS.child(iD).observeSingleEvent(of: FIRDataEventType.value, with: { (snapshot) in
-            // Get user value
+        
+        let currentUserID = UserDefaults.standard.object(forKey: KEY_UID) as! String
+        
+        URL_BASE.child("user-radar").child(currentUserID).observeSingleEvent(of: FIRDataEventType.value, with: { (snapshot) in
             
-            self.currentUser = (snapshot.value as? NSDictionary)!
-            
-            PostService.ds.REF_ACTIVE_POSTS.observeSingleEvent(of: FIRDataEventType.value, with: { snapshot in
-                print("Got snapshot...")
-                if let activePosts = snapshot.children.allObjects as? [FIRDataSnapshot] {
-                    
-                    self.posts = []
-                    for post in activePosts {
-                        if let postDict = post.value as?  Dictionary<String, AnyObject> {
-                            let key = post.key
-                            //print(currentUser)
-                            if let userSubscriptions = self.currentUser["subscriptions"] as? NSDictionary {
-                                
-                                let postCategories = postDict["categories"] as! NSDictionary
-                                var isUserSubscribed = false
-                                for(postCategory, _) in postCategories {
-                                    for(userSubscription, _) in userSubscriptions {
-                                        if postCategory as! String == userSubscription as! String {
-                                            isUserSubscribed = true
-                                            break
-                                        }
-                                    }
-                                    if isUserSubscribed { break }
-                                }
-                                if isUserSubscribed && self.currentUser["user_ref"] as? String != postDict["user_id"] as? String {
-                                    print(post)
-
-                                    let postLat = Double((postDict["latitude"] as? Double)!)
-                                    let postLong = Double((postDict["longitude"] as? Double)!)
-                                    let userLat = Double((self.currentUser["latitude"] as? Double)!)
-                                    let userLong = Double((self.currentUser["longitude"] as? Double)!)
-                                    
-                                    let postDistance = postDict["distance"] as? Int
-                                    let postLocation = CLLocation(latitude: postLat, longitude: postLong)
-                                    let userLocation = CLLocation(latitude: userLat, longitude: userLong)
-                                    
-                                    let distanceBetweenUserAndPost = userLocation.distance(from: postLocation)
-                                    let isUserInRadius = distanceBetweenUserAndPost - Double(postDistance!)
-                                    print(isUserInRadius)
-                                    if(isUserInRadius < 0) {
-                                        
-                                        print("User is in radius. Adding Post...")
-                                        let post = Post(postKey: key, dictionary: postDict)
-                                        self.posts.append(post)
-                                    } else {
-                                        print("User is not in radius.")
-                                        continue
-                                    }
-                                    
-                                }
-                            } else {
-                                print("User is not subscribed to anything!")
-                            }
-                        }
+            if let radarPosts = snapshot.children.allObjects as? [FIRDataSnapshot] {
+                
+                self.posts = []
+                for post in radarPosts {
+                    if let postDict = post.value as? Dictionary<String, AnyObject> {
+                        
+                        let post = Post(postKey: post.key, dictionary: postDict)
+                        self.posts.append(post)
                     }
                 }
-                if self.posts.count > 0 {
-                    self.tableView.reloadData()
-                    self.tableView.isHidden = false
+            }
+            
+            if self.posts.count > 0 {
+                self.tableView.reloadData()
+                self.tableView.isHidden = false
+            }
+
+        })
+
+        URL_BASE.child("users").child(currentUserID).child("following").observe(FIRDataEventType.value, with: { (snapshot) in
+            
+            let followingUsers = snapshot.children.allObjects as? [FIRDataSnapshot] ?? []
+            print(followingUsers)
+            let cells = self.tableView.visibleCells as? [PostCell] ?? []
+            
+            if followingUsers.count > 0 {
+                var index = 0
+                for cell in cells {
+                    for user in followingUsers {
+                        if cell.post.user_id == user.key {
+                            cell.followerBtn.setImage(self.followingImage, for: .normal)
+                            break
+                        } else {
+                            cell.followerBtn.setImage(self.notFollowingImage, for: .normal)
+                        }
+                    }
+                    index += 1
                 }
-            })
-        }) { (error) in
-            print("CurrentUserError: \(error.localizedDescription)")
-        }
+            } else {
+                for cell in cells {
+                    cell.followerBtn.setImage(self.notFollowingImage, for: .normal)
+                }
+            }
+            
+        })
 
         //Burger side menu
         if revealViewController() != nil {
@@ -219,6 +193,12 @@ class ActivityVC: UIViewController, CLLocationManagerDelegate, UITableViewDelega
 //            tableView.reloadData()
 //        }
 //    }
+    
+    override func viewDidAppear(_ animated: Bool) {
+
+
+
+    }
 
     
     override func viewDidLayoutSubviews() {
@@ -286,7 +266,7 @@ class ActivityVC: UIViewController, CLLocationManagerDelegate, UITableViewDelega
                 return PostCell()
             }
         }
-            return PostCell()
+        return PostCell()
     }
     
     func tableView(_ tableView: UITableView, heightForRowAt indexPath: IndexPath) -> CGFloat {
@@ -327,8 +307,8 @@ class ActivityVC: UIViewController, CLLocationManagerDelegate, UITableViewDelega
         animation.duration = 0.1
         animation.repeatCount = Float.infinity
         animation.autoreverses = true
-        animation.fromValue = NSValue(cgPoint: CGPoint(x: pulseImg.center.x - 5, y: pulseImg.center.y))
-        animation.toValue = NSValue(cgPoint: CGPoint(x: pulseImg.center.x + 5, y: pulseImg.center.y))
+        animation.fromValue = NSValue(cgPoint: CGPoint(x: pulseImg.center.x - 3, y: pulseImg.center.y))
+        animation.toValue = NSValue(cgPoint: CGPoint(x: pulseImg.center.x + 3, y: pulseImg.center.y))
         pulseImg.layer.add(animation, forKey: "position")
     }
     

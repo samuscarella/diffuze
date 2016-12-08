@@ -6,7 +6,7 @@
 //  Copyright (c) 2014 Firebase. All rights reserved.
 //
 
-#import <FirebaseDatabase/FIRDatabase.h>
+#import <FirebaseDatabase/FirebaseDatabase.h>
 
 #import "GeoFire.h"
 #import "GeoFire+Private.h"

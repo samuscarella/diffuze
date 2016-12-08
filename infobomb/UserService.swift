@@ -9,7 +9,6 @@
 import Foundation
 import Firebase
 
-
 class UserService {
     
     static let ds = UserService()

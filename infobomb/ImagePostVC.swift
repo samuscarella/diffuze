@@ -254,7 +254,6 @@ class ImagePostVC: UIViewController, UINavigationControllerDelegate, UITextViewD
     
     
     func dismissKeyboard() {
-        
         view.endEditing(true)
     }
     

@@ -77,8 +77,6 @@ class AudioPostVC: UIViewController, UITextFieldDelegate, AVAudioRecorderDelegat
         titleField.attributedPlaceholder = NSAttributedString(string: "Title",
                                                               attributes:[NSForegroundColorAttributeName: UIColor.white, NSFontAttributeName: UIFont.italicSystemFont(ofSize: 24.0)])
 
-
-        
         let button: UIButton = UIButton(type: UIButtonType.custom)
         button.setImage(UIImage(named: "notification.png"), for: UIControlState())
 //        button.addTarget(self, action: #selector(AudioPostVC.notificationBtnPressed), for: UIControlEvents.touchUpInside)
