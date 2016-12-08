@@ -16,6 +16,7 @@
 		933A0AD61DA154C0008E58E6 /* LinkPostVC.swift in Sources */ = {isa = PBXBuildFile; fileRef = 933A0AD51DA154C0008E58E6 /* LinkPostVC.swift */; };
 		933C2C201D803C4100DB89AE /* TopNav.swift in Sources */ = {isa = PBXBuildFile; fileRef = 933C2C1F1D803C4100DB89AE /* TopNav.swift */; };
 		933C2C221D8087F400DB89AE /* SubscriptionCell.swift in Sources */ = {isa = PBXBuildFile; fileRef = 933C2C211D8087F400DB89AE /* SubscriptionCell.swift */; };
+		93402D1A1DED304100B2B59A /* wave.mov in Resources */ = {isa = PBXBuildFile; fileRef = 93402D191DED304100B2B59A /* wave.mov */; };
 		9340CA751D7DB10800AE1231 /* AppDelegate.swift in Sources */ = {isa = PBXBuildFile; fileRef = 9340CA741D7DB10800AE1231 /* AppDelegate.swift */; };
 		9340CA771D7DB10800AE1231 /* ViewController.swift in Sources */ = {isa = PBXBuildFile; fileRef = 9340CA761D7DB10800AE1231 /* ViewController.swift */; };
 		9340CA7C1D7DB10800AE1231 /* Assets.xcassets in Resources */ = {isa = PBXBuildFile; fileRef = 9340CA7B1D7DB10800AE1231 /* Assets.xcassets */; };
@@ -26,7 +27,6 @@
 		9340CA931D7DDFC800AE1231 /* TransparentPasswordField.swift in Sources */ = {isa = PBXBuildFile; fileRef = 9340CA921D7DDFC800AE1231 /* TransparentPasswordField.swift */; };
 		9340CA951D7DE0D500AE1231 /* MaterialButton.swift in Sources */ = {isa = PBXBuildFile; fileRef = 9340CA941D7DE0D500AE1231 /* MaterialButton.swift */; };
 		9340CA971D7DE10400AE1231 /* Constants.swift in Sources */ = {isa = PBXBuildFile; fileRef = 9340CA961D7DE10400AE1231 /* Constants.swift */; };
-		9340CA991D7DE3CA00AE1231 /* LoginButton.swift in Sources */ = {isa = PBXBuildFile; fileRef = 9340CA981D7DE3CA00AE1231 /* LoginButton.swift */; };
 		9340CA9B1D7DED5900AE1231 /* gun-shot.mp3 in Resources */ = {isa = PBXBuildFile; fileRef = 9340CA9A1D7DED5900AE1231 /* gun-shot.mp3 */; };
 		9340CA9D1D7E2BC200AE1231 /* GoogleService-Info.plist in Resources */ = {isa = PBXBuildFile; fileRef = 9340CA9C1D7E2BC200AE1231 /* GoogleService-Info.plist */; };
 		9340CA9F1D7E2E4700AE1231 /* UserService.swift in Sources */ = {isa = PBXBuildFile; fileRef = 9340CA9E1D7E2E4700AE1231 /* UserService.swift */; };
@@ -46,6 +46,9 @@
 		937E3AEF1D8615A600BB7C01 /* CategoryCell.swift in Sources */ = {isa = PBXBuildFile; fileRef = 937E3AEE1D8615A600BB7C01 /* CategoryCell.swift */; };
 		9385B14F1DE8BAF7004087E9 /* radar-spinner.gif in Resources */ = {isa = PBXBuildFile; fileRef = 9385B14E1DE8BAF7004087E9 /* radar-spinner.gif */; };
 		9385D00B1DA9979800AAAAD2 /* ImagePostVC.swift in Sources */ = {isa = PBXBuildFile; fileRef = 9385D00A1DA9979800AAAAD2 /* ImagePostVC.swift */; };
+		938A20D91DF834BD00BF0A6C /* SignUpOneVC.swift in Sources */ = {isa = PBXBuildFile; fileRef = 938A20D81DF834BD00BF0A6C /* SignUpOneVC.swift */; };
+		938A20DB1DF83AFF00BF0A6C /* SignUpTwoVC.swift in Sources */ = {isa = PBXBuildFile; fileRef = 938A20DA1DF83AFF00BF0A6C /* SignUpTwoVC.swift */; };
+		938A20DD1DF83FAA00BF0A6C /* SignUpThreeVC.swift in Sources */ = {isa = PBXBuildFile; fileRef = 938A20DC1DF83FAA00BF0A6C /* SignUpThreeVC.swift */; };
 		938CF36E1DE4CC53006A1833 /* BombVC.swift in Sources */ = {isa = PBXBuildFile; fileRef = 938CF36D1DE4CC53006A1833 /* BombVC.swift */; };
 		9390DC621DD8F0D700BCF212 /* LaunchVC.swift in Sources */ = {isa = PBXBuildFile; fileRef = 9390DC611DD8F0D700BCF212 /* LaunchVC.swift */; };
 		9393A1CC1D83AC3B0078503C /* MaterialView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 9393A1CB1D83AC3B0078503C /* MaterialView.swift */; };
@@ -60,6 +63,7 @@
 		93AA25F81D85ACF4002344D3 /* TextPostVC.swift in Sources */ = {isa = PBXBuildFile; fileRef = 93AA25F71D85ACF4002344D3 /* TextPostVC.swift */; };
 		93AD77501DE61C940038FE42 /* Main.storyboard in Resources */ = {isa = PBXBuildFile; fileRef = 93AD774F1DE61C940038FE42 /* Main.storyboard */; };
 		93B8E7B31D7EE055005ACC48 /* SWRevealViewController.m in Sources */ = {isa = PBXBuildFile; fileRef = 93B8E7B21D7EE055005ACC48 /* SWRevealViewController.m */; };
+		93BD5E301DF73B6D0022483A /* LoginVC.swift in Sources */ = {isa = PBXBuildFile; fileRef = 93BD5E2F1DF73B6D0022483A /* LoginVC.swift */; };
 		93C164591D8E447A004B0432 /* Post.swift in Sources */ = {isa = PBXBuildFile; fileRef = 93C164581D8E447A004B0432 /* Post.swift */; };
 		93C1645B1D8EBD24004B0432 /* PostCell.swift in Sources */ = {isa = PBXBuildFile; fileRef = 93C1645A1D8EBD24004B0432 /* PostCell.swift */; };
 		93C1645D1D8F299A004B0432 /* PostTextView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 93C1645C1D8F299A004B0432 /* PostTextView.swift */; };
@@ -69,8 +73,13 @@
 		93C893101D823800008B792D /* Sdk in Resources */ = {isa = PBXBuildFile; fileRef = 93C8930F1D823800008B792D /* Sdk */; };
 		93C893121D82387D008B792D /* libsqlite3.tbd in Frameworks */ = {isa = PBXBuildFile; fileRef = 93C893111D82387D008B792D /* libsqlite3.tbd */; };
 		93C893141D823888008B792D /* libz.tbd in Frameworks */ = {isa = PBXBuildFile; fileRef = 93C893131D823888008B792D /* libz.tbd */; };
-		93E75DE21DAAAF8900E80220 /* wave.mov in Resources */ = {isa = PBXBuildFile; fileRef = 93E75DE11DAAAF8900E80220 /* wave.mov */; };
+		93D179D91DF4DBD7005C1EE7 /* RadarVC.swift in Sources */ = {isa = PBXBuildFile; fileRef = 93D179D81DF4DBD7005C1EE7 /* RadarVC.swift */; };
+		93D179DB1DF4F3AA005C1EE7 /* ViralVC.swift in Sources */ = {isa = PBXBuildFile; fileRef = 93D179DA1DF4F3AA005C1EE7 /* ViralVC.swift */; };
+		93D179DD1DF4F58C005C1EE7 /* FollowersVC.swift in Sources */ = {isa = PBXBuildFile; fileRef = 93D179DC1DF4F58C005C1EE7 /* FollowersVC.swift */; };
+		93D179DF1DF4F842005C1EE7 /* SettingsVC.swift in Sources */ = {isa = PBXBuildFile; fileRef = 93D179DE1DF4F842005C1EE7 /* SettingsVC.swift */; };
+		93D179E11DF5F143005C1EE7 /* FollowerCell.swift in Sources */ = {isa = PBXBuildFile; fileRef = 93D179E01DF5F143005C1EE7 /* FollowerCell.swift */; };
 		93EE29221DA9C9550082FDA5 /* VideoContainerView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 93EE29211DA9C9550082FDA5 /* VideoContainerView.swift */; };
+		93EE89011DF28E2600464129 /* animated-green-checkmark.gif in Resources */ = {isa = PBXBuildFile; fileRef = 93EE89001DF28E2600464129 /* animated-green-checkmark.gif */; };
 		93EFD5771D7F9EDE00455DF0 /* SubscriptionsVC.swift in Sources */ = {isa = PBXBuildFile; fileRef = 93EFD5761D7F9EDE00455DF0 /* SubscriptionsVC.swift */; };
 		93EFD5791D7FAD2000455DF0 /* PremiumVC.swift in Sources */ = {isa = PBXBuildFile; fileRef = 93EFD5781D7FAD2000455DF0 /* PremiumVC.swift */; };
 		93F177D81DA33FA4002D0570 /* MaterialImgView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 93F177D71DA33FA4002D0570 /* MaterialImgView.swift */; };
@@ -85,6 +94,7 @@
 		933A0AD51DA154C0008E58E6 /* LinkPostVC.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = LinkPostVC.swift; sourceTree = "<group>"; };
 		933C2C1F1D803C4100DB89AE /* TopNav.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = TopNav.swift; sourceTree = "<group>"; };
 		933C2C211D8087F400DB89AE /* SubscriptionCell.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = SubscriptionCell.swift; sourceTree = "<group>"; };
+		93402D191DED304100B2B59A /* wave.mov */ = {isa = PBXFileReference; lastKnownFileType = video.quicktime; path = wave.mov; sourceTree = "<group>"; };
 		9340CA711D7DB10800AE1231 /* infobomb.app */ = {isa = PBXFileReference; explicitFileType = wrapper.application; includeInIndex = 0; path = infobomb.app; sourceTree = BUILT_PRODUCTS_DIR; };
 		9340CA741D7DB10800AE1231 /* AppDelegate.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = AppDelegate.swift; sourceTree = "<group>"; };
 		9340CA761D7DB10800AE1231 /* ViewController.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ViewController.swift; sourceTree = "<group>"; };
@@ -97,7 +107,6 @@
 		9340CA921D7DDFC800AE1231 /* TransparentPasswordField.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = TransparentPasswordField.swift; sourceTree = "<group>"; };
 		9340CA941D7DE0D500AE1231 /* MaterialButton.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = MaterialButton.swift; sourceTree = "<group>"; };
 		9340CA961D7DE10400AE1231 /* Constants.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = Constants.swift; sourceTree = "<group>"; };
-		9340CA981D7DE3CA00AE1231 /* LoginButton.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = LoginButton.swift; sourceTree = "<group>"; };
 		9340CA9A1D7DED5900AE1231 /* gun-shot.mp3 */ = {isa = PBXFileReference; lastKnownFileType = audio.mp3; path = "gun-shot.mp3"; sourceTree = "<group>"; };
 		9340CA9C1D7E2BC200AE1231 /* GoogleService-Info.plist */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = text.plist.xml; path = "GoogleService-Info.plist"; sourceTree = "<group>"; };
 		9340CA9E1D7E2E4700AE1231 /* UserService.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = UserService.swift; sourceTree = "<group>"; };
@@ -117,6 +126,9 @@
 		937E3AEE1D8615A600BB7C01 /* CategoryCell.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = CategoryCell.swift; sourceTree = "<group>"; };
 		9385B14E1DE8BAF7004087E9 /* radar-spinner.gif */ = {isa = PBXFileReference; lastKnownFileType = image.gif; path = "radar-spinner.gif"; sourceTree = "<group>"; };
 		9385D00A1DA9979800AAAAD2 /* ImagePostVC.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = ImagePostVC.swift; sourceTree = "<group>"; };
+		938A20D81DF834BD00BF0A6C /* SignUpOneVC.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = SignUpOneVC.swift; sourceTree = "<group>"; };
+		938A20DA1DF83AFF00BF0A6C /* SignUpTwoVC.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = SignUpTwoVC.swift; sourceTree = "<group>"; };
+		938A20DC1DF83FAA00BF0A6C /* SignUpThreeVC.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = SignUpThreeVC.swift; sourceTree = "<group>"; };
 		938CF36D1DE4CC53006A1833 /* BombVC.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = BombVC.swift; sourceTree = "<group>"; };
 		9390DC611DD8F0D700BCF212 /* LaunchVC.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = LaunchVC.swift; sourceTree = "<group>"; };
 		9393A1CB1D83AC3B0078503C /* MaterialView.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = MaterialView.swift; sourceTree = "<group>"; };
@@ -133,6 +145,7 @@
 		93B8E7B01D7ED935005ACC48 /* infobomb-Bridging-Header.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = "infobomb-Bridging-Header.h"; sourceTree = "<group>"; };
 		93B8E7B11D7EE055005ACC48 /* SWRevealViewController.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = SWRevealViewController.h; sourceTree = "<group>"; };
 		93B8E7B21D7EE055005ACC48 /* SWRevealViewController.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = SWRevealViewController.m; sourceTree = "<group>"; };
+		93BD5E2F1DF73B6D0022483A /* LoginVC.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = LoginVC.swift; sourceTree = "<group>"; };
 		93C164581D8E447A004B0432 /* Post.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = Post.swift; sourceTree = "<group>"; };
 		93C1645A1D8EBD24004B0432 /* PostCell.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = PostCell.swift; sourceTree = "<group>"; };
 		93C1645C1D8F299A004B0432 /* PostTextView.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = PostTextView.swift; sourceTree = "<group>"; };
@@ -142,7 +155,11 @@
 		93C8930F1D823800008B792D /* Sdk */ = {isa = PBXFileReference; lastKnownFileType = folder; path = Sdk; sourceTree = "<group>"; };
 		93C893111D82387D008B792D /* libsqlite3.tbd */ = {isa = PBXFileReference; lastKnownFileType = "sourcecode.text-based-dylib-definition"; name = libsqlite3.tbd; path = usr/lib/libsqlite3.tbd; sourceTree = SDKROOT; };
 		93C893131D823888008B792D /* libz.tbd */ = {isa = PBXFileReference; lastKnownFileType = "sourcecode.text-based-dylib-definition"; name = libz.tbd; path = usr/lib/libz.tbd; sourceTree = SDKROOT; };
-		93E75DE11DAAAF8900E80220 /* wave.mov */ = {isa = PBXFileReference; lastKnownFileType = video.quicktime; name = wave.mov; path = Assets.xcassets/wave.dataset/wave.mov; sourceTree = "<group>"; };
+		93D179D81DF4DBD7005C1EE7 /* RadarVC.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = RadarVC.swift; sourceTree = "<group>"; };
+		93D179DA1DF4F3AA005C1EE7 /* ViralVC.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = ViralVC.swift; sourceTree = "<group>"; };
+		93D179DC1DF4F58C005C1EE7 /* FollowersVC.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = FollowersVC.swift; sourceTree = "<group>"; };
+		93D179DE1DF4F842005C1EE7 /* SettingsVC.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = SettingsVC.swift; sourceTree = "<group>"; };
+		93D179E01DF5F143005C1EE7 /* FollowerCell.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = FollowerCell.swift; sourceTree = "<group>"; };
 		93EE29211DA9C9550082FDA5 /* VideoContainerView.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = VideoContainerView.swift; sourceTree = "<group>"; };
 		93EE29321DA9E2010082FDA5 /* CLCloudinary.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = CLCloudinary.h; sourceTree = "<group>"; };
 		93EE29331DA9E2010082FDA5 /* CLEagerTransformation.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = CLEagerTransformation.h; sourceTree = "<group>"; };
@@ -150,6 +167,7 @@
 		93EE29351DA9E2010082FDA5 /* Cloudinary.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = Cloudinary.h; sourceTree = "<group>"; };
 		93EE29361DA9E2010082FDA5 /* CLTransformation.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = CLTransformation.h; sourceTree = "<group>"; };
 		93EE29371DA9E2010082FDA5 /* CLUploader.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = CLUploader.h; sourceTree = "<group>"; };
+		93EE89001DF28E2600464129 /* animated-green-checkmark.gif */ = {isa = PBXFileReference; lastKnownFileType = image.gif; path = "animated-green-checkmark.gif"; sourceTree = "<group>"; };
 		93EFD5761D7F9EDE00455DF0 /* SubscriptionsVC.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = SubscriptionsVC.swift; sourceTree = "<group>"; };
 		93EFD5781D7FAD2000455DF0 /* PremiumVC.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = PremiumVC.swift; sourceTree = "<group>"; };
 		93F177D71DA33FA4002D0570 /* MaterialImgView.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = MaterialImgView.swift; sourceTree = "<group>"; };
@@ -255,6 +273,14 @@
 				936B24261DB2F011006E30CE /* QuotePostVC.swift */,
 				9390DC611DD8F0D700BCF212 /* LaunchVC.swift */,
 				938CF36D1DE4CC53006A1833 /* BombVC.swift */,
+				93D179D81DF4DBD7005C1EE7 /* RadarVC.swift */,
+				93D179DA1DF4F3AA005C1EE7 /* ViralVC.swift */,
+				93D179DC1DF4F58C005C1EE7 /* FollowersVC.swift */,
+				93D179DE1DF4F842005C1EE7 /* SettingsVC.swift */,
+				93BD5E2F1DF73B6D0022483A /* LoginVC.swift */,
+				938A20D81DF834BD00BF0A6C /* SignUpOneVC.swift */,
+				938A20DA1DF83AFF00BF0A6C /* SignUpTwoVC.swift */,
+				938A20DC1DF83FAA00BF0A6C /* SignUpThreeVC.swift */,
 			);
 			name = Controller;
 			sourceTree = "<group>";
@@ -266,7 +292,6 @@
 				9340CA901D7DD41C00AE1231 /* TransparentUsernameField.swift */,
 				9340CA921D7DDFC800AE1231 /* TransparentPasswordField.swift */,
 				9340CA941D7DE0D500AE1231 /* MaterialButton.swift */,
-				9340CA981D7DE3CA00AE1231 /* LoginButton.swift */,
 				933C2C1F1D803C4100DB89AE /* TopNav.swift */,
 				9393A1CB1D83AC3B0078503C /* MaterialView.swift */,
 				937E3AE41D85BBD400BB7C01 /* MaterialTextView.swift */,
@@ -279,6 +304,7 @@
 				93F177D71DA33FA4002D0570 /* MaterialImgView.swift */,
 				93EE29211DA9C9550082FDA5 /* VideoContainerView.swift */,
 				937131F71DACDB8D006CC35E /* NewPostNavBarView.swift */,
+				93D179E01DF5F143005C1EE7 /* FollowerCell.swift */,
 			);
 			name = View;
 			sourceTree = "<group>";
@@ -304,9 +330,10 @@
 		9340CA8A1D7DB44F00AE1231 /* Resources */ = {
 			isa = PBXGroup;
 			children = (
-				93E75DE11DAAAF8900E80220 /* wave.mov */,
+				93402D191DED304100B2B59A /* wave.mov */,
 				93AA25F31D859561002344D3 /* radar.mp3 */,
 				93AA25F41D859561002344D3 /* intro.mp3 */,
+				93EE89001DF28E2600464129 /* animated-green-checkmark.gif */,
 				935C20FA1D7F8AC300C41A47 /* NotoSans-Bold.ttf */,
 				935C20FB1D7F8AC300C41A47 /* NotoSans-BoldItalic.ttf */,
 				935C20FC1D7F8AC300C41A47 /* NotoSans-Italic.ttf */,
@@ -426,17 +453,18 @@
 			buildActionMask = 2147483647;
 			files = (
 				935C20FE1D7F8AC300C41A47 /* NotoSans-Bold.ttf in Resources */,
+				93EE89011DF28E2600464129 /* animated-green-checkmark.gif in Resources */,
 				9340CA7F1D7DB10800AE1231 /* LaunchScreen.storyboard in Resources */,
 				9340CA9B1D7DED5900AE1231 /* gun-shot.mp3 in Resources */,
 				935C21011D7F8AC300C41A47 /* NotoSans-Regular.ttf in Resources */,
 				93AA25F51D859561002344D3 /* radar.mp3 in Resources */,
 				935C20FF1D7F8AC300C41A47 /* NotoSans-BoldItalic.ttf in Resources */,
 				9385B14F1DE8BAF7004087E9 /* radar-spinner.gif in Resources */,
-				93E75DE21DAAAF8900E80220 /* wave.mov in Resources */,
 				9340CA8F1D7DD15A00AE1231 /* blast.mp3 in Resources */,
 				93AA25F61D859561002344D3 /* intro.mp3 in Resources */,
 				935C21001D7F8AC300C41A47 /* NotoSans-Italic.ttf in Resources */,
 				93089D5B1DD8E7140047587C /* oilbats.basic.ttf in Resources */,
+				93402D1A1DED304100B2B59A /* wave.mov in Resources */,
 				93AD77501DE61C940038FE42 /* Main.storyboard in Resources */,
 				9340CA7C1D7DB10800AE1231 /* Assets.xcassets in Resources */,
 				93C893101D823800008B792D /* Sdk in Resources */,
@@ -500,14 +528,16 @@
 			isa = PBXSourcesBuildPhase;
 			buildActionMask = 2147483647;
 			files = (
+				938A20DB1DF83AFF00BF0A6C /* SignUpTwoVC.swift in Sources */,
 				9340CA911D7DD41C00AE1231 /* TransparentUsernameField.swift in Sources */,
 				9393A1CC1D83AC3B0078503C /* MaterialView.swift in Sources */,
 				9324326E1D98B73000D5C3DA /* ShakeImage.swift in Sources */,
+				93D179D91DF4DBD7005C1EE7 /* RadarVC.swift in Sources */,
 				9340CA771D7DB10800AE1231 /* ViewController.swift in Sources */,
 				937131F61DACD925006CC35E /* UIImageExtension.swift in Sources */,
 				93B8E7B31D7EE055005ACC48 /* SWRevealViewController.m in Sources */,
 				9341CDBF1DCF85EB006861D9 /* VideoUploadOptionVC.swift in Sources */,
-				9340CA991D7DE3CA00AE1231 /* LoginButton.swift in Sources */,
+				93D179DF1DF4F842005C1EE7 /* SettingsVC.swift in Sources */,
 				9385D00B1DA9979800AAAAD2 /* ImagePostVC.swift in Sources */,
 				937E3AE51D85BBD400BB7C01 /* MaterialTextView.swift in Sources */,
 				939BEEEF1D7E484200F1C954 /* ActivityVC.swift in Sources */,
@@ -522,7 +552,9 @@
 				93EFD5791D7FAD2000455DF0 /* PremiumVC.swift in Sources */,
 				938CF36E1DE4CC53006A1833 /* BombVC.swift in Sources */,
 				93C1645B1D8EBD24004B0432 /* PostCell.swift in Sources */,
+				93D179DD1DF4F58C005C1EE7 /* FollowersVC.swift in Sources */,
 				93AA25EA1D844CB1002344D3 /* TransparentEmailField.swift in Sources */,
+				938A20D91DF834BD00BF0A6C /* SignUpOneVC.swift in Sources */,
 				9340CA951D7DE0D500AE1231 /* MaterialButton.swift in Sources */,
 				9390DC621DD8F0D700BCF212 /* LaunchVC.swift in Sources */,
 				931CC0061D9AE377005DA803 /* PostDetailVC.swift in Sources */,
@@ -530,13 +562,17 @@
 				93AA25F81D85ACF4002344D3 /* TextPostVC.swift in Sources */,
 				93EFD5771D7F9EDE00455DF0 /* SubscriptionsVC.swift in Sources */,
 				935C20F91D7F36C200C41A47 /* LeftNavVC.swift in Sources */,
+				93D179DB1DF4F3AA005C1EE7 /* ViralVC.swift in Sources */,
 				93C164591D8E447A004B0432 /* Post.swift in Sources */,
 				937131F81DACDB8D006CC35E /* NewPostNavBarView.swift in Sources */,
 				93C1645F1D8F3A4B004B0432 /* MaterialUIView.swift in Sources */,
 				93C893041D81811E008B792D /* CategoryService.swift in Sources */,
+				938A20DD1DF83FAA00BF0A6C /* SignUpThreeVC.swift in Sources */,
 				937E3AEB1D85F64B00BB7C01 /* CategoryVC.swift in Sources */,
+				93BD5E301DF73B6D0022483A /* LoginVC.swift in Sources */,
 				93770C401DAA718C00A2A134 /* AudioPostVC.swift in Sources */,
 				9340CA971D7DE10400AE1231 /* Constants.swift in Sources */,
+				93D179E11DF5F143005C1EE7 /* FollowerCell.swift in Sources */,
 				9315C06E1D8376130051BFCD /* FirebaseStorage.swift in Sources */,
 				931479D01D88D34600F5E366 /* PostService.swift in Sources */,
 				937E3AEF1D8615A600BB7C01 /* CategoryCell.swift in Sources */,

@@ -19,6 +19,7 @@ class NewPostVC: UIViewController, CLLocationManagerDelegate {
     @IBOutlet weak var audioView: MaterialView!
     @IBOutlet weak var premiumView: MaterialView!
     
+    @IBOutlet weak var premiumBtn: UIButton!
     
     override func viewDidLoad() {
         super.viewDidLoad()
@@ -30,7 +31,7 @@ class NewPostVC: UIViewController, CLLocationManagerDelegate {
 
         let button: UIButton = UIButton(type: UIButtonType.custom)
         button.setImage(UIImage(named: "notification.png"), for: UIControlState())
-//        button.addTarget(self, action: #selector(ActivityVC.notificationBtnPressed), forControlEvents: UIControlEvents.TouchUpInside)
+
         button.frame = CGRect(x: 0, y: 0, width: 27, height: 27)
         let barButton = UIBarButtonItem(customView: button)
         self.navigationItem.rightBarButtonItem = barButton
@@ -54,6 +55,8 @@ class NewPostVC: UIViewController, CLLocationManagerDelegate {
         
         imageView.center = (imageView.superview?.center)!
         self.navigationItem.titleView = customView
+        
+        premiumBtn.layer.cornerRadius = 2
 
         NotificationCenter.default.addObserver(LocationService(), selector: #selector(LocationService.stopUpdatingLocation), name: NSNotification.Name(rawValue: "userSignedOut"), object: nil)
 

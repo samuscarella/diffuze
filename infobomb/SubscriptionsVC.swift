@@ -104,7 +104,7 @@ class SubscriptionsVC: UIViewController, UITableViewDataSource, UITableViewDeleg
             if let url = category.image_path {
                 img = SubscriptionsVC.imageCache.object(forKey: url as AnyObject) as? UIImage
             }
-        
+            
             cell.configureCell(category, img: img)
             
             return cell

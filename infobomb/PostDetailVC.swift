@@ -30,7 +30,7 @@ class PostDetailVC: UIViewController {
         self.navigationController?.navigationBar.shadowImage = UIImage()
         self.navigationController?.navigationBar.isTranslucent = true
         
-        mediaImg.clipsToBounds = true
+        //mediaImg.clipsToBounds = true
 
         //categoryOneImg.layer.cornerRadius = categoryOneImg.frame.size.width / 2
         //categoryOneImg.clipsToBounds = true
@@ -47,13 +47,13 @@ class PostDetailVC: UIViewController {
         imageView.contentMode = UIViewContentMode.scaleAspectFit
         customView.addSubview(imageView)
         
-        categoryOneImg.layoutIfNeeded()
-        categoryTwoImg.layoutIfNeeded()
-        categoryOneImg.layer.cornerRadius = categoryOneImg.frame.size.width / 2
-        categoryOneImg.clipsToBounds = true
+        //categoryOneImg.layoutIfNeeded()
+        //categoryTwoImg.layoutIfNeeded()
+        //categoryOneImg.layer.cornerRadius = categoryOneImg.frame.size.width / 2
+        //categoryOneImg.clipsToBounds = true
         
-        categoryTwoImg.layer.cornerRadius = categoryTwoImg.frame.size.width / 2
-        categoryTwoImg.clipsToBounds = true
+        //categoryTwoImg.layer.cornerRadius = categoryTwoImg.frame.size.width / 2
+        //categoryTwoImg.clipsToBounds = true
 
         
         imageView.center = (imageView.superview?.center)!
@@ -82,7 +82,7 @@ class PostDetailVC: UIViewController {
         self.navigationController?.navigationBar.setBackgroundImage(UIImage(), for: .default)
         self.navigationController?.navigationBar.shadowImage = UIImage()
         self.navigationController?.navigationBar.isTranslucent = true
-
+        
         if (messageLbl != nil) && messageLbl.text! != "" {
             isMessageEmpty = false
             let height = heightForView(messageLbl, text: messageLbl.text!, font: font!)
@@ -97,30 +97,28 @@ class PostDetailVC: UIViewController {
             NotificationCenter.default.post(name: Notification.Name(rawValue: "messageHeightUpdated"), object: nil)
         }
 
-        
-
     }
     
     func updateViews()  {
         
-        var totalHeight: CGFloat = 0
-        
-        for subView in self.contentView.subviews {
-            
-            if subView.tag == 5 && isMessageEmpty == false {
-                
-                totalHeight += subView.frame.height
-            } else if subView.tag == 6 && isLinkDescriptionLblEmpty == false {
-                
-                totalHeight += subView.frame.height
-            } else if subView.tag != 5 {
-                if subView.tag != 1 && subView.tag != 2 && subView.tag != 3 && subView.tag != 4 {
-                    
-                    totalHeight += subView.frame.height
-                }
-            }
-        }
-        self.contentViewHeight.constant = totalHeight + 15
+//        var totalHeight: CGFloat = 0
+//        
+//        for subView in self.contentView.subviews {
+//            
+//            if subView.tag == 5 && isMessageEmpty == false {
+//                
+//                totalHeight += subView.frame.height
+//            } else if subView.tag == 6 && isLinkDescriptionLblEmpty == false {
+//                
+//                totalHeight += subView.frame.height
+//            } else if subView.tag != 5 {
+//                if subView.tag != 1 && subView.tag != 2 && subView.tag != 3 && subView.tag != 4 {
+//                    
+//                    totalHeight += subView.frame.height
+//                }
+//            }
+//        }
+//        self.contentViewHeight.constant = totalHeight + 15
     }
     
     override func viewDidLayoutSubviews() {

@@ -44,10 +44,20 @@
 			<key>isShown</key>
 			<false/>
 		</dict>
+		<key>SwiftyGif.xcscheme</key>
+		<dict>
+			<key>isShown</key>
+			<false/>
+		</dict>
 	</dict>
 	<key>SuppressBuildableAutocreation</key>
 	<dict>
-		<key>0B85DB73F17472A25479308DABC28FC4</key>
+		<key>0E0114F6302B4E34884D308962F1D34F</key>
+		<dict>
+			<key>primary</key>
+			<true/>
+		</dict>
+		<key>19CC340220B8D3232C0490A32F8372E4</key>
 		<dict>
 			<key>primary</key>
 			<true/>
@@ -57,22 +67,22 @@
 			<key>primary</key>
 			<true/>
 		</dict>
+		<key>3798D1C6B4C44340F4A784DC8EEF4FFD</key>
+		<dict>
+			<key>primary</key>
+			<true/>
+		</dict>
 		<key>581B578E304C99F668C316407DB4A48F</key>
 		<dict>
 			<key>primary</key>
 			<true/>
 		</dict>
-		<key>5F42D3ECC4D65E8D29B5D602286867EF</key>
-		<dict>
-			<key>primary</key>
-			<true/>
-		</dict>
-		<key>794E86CD515B1AA80D99AD06CFF6DCE4</key>
-		<dict>
-			<key>primary</key>
-			<true/>
-		</dict>
 		<key>79C040AFDDCE1BCBF6D8B5EB0B85887F</key>
+		<dict>
+			<key>primary</key>
+			<true/>
+		</dict>
+		<key>A04B73858305DF2E19B0AAD639869A22</key>
 		<dict>
 			<key>primary</key>
 			<true/>

@@ -28,8 +28,9 @@ class TransparentEmailField: UITextField {
     
     func makeTextFieldBottomBorderOnly() {
         
+
         let bottomLine = CALayer()
-        bottomLine.frame = CGRect(x: 0.0, y: frame.height - 1, width: frame.width, height: 1.0)
+        bottomLine.frame = CGRect(x: 0.0, y: self.frame.height - 1, width: self.frame.width, height: 1.0)
         bottomLine.backgroundColor = UIColor.white.cgColor
         borderStyle = UITextBorderStyle.none
         layer.addSublayer(bottomLine)

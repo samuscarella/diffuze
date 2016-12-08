@@ -12,20 +12,15 @@ import Firebase
 
 class ViewController: UIViewController {
     
-    
-    
-    @IBOutlet weak var emailField: TransparentEmailField?
-    @IBOutlet weak var usernameField: TransparentUsernameField?
-    @IBOutlet weak var passwordField: TransparentPasswordField?
+    @IBOutlet weak var signUpBtn: UIButton!
+    @IBOutlet weak var loginBtn: UIButton!
     
     var introMusic: AVAudioPlayer!
     
-
     override func viewDidLoad() {
         super.viewDidLoad()
         
-    print("Sign In View Did Load...")
-
+        signUpBtn.layer.cornerRadius = 3
     }
     
     override func viewDidAppear(_ animated: Bool) {
@@ -33,7 +28,7 @@ class ViewController: UIViewController {
         
         print("Sign In View Did Appear...")
         
-        if UserDefaults.standard.value(forKey: KEY_UID) != nil && UserDefaults.standard.value(forKey: KEY_USERNAME) != nil {
+        if UserDefaults.standard.value(forKey: KEY_UID) != nil {
             if let user = FIRAuth.auth()?.currentUser {
                 print("User is signed in: \(user.displayName!)")
                 UserDefaults.standard.setValue(user.uid, forKey: KEY_UID)
@@ -49,88 +44,6 @@ class ViewController: UIViewController {
 
     }
     
-    
-    @IBAction func loginUserBtnPressed(_ sender: AnyObject) {
-        
-        if let email = emailField!.text , email != "", let username = usernameField!.text , username != "", let pwd = passwordField!.text , pwd != "" {
-            
-            FIRAuth.auth()?.signIn(withEmail: email, password: pwd) { (user, error) in
-                
-                if error != nil {
-                    
-                        print(error)
-                    
-                    if error!._code == USER_NOT_FOUND {
-                        
-                        print("User not found. Attempting to create new user...")
-                        
-                        FIRAuth.auth()?.createUser(withEmail: email, password: pwd) { (user, error) in
-                            
-                            if error != nil {
-                                
-                                print(error)
-                                self.showErrorAlert("Could not create account", msg: "Problem creating account. Try something else")
-                            } else {
-                                
-                                FIRAuth.auth()?.signIn(withEmail: email, password: pwd) { (user, error) in
-                                    
-                                    let user = FIRAuth.auth()?.currentUser
-                                    if let user = user {
-                                        let changeRequest = user.profileChangeRequest()
-                                        
-                                        changeRequest.displayName = username
-                                        
-                                        changeRequest.commitChanges { error in
-                                            if error != nil {
-                                                print("Could not update user display name.")
-                                            } else {
-                                                print("User display name updated!")
-                                            }
-                                        }
-                                    }
-
-                                    UserDefaults.standard.setValue(user!.uid, forKey: KEY_UID)
-                                    UserDefaults.standard.setValue(username, forKey: KEY_USERNAME)
-
-                                    let userData = [
-                                        "email": email,
-                                        "username": username,
-                                        "provider": FIREBASE,
-                                        "user_ref": user!.uid
-                                    ]
-                                    UserService.ds.createFirebaseUser(user!.uid, user: userData)
-                                    self.playIntroSound()
-                                    self.performSegue(withIdentifier: SEGUE_LOGGED_IN, sender: nil)
-                                }
-                            }
-                        }
-                    } else if error?._code == PASSWORD_NOT_FOUND {
-                        self.showErrorAlert("Could not login", msg: "Please check your username or password!")
-                    }
-                } else {
-                    
-                    UserDefaults.standard.setValue(user!.uid, forKey: KEY_UID)
-                    UserDefaults.standard.setValue(username, forKey: KEY_USERNAME)
-                    print("User is signed in: \(user!.displayName)")
-                    self.playIntroSound()
-                    self.performSegue(withIdentifier: SEGUE_LOGGED_IN, sender: nil)
-                }
-            }
-        
-        } else {
-            showErrorAlert("Username or Password is Invalid!", msg: "Please check your credentials and try again.")
-        }
-        
-    }
-    
-    func showErrorAlert(_ title: String, msg: String) {
-        let alert = UIAlertController(title: title, message: msg, preferredStyle: .alert)
-        let action = UIAlertAction(title: "Ok", style: .default, handler: nil)
-        alert.addAction(action)
-        present(alert, animated: true, completion: nil)
-    }
-    
-    
     func playIntroSound() {
         
         let path = Bundle.main.path(forResource: "intro", ofType: "mp3")!
@@ -145,11 +58,14 @@ class ViewController: UIViewController {
         } catch {
             print("Error Could not play Sound!")
         }
-
+        
     }
     
+    @IBAction func unwindToMainScreen(_ segue: UIStoryboardSegue) {
+        
+    }
 
-    
+
     
 
 }
