@@ -85,8 +85,8 @@ class BombVC: UIViewController {
     
     func startGeoFireQuery(latitudeDelta: Double, longitudeDelta: Double) {
         
-        let regionWithDistance = MKCoordinateRegionMakeWithDistance((center?.coordinate)!, latitudeDelta, longitudeDelta)
-        let region = MKCoordinateRegionMake((center?.coordinate)!, regionWithDistance.span)
+//        let regionWithDistance = MKCoordinateRegionMakeWithDistance((center?.coordinate)!, latitudeDelta, longitudeDelta)
+//        let region = MKCoordinateRegionMake((center?.coordinate)!, regionWithDistance.span)
         meters += 1.0
         query = geoFire?.query(at: center, withRadius: Double(meters))
 //        query = geoFire?.query(with: region)

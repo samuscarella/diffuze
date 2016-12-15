@@ -16,31 +16,34 @@ import GeoFire
 //private var latitude: Double = 0.0
 //private var longitude: Double = 0.0
 
-class ActivityVC: UIViewController, CLLocationManagerDelegate, UITableViewDelegate, UITableViewDataSource {
+class ActivityVC: UIViewController, CLLocationManagerDelegate, UITableViewDelegate, UITableViewDataSource, TableViewCellDelegate {
     
-    @IBOutlet weak var filterBtn: MaterialButton!
     @IBOutlet weak var notificationBtn: UIBarButtonItem!
     @IBOutlet weak var pulseImg: UIImageView!
     @IBOutlet weak var tableView: UITableView!
     @IBOutlet weak var background: UIView!
-    
-    let pulsator = Pulsator()
-    
-    var locationService: LocationService!
-    var currentLocation: [String:AnyObject] = [:]
-    var posts = [Post]()
-    let userID = FIRAuth.auth()?.currentUser?.uid
-    var currentUser: NSDictionary = [:]
-    let iD = UserService.ds.currentUserID
+    @IBOutlet weak var scoreView: UIView!
+    @IBOutlet weak var scoreLbl: UILabel!
+    @IBOutlet weak var categoryFilterBtn: UIButton!
+    @IBOutlet weak var postTypeFilterBtn: UIButton!
     
     static var imageCache = NSCache<AnyObject, AnyObject>()
     
+    let pulsator = Pulsator()
+    let userID = FIRAuth.auth()?.currentUser?.uid
+    let iD = UserService.ds.currentUserID
+
+    var locationService: LocationService!
+    var currentLocation: [String:AnyObject] = [:]
+    var posts = [Post]()
+    var currentUser: NSDictionary = [:]
     var latitude: Double = 0.0
     var longitude: Double = 0.0
     var audioPlayerItem: AVPlayerItem?
     var audioPlayer: AVPlayer?
     var followingImage: UIImage!
     var notFollowingImage: UIImage!
+    var lineView: UIView!
 
     override func viewDidLoad() {
         super.viewDidLoad()
@@ -49,10 +52,14 @@ class ActivityVC: UIViewController, CLLocationManagerDelegate, UITableViewDelega
         self.view.backgroundColor = SMOKY_BLACK
         
         UIApplication.shared.statusBarStyle = .lightContent
-        filterBtn.showsTouchWhenHighlighted = true
         
         followingImage = UIImage(named: "following-blue")
         notFollowingImage = UIImage(named: "follower-grey")
+        
+        postTypeFilterBtn.imageEdgeInsets = UIEdgeInsetsMake(30, 80, 30, 80)
+        postTypeFilterBtn.setImage(UIImage(named: "funnel-black"), for: .highlighted)
+        categoryFilterBtn.imageEdgeInsets = UIEdgeInsetsMake(30, 80, 30, 80)
+        categoryFilterBtn.setImage(UIImage(named: "categories-icon"), for: .highlighted)
         
         self.navigationController?.navigationBar.setBackgroundImage(UIImage(), for: .default)
         self.navigationController?.navigationBar.shadowImage = UIImage()
@@ -71,9 +78,7 @@ class ActivityVC: UIViewController, CLLocationManagerDelegate, UITableViewDelega
         
         imageView.center = (imageView.superview?.center)!
         self.navigationItem.titleView = customView
-        
-       filterBtn.imageEdgeInsets = UIEdgeInsetsMake(5,5,5,5);
-        
+                
         let button: UIButton = UIButton(type: UIButtonType.custom)
         button.setImage(UIImage(named: "notification.png"), for: UIControlState())
         button.addTarget(self, action: #selector(ActivityVC.notificationBtnPressed), for: UIControlEvents.touchUpInside)
@@ -88,35 +93,33 @@ class ActivityVC: UIViewController, CLLocationManagerDelegate, UITableViewDelega
         self.navigationItem.leftBarButtonItem = leftBarButton
         locationService = LocationService()
         
-////        locationService.startTracking()
+//        locationService.startTracking()
 //        locationService.addObserver(self, forKeyPath: "latitude", options: .New, context: &latitude)
 //        locationService.addObserver(self, forKeyPath: "longitude", options: .New, context: &longitude)
         
         UserService.ds.REF_USER_CURRENT.observeSingleEvent(of: FIRDataEventType.value, with: { (snapshot) in
+            
                 let value = snapshot.value as? NSDictionary
                 let latitude = value!["latitude"]
                 let longitude = value!["longitude"]
                 self.currentLocation["latitude"] = latitude as AnyObject?
                 self.currentLocation["longitude"] = longitude as AnyObject?
-//                self.tableView.reloadData()
+//              self.tableView.reloadData()
         })
 
 //        NSNotificationCenter.defaultCenter().addObserver(self, selector: #selector(ActivityVC.refreshTableView), name: "userUpdatedLocation", object: nil)
         NotificationCenter.default.addObserver(locationService, selector: #selector(locationService.stopUpdatingLocation), name: NSNotification.Name(rawValue: "userSignedOut"), object: nil)
         
-        
         pulsator.radius = 300.0
         pulsator.backgroundColor = UIColor(red: 255.0, green: 0, blue: 0, alpha: 1).cgColor
-        pulsator.animationDuration = 2
-        pulsator.numPulse = 4
-        pulsator.pulseInterval = 0
-//        pulsator.timingFunction = add timer for audio pulse to add more waves
+        pulsator.animationDuration = 4
+        pulsator.numPulse = 6
+        pulsator.pulseInterval = 2
         pulseImg.layer.superlayer?.insertSublayer(pulsator, below: pulseImg.layer)
         pulsator.start()
  
         tableView.delegate = self
         tableView.dataSource = self
-        tableView.tableFooterView = UIView()
         tableView.rowHeight = UITableViewAutomaticDimension
         tableView.estimatedRowHeight = 300
         tableView.isHidden = true
@@ -136,18 +139,16 @@ class ActivityVC: UIViewController, CLLocationManagerDelegate, UITableViewDelega
                     }
                 }
             }
-            
             if self.posts.count > 0 {
                 self.tableView.reloadData()
                 self.tableView.isHidden = false
             }
-
         })
 
         URL_BASE.child("users").child(currentUserID).child("following").observe(FIRDataEventType.value, with: { (snapshot) in
             
             let followingUsers = snapshot.children.allObjects as? [FIRDataSnapshot] ?? []
-            print(followingUsers)
+
             let cells = self.tableView.visibleCells as? [PostCell] ?? []
             
             if followingUsers.count > 0 {
@@ -168,10 +169,9 @@ class ActivityVC: UIViewController, CLLocationManagerDelegate, UITableViewDelega
                     cell.followerBtn.setImage(self.notFollowingImage, for: .normal)
                 }
             }
-            
+    
         })
 
-        //Burger side menu
         if revealViewController() != nil {
             
             menuButton.addTarget(revealViewController(), action: #selector(SWRevealViewController.revealToggle(_:)), for: UIControlEvents.touchUpInside)
@@ -194,13 +194,6 @@ class ActivityVC: UIViewController, CLLocationManagerDelegate, UITableViewDelega
 //        }
 //    }
     
-    override func viewDidAppear(_ animated: Bool) {
-
-
-
-    }
-
-    
     override func viewDidLayoutSubviews() {
         super.viewDidLayoutSubviews()
         
@@ -215,14 +208,29 @@ class ActivityVC: UIViewController, CLLocationManagerDelegate, UITableViewDelega
         NotificationCenter.default.removeObserver(self)
     }
     
+    
+    func postDeleted(post: Post, action: String) {
+        
+        let index = (posts as NSArray).index(of: post)
+        if index == NSNotFound { return }
+        
+        posts.remove(at: index)
+        
+        tableView.beginUpdates()
+        
+        let indexPathForRow = NSIndexPath(row: index, section: 0)
+        tableView.deleteRows(at: [indexPathForRow as IndexPath], with: .fade)
+        
+        tableView.endUpdates()
+        
+        showScoreView(action: action)
+    }
+    
     private func tableView(_ collectionView: UICollectionView, didSelectItemAtIndexPath indexPath: IndexPath) {
         
         var post: Post!
-        
         post = posts[(indexPath as NSIndexPath).row]
-                
         performSegue(withIdentifier: "PostDetailVC", sender: post)
-        
     }
     
     func numberOfSections(in tableView: UITableView) -> Int {
@@ -238,12 +246,11 @@ class ActivityVC: UIViewController, CLLocationManagerDelegate, UITableViewDelega
         return posts.count
     }
     
-    
     func tableView(_ tableView: UITableView, cellForRowAt indexPath: IndexPath) -> UITableViewCell {
         
         if posts.count > 0 {
             let post = posts[(indexPath as NSIndexPath).row]
-        
+            
             if let cell = tableView.dequeueReusableCell(withIdentifier: "PostCell", for: indexPath) as? PostCell {
                 
                 cell.request?.cancel()
@@ -253,53 +260,31 @@ class ActivityVC: UIViewController, CLLocationManagerDelegate, UITableViewDelega
                 
                 var img: UIImage?
                 
-                if let url = post.image {
-                    img = ActivityVC.imageCache.object(forKey: url as AnyObject) as? UIImage
-                } else if let url = post.thumbnail {
-                    img = ActivityVC.imageCache.object(forKey: url as AnyObject) as? UIImage
+                if let postImgUrl = post.image {
+                    img = ActivityVC.imageCache.object(forKey: postImgUrl as AnyObject) as? UIImage
+                } else if let postImgUrl = post.thumbnail {
+                    img = ActivityVC.imageCache.object(forKey: postImgUrl as AnyObject) as? UIImage
                 }
                 
-                cell.configureCell(post, currentLocation: currentLocation, image: img)
-
+                cell.delegate = self
+                
+                cell.configureCell(post, currentLocation: currentLocation, image: img, postType: "radar")
+                
                 return cell
             } else {
-                return PostCell()
+                return PostCell(coder: NSCoder())
             }
         }
-        return PostCell()
+        return PostCell(coder: NSCoder())
     }
     
     func tableView(_ tableView: UITableView, heightForRowAt indexPath: IndexPath) -> CGFloat {
-        
-        if posts.count > 0 {
-            let post = posts[(indexPath as NSIndexPath).row]
-        
-            if post.type == "text" {
                 return UITableViewAutomaticDimension
-            }
-        }
-        return UITableViewAutomaticDimension
         
     }
     
     func tableView(_ tableView: UITableView, didSelectRowAt indexPath: IndexPath) {
         self.performSegue(withIdentifier: "PostDetailVC", sender: posts[indexPath.row])
-    }
-    
-    func finishedPlaying(myNotification:NSNotification) {
-//        playAudioBtn.setImage(UIImage(named: "play-btn.png"), for: UIControlState.normal)
-        let stoppedPlayerItem: AVPlayerItem = myNotification.object as! AVPlayerItem
-        stoppedPlayerItem.seek(to: kCMTimeZero)
-    }
-    
-    func playButtonTapped(sender: AnyObject) {
-                if audioPlayer?.rate == 0 {
-                    audioPlayer!.play()
-//                                playAudioBtn.setImage(UIImage(named: "pause-button.png"), for: UIControlState.normal)
-                } else {
-                    audioPlayer!.pause()
-//   playAudioBtn.setImage(UIImage(named: "play-btn.png"), for: UIControlState.normal)
-                }
     }
     
     func shake() {
@@ -322,9 +307,30 @@ class ActivityVC: UIViewController, CLLocationManagerDelegate, UITableViewDelega
         return label.frame.height
     }
     
-    
     func notificationBtnPressed() {
         
+    }
+    
+    func showScoreView(action: String) {
+        
+        self.scoreView.isHidden = false
+        self.scoreView.alpha = 1
+
+        if action == "dislike" {
+            self.scoreLbl.textColor = UIColor.red
+            self.scoreLbl.text = "-1"
+        } else if action == "like" {
+            self.scoreLbl.textColor = UIColor.green
+            self.scoreLbl.text = "+1"
+        }
+        UIView.animate(withDuration: 1, animations: {
+            self.scoreView.alpha = 0
+        }, completion: { finished in
+            if !finished {
+                return
+            }
+            self.scoreView.isHidden = true
+        })
     }
     
     @IBAction func unwindToActivityPost(_ segue: UIStoryboardSegue) {

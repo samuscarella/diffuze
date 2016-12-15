@@ -9,9 +9,12 @@
 import UIKit
 import Firebase
 
-class RadarVC: UIViewController, UITableViewDelegate, UITableViewDataSource {
+class RadarVC: UIViewController, UITableViewDelegate, UITableViewDataSource, ActivityTableViewCellDelegate {
 
     @IBOutlet weak var tableView: UITableView!
+    @IBOutlet weak var scoreView: UIView!
+    @IBOutlet weak var scoreLbl: UILabel!
+    @IBOutlet weak var neutralImageView: UIImageView!
     
     let userID = FIRAuth.auth()?.currentUser?.uid
     let iD = UserService.ds.currentUserID
@@ -22,7 +25,8 @@ class RadarVC: UIViewController, UITableViewDelegate, UITableViewDataSource {
     var currentUser: NSDictionary = [:]
     var followingImage: UIImage!
     var notFollowingImage: UIImage!
-
+    var myGroup = DispatchGroup()
+    var currentUserID: String!
 
     override func viewDidLoad() {
         super.viewDidLoad()
@@ -59,9 +63,9 @@ class RadarVC: UIViewController, UITableViewDelegate, UITableViewDataSource {
         self.navigationItem.leftBarButtonItem = leftBarButton
         locationService = LocationService()
         
-        ////        locationService.startTracking()
-        //        locationService.addObserver(self, forKeyPath: "latitude", options: .New, context: &latitude)
-        //        locationService.addObserver(self, forKeyPath: "longitude", options: .New, context: &longitude)
+        //locationService.startTracking()
+        //locationService.addObserver(self, forKeyPath: "latitude", options: .New, context: &latitude)
+        //locationService.addObserver(self, forKeyPath: "longitude", options: .New, context: &longitude)
         
         tableView.delegate = self
         tableView.dataSource = self
@@ -73,60 +77,47 @@ class RadarVC: UIViewController, UITableViewDelegate, UITableViewDataSource {
         followingImage = UIImage(named: "following-blue")
         notFollowingImage = UIImage(named: "follower-grey")
         
-        let currentUserID = UserDefaults.standard.object(forKey: KEY_UID) as! String
+        currentUserID = UserDefaults.standard.object(forKey: KEY_UID) as! String
         
-        URL_BASE.child("user-radar").child(currentUserID).observeSingleEvent(of: FIRDataEventType.value, with: { (snapshot) in
-            
-            if let radarPosts = snapshot.children.allObjects as? [FIRDataSnapshot] {
-                
-                self.posts = []
-                for post in radarPosts {
-                    if let postDict = post.value as? Dictionary<String, AnyObject> {
-                        
-                        let post = Post(postKey: post.key, dictionary: postDict)
-                        self.posts.append(post)
-                    }
-                }
-            }
-            if self.posts.count > 0 {
-                self.tableView.reloadData()
-                self.tableView.isHidden = false
-            }
-            
-        })
+        getAllFollowingUsers()
         
         URL_BASE.child("users").child(currentUserID).child("following").observe(FIRDataEventType.value, with: { (snapshot) in
             
             let followingUsers = snapshot.children.allObjects as? [FIRDataSnapshot] ?? []
-
-            let cells = self.tableView.visibleCells as? [PostCell] ?? []
             
-            if followingUsers.count > 0 {
-                var index = 0
-                for cell in cells {
+            if followingUsers.count > 0 && self.posts.count > 0 {
+                
+                var isUserFollowing = false
+                for i in 0...self.posts.count - 1 {
+                    isUserFollowing = false
                     for user in followingUsers {
-                        if cell.post.user_id == user.key {
-                            cell.followerBtn.setImage(self.followingImage, for: .normal)
+                        if user.key == self.posts[i].user_id {
+                            isUserFollowing = true
                             break
-                        } else {
-                            cell.followerBtn.setImage(self.notFollowingImage, for: .normal)
                         }
                     }
-                    index += 1
-                }
-            } else {
-                for cell in cells {
-                    cell.followerBtn.setImage(self.notFollowingImage, for: .normal)
+                    if !isUserFollowing {
+                        self.posts.remove(at: i)
+                        break
+                    }
                 }
             }
-            
+            if followingUsers.count == 0 {
+                self.posts = []
+            }
+            self.tableView.reloadData()
         })
-
+        
         //Burger side menu
         if revealViewController() != nil {
             
             menuButton.addTarget(revealViewController(), action: #selector(SWRevealViewController.revealToggle(_:)), for: UIControlEvents.touchUpInside)
         }
+    }
+    
+    func postAction(action: String) {
+        print(423)
+        showScoreView(action: action)
     }
     
     func numberOfSections(in tableView: UITableView) -> Int {
@@ -135,10 +126,6 @@ class RadarVC: UIViewController, UITableViewDelegate, UITableViewDataSource {
     
     func tableView(_ tableView: UITableView, numberOfRowsInSection section: Int) -> Int {
         
-//        if posts.count > 0 {
-//            pulseImg.isHidden = true
-//            pulsator.stop()
-//        }
         return posts.count
     }
     
@@ -163,27 +150,84 @@ class RadarVC: UIViewController, UITableViewDelegate, UITableViewDataSource {
                     img = ActivityVC.imageCache.object(forKey: url as AnyObject) as? UIImage
                 }
                 
-                cell.configureCell(post, currentLocation: currentLocation, image: img)
+                cell.configureCell(post, currentLocation: currentLocation, image: img, postType: "activity")
+                
+                cell.activityDelegate = self
                 
                 return cell
             } else {
-                return PostCell()
+                return PostCell(coder: NSCoder())
             }
         }
-        return PostCell()
+        return PostCell(coder: NSCoder())
     }
     
     func tableView(_ tableView: UITableView, heightForRowAt indexPath: IndexPath) -> CGFloat {
-        
-        if posts.count > 0 {
-            let post = posts[(indexPath as NSIndexPath).row]
-            
-            if post.type == "text" {
-                return UITableViewAutomaticDimension
-            }
-        }
         return UITableViewAutomaticDimension
         
     }
+    
+    func getAllFollowingUsers() {
+        
+        URL_BASE.child("users").child(currentUserID).child("following").observeSingleEvent(of: FIRDataEventType.value, with: { (snapshot) in
+            
+            let followingUsers = snapshot.children.allObjects as? [FIRDataSnapshot] ?? []
+            
+            if followingUsers.count > 0 {
+                
+                self.posts = []
+                for user in followingUsers {
+                    
+                    self.myGroup.enter()
+                    let userRecentPost = URL_BASE.child("user-posts").child(user.key).queryLimited(toLast: 1)
+                    userRecentPost.observeSingleEvent(of: FIRDataEventType.value, with: { snapshot in
+                        
+                        let postObjects = snapshot.children.allObjects as? [FIRDataSnapshot] ?? []
+                        for post in postObjects {
+                            let postDict = post.value as? Dictionary<String,AnyObject>
+                            let post = Post(postKey: post.key, dictionary: postDict!)
+                            self.posts.append(post)
+                        }
+                        self.myGroup.leave()
+                    })
+                }
+                
+                self.myGroup.notify(queue: DispatchQueue.main, execute: {
+                    if self.posts.count > 0 {
+                        self.tableView.reloadData()
+                        self.tableView.isHidden = false
+                    }
+                })
+                
+            } else {
+                self.posts = []
+                self.tableView.reloadData()
+            }
+            
+        })
+    }
+    
+    func showScoreView(action: String) {
+
+        self.scoreView.isHidden = false
+        self.scoreView.alpha = 1
+        
+        if action == "dislike" {
+            self.scoreLbl.textColor = UIColor.red
+            self.scoreLbl.text = "-1"
+        } else if action == "like" {
+            self.scoreLbl.textColor = UIColor.green
+            self.scoreLbl.text = "+1"
+        }
+        UIView.animate(withDuration: 1, animations: {
+            self.scoreView.alpha = 0
+            }, completion: { finished in
+                if !finished {
+                    return
+                }
+                self.scoreView.isHidden = true
+        })
+    }
+
 
 }

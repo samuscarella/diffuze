@@ -12,7 +12,18 @@ import Alamofire
 import Firebase
 import CoreLocation
 import AVFoundation
-import AVKit
+import GeoFire
+import QuartzCore
+
+// A protocol that the TableViewCell uses to inform its delegate of state change
+protocol TableViewCellDelegate {
+
+    func postDeleted(post: Post, action: String)
+}
+protocol ActivityTableViewCellDelegate {
+    
+    func postAction(action: String)
+}
 
 class PostCell: UITableViewCell {
     
@@ -35,6 +46,11 @@ class PostCell: UITableViewCell {
     @IBOutlet weak var commentsLbl: UILabel!
     @IBOutlet weak var profileImg: UIImageView!
     @IBOutlet weak var followerBtn: UIButton!
+    @IBOutlet weak var postScoreLbl: UILabel!
+    @IBOutlet weak var sharePostBtn: UIButton!
+    @IBOutlet weak var flagPostBtn: UIButton!
+    @IBOutlet weak var followersLbl: UILabel!
+    @IBOutlet weak var neutralImageView: UIImageView!
     
     //Height Constraints
     @IBOutlet weak var messageHeight: NSLayoutConstraint!
@@ -46,15 +62,16 @@ class PostCell: UITableViewCell {
     @IBOutlet weak var messageTrailing: NSLayoutConstraint!
     @IBOutlet weak var messageLeading: NSLayoutConstraint!
     @IBOutlet weak var messageTop: NSLayoutConstraint!
+    @IBOutlet weak var postCellView: MaterialUIView!
     
     let currentUserID = UserDefaults.standard.object(forKey: KEY_UID) as! String
+    let geofireRef = URL_BASE.child("user-locations")
 
     //Variables
     var post: Post!
     var request: Request?
-    var videoLayer: AVPlayerLayer?
-    var player: AVPlayer?
-    var mediaPlayer: AVPlayerViewController?
+    var followingUsers: FIRDatabaseReference!
+    var followingUser: FIRDatabaseReference!
     var postTypeImage: UIImage!
     var trimmedMessage: String?
     var titleHeight: CGFloat?
@@ -72,32 +89,119 @@ class PostCell: UITableViewCell {
     var commentsLblBottom: NSLayoutConstraint?
     var followingImage: UIImage!
     var notFollowingImage: UIImage!
-
+    var originalCenter = CGPoint()
+    var deleteOnDragRelease = false
+    var likeOnDragRelease = false
+    var delegate: TableViewCellDelegate?
+    var activityDelegate: ActivityTableViewCellDelegate?
+    var postType: String!
     
+    required init(coder aDecoder: NSCoder) {
+        super.init(coder: aDecoder)!
+        
+        let recognizer = UIPanGestureRecognizer(target: self, action: #selector(self.handlePan(recognizer:)))
+        recognizer.delegate = self
+        addGestureRecognizer(recognizer)
+    }
+    
+    override init(style: UITableViewCellStyle, reuseIdentifier: String?) {
+        super.init(style: style, reuseIdentifier: reuseIdentifier)
+        
+        let recognizer = UIPanGestureRecognizer(target: self, action: #selector(self.handlePan(recognizer:)))
+        recognizer.delegate = self
+        addGestureRecognizer(recognizer)
+    }
+
     override func awakeFromNib() {
         super.awakeFromNib()
         followingImage = UIImage(named: "following-blue")
         notFollowingImage = UIImage(named: "follower-grey")
     }
     
-    func configureCell(_ post: Post, currentLocation: Dictionary<String, AnyObject>?, image: UIImage?) {
-
+    func configureCell(_ post: Post, currentLocation: Dictionary<String, AnyObject>?, image: UIImage?, postType: String) {
+        
         self.post = post
         self.username.text = post.username
-        self.audioView.isHidden = true
-        undoQuoteDisplay()
+        self.postType = postType
         
-    URL_BASE.child("users").child(currentUserID).child("following").child(self.post.user_id).observeSingleEvent(of: FIRDataEventType.value, with: { (snapshot) in
+        let score = post.likes - post.dislikes
+        if score == 0 {
+            self.postScoreLbl.textColor = GOLDEN_YELLOW
+        } else if score > 0 {
+            self.postScoreLbl.textColor = UIColor.green
+        } else {
+            self.postScoreLbl.textColor = AUBURN_RED
+        }
+        self.postScoreLbl.text = "\(score)"
         
-        let following = snapshot.value as? Bool
-
-        if following == true {
-                self.followerBtn.setImage(UIImage(named: "following-blue"), for: .normal)
+        let date = NSDate()
+        let millisecondsDateOfPost = post.timestamp
+        let millisecondsDateOfNow = date.timeIntervalSince1970 * 1000
+        let millis = millisecondsDateOfNow - Double(millisecondsDateOfPost)
+        let timeService = TimeService()
+        self.timestamp.text = timeService.getTimeStampFromMilliSeconds(millis: millis)
+        
+        let geoFire = GeoFire(firebaseRef: geofireRef)!
+        
+        geoFire.getLocationForKey(currentUserID, withCallback: { (location, error) in
+            if (error != nil) {
+                print("An error occurred getting the location for \"firebase-hq\": \(error?.localizedDescription)")
+            } else if (location != nil) {
+                print("Location for current user is [\(location?.coordinate.latitude), \(location?.coordinate.longitude)]")
+                var locationDict: Dictionary<String,AnyObject> = [:]
+                locationDict["latitude"] = location?.coordinate.latitude as AnyObject?
+                locationDict["longitude"] = location?.coordinate.longitude as AnyObject?
+                let location = Location()
+                self.distanceAway.text = location.getDistanceBetweenUserAndPost(locationDict, post: post)
             } else {
-                self.followerBtn.setImage(UIImage(named: "follower-grey"), for: .normal)
+                print("GeoFire does not contain a location for \"firebase-hq\"")
             }
         })
-
+        
+        undoQuoteDisplay()
+        URL_BASE.child("users").child(self.post.user_id).observeSingleEvent(of: FIRDataEventType.value, with: { (snapshot) in
+            
+            let userDict = snapshot.value as? Dictionary<String, AnyObject> ?? [:]
+            let key = userDict["user_ref"] as! String
+            let user = User.init(userId: key, dictionary: userDict)
+            
+            if let userPhoto = user.userPhoto {
+                let photoCheck = ActivityVC.imageCache.object(forKey: userPhoto as AnyObject) as? UIImage
+                print(photoCheck)
+            }
+            
+            var numberOfFollowers = 0
+            if let userFollowers = user.followers {
+                
+                numberOfFollowers = userFollowers.count
+                
+                var isFollowingPoster = false
+                for follower in userFollowers {
+                    if follower == self.currentUserID {
+                        isFollowingPoster = true
+                        break
+                    }
+                }
+                if self.followerBtn != nil {
+                    if isFollowingPoster {
+                        self.followerBtn.setImage(UIImage(named: "following-blue"), for: .normal)
+                    } else {
+                        self.followerBtn.setImage(UIImage(named: "follower-grey"), for: .normal)
+                    }
+                }
+            } else {
+                if self.followerBtn != nil {
+                    self.followerBtn.setImage(UIImage(named: "follower-grey"), for: .normal)
+                }
+            }
+            
+            if numberOfFollowers == 1 {
+                self.followersLbl.text = "\(numberOfFollowers) Follower"
+            } else {
+                self.followersLbl.text = "\(numberOfFollowers) Followers"
+            }
+        })
+        
         if post.type == "text" {
             
             self.postTypeView.backgroundColor = AUBURN_RED
@@ -164,10 +268,10 @@ class PostCell: UITableViewCell {
         self.postImg.isHidden = true
         self.linkTitle.isHidden = true
         self.linkURL.isHidden = true
+        self.audioView.isHidden = true
         
         //This should be eventually done on post creation.
         trimmedMessage = message.trimmingCharacters(in: CharacterSet.whitespacesAndNewlines)
-        
         
         //Constraints
         self.linkViewHeight.constant = 0
@@ -178,7 +282,6 @@ class PostCell: UITableViewCell {
         self.messageHeight.constant = height
         self.message.text = trimmedMessage
         self.message.font = UIFont(name: self.message.font.fontName, size: 12)
-
     }
     
     func setDynamicLinkCell(linkTitle: String?, message: String?, image: UIImage?) {
@@ -188,12 +291,10 @@ class PostCell: UITableViewCell {
         } else if let postImage = post.image as String? {
                 
             getPostImageFromServer(urlString: postImage, postType: "image")
-
         }
         
         configureMediaViewUI()
 
-        //Displays
         self.postImg.isHidden = false
         self.linkTitle.isHidden = false
         self.linkURL.isHidden = false
@@ -452,28 +553,110 @@ class PostCell: UITableViewCell {
     }
     
     @IBAction func followersBtnPressed(_ sender: AnyObject) {
-
+        
         let followingUsers = URL_BASE.child("users").child(currentUserID).child("following")
         let followingUser = URL_BASE.child("users").child(post.user_id).child("followers")
         
-        let followingObj = [
-            self.post.user_id: true
-        ]
-        let followerObj = [
-            currentUserID: true
-        ]
+        let followingObj = [self.post.user_id: true]
+        let followerObj = [currentUserID: true]
 
         if followerBtn.imageView?.image == notFollowingImage {
+            
             followingUsers.updateChildValues(followingObj)
             followingUser.updateChildValues(followerObj)
             followerBtn.setImage(followingImage, for: .normal)
-
         } else if followerBtn.imageView?.image == followingImage {
+            
             followingUsers.child(self.post.user_id).removeValue()
             followingUser.child(currentUserID).removeValue()
             followerBtn.setImage(notFollowingImage, for: .normal)
         }
+    }
+    
+    
+    
+    func showUnfollowUserPostView() {
+        //observe user object and save suppressed posts in key and have tableview update and refresh each time a post is suppressed. By adding a key to the postDict that will notify post cell to change view to suppressed view
         
+        for view in postCellView.subviews {
+            view.isHidden = true
+            view.frame.size.height = 0
+        }
+        postCellView.frame.size.height = 0
+        contentView.frame.size.height = 0
+        postTypeImg.isHidden = true
+        self.frame.size.height = 100
+    }
+    
+    func handlePan(recognizer: UIPanGestureRecognizer) {
+        
+        if self.postType != "myinfo" {
+            
+            // 1
+            if recognizer.state == .began {
+                // when the gesture begins, record the current center location
+                originalCenter = center
+            }
+            // 2
+            if recognizer.state == .changed {
+                let translation = recognizer.translation(in: self)
+                center = CGPoint(x: originalCenter.x + translation.x,y: originalCenter.y)
+                
+                likeOnDragRelease = false
+                deleteOnDragRelease = false
+                
+                if frame.origin.x > frame.size.width / 2.0 {
+                    likeOnDragRelease = true
+                } else if frame.origin.x < -frame.size.width / 2.0 {
+                    deleteOnDragRelease = true
+                }
+            }
+            // 3
+            if recognizer.state == .ended {
+                
+                let originalFrame = CGRect(x: 0, y: frame.origin.y,
+                                           width: bounds.size.width, height: bounds.size.height)
+                if deleteOnDragRelease {
+                    
+                    if delegate != nil || activityDelegate != nil && post != nil {
+                        
+                        if self.postType == "activity" {
+                            activityDelegate!.postAction(action: "dislike")
+                            self.neutralImageView.image = UIImage(named: "red-checkmark")
+                        } else if self.postType == "radar" {
+                            delegate!.postDeleted(post: post!, action: "dislike")
+                        }
+                    }
+                }
+                if likeOnDragRelease {
+                    
+                    if delegate != nil || activityDelegate != nil && post != nil {
+                        
+                        if self.postType == "activity" {
+                            activityDelegate!.postAction(action: "like")
+                            self.neutralImageView.image = UIImage(named: "green-checkmark")
+                        } else if self.postType == "radar" {
+                            delegate!.postDeleted(post: post!, action: "like")
+                        }
+                    }
+                }
+                if !deleteOnDragRelease && !likeOnDragRelease || self.postType == "activity" {
+                    
+                    UIView.animate(withDuration: 0.2, animations: {self.frame = originalFrame})
+                }
+            }
+        }
+    }
+    
+    override func gestureRecognizerShouldBegin(_ gestureRecognizer: UIGestureRecognizer) -> Bool {
+        if let panGestureRecognizer = gestureRecognizer as? UIPanGestureRecognizer {
+            let translation = panGestureRecognizer.translation(in: superview!)
+            if fabs(translation.x) > fabs(translation.y) {
+                return true
+            }
+            return false
+        }
+        return false
     }
 
 }
