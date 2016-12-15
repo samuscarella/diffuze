@@ -50,8 +50,25 @@
 		938A20DB1DF83AFF00BF0A6C /* SignUpTwoVC.swift in Sources */ = {isa = PBXBuildFile; fileRef = 938A20DA1DF83AFF00BF0A6C /* SignUpTwoVC.swift */; };
 		938A20DD1DF83FAA00BF0A6C /* SignUpThreeVC.swift in Sources */ = {isa = PBXBuildFile; fileRef = 938A20DC1DF83FAA00BF0A6C /* SignUpThreeVC.swift */; };
 		938CF36E1DE4CC53006A1833 /* BombVC.swift in Sources */ = {isa = PBXBuildFile; fileRef = 938CF36D1DE4CC53006A1833 /* BombVC.swift */; };
+		938D02781DFC6EB80019D5B9 /* TimeService.swift in Sources */ = {isa = PBXBuildFile; fileRef = 938D02771DFC6EB80019D5B9 /* TimeService.swift */; };
+		938D027D1DFCA3630019D5B9 /* Location.swift in Sources */ = {isa = PBXBuildFile; fileRef = 938D027C1DFCA3630019D5B9 /* Location.swift */; };
+		938D027F1DFCBB250019D5B9 /* repetitionDEMO.otf in Resources */ = {isa = PBXBuildFile; fileRef = 938D027E1DFCBB250019D5B9 /* repetitionDEMO.otf */; };
+		938DC2191E0233F600957766 /* CategoryFilterVC.swift in Sources */ = {isa = PBXBuildFile; fileRef = 938DC2181E0233F600957766 /* CategoryFilterVC.swift */; };
 		9390DC621DD8F0D700BCF212 /* LaunchVC.swift in Sources */ = {isa = PBXBuildFile; fileRef = 9390DC611DD8F0D700BCF212 /* LaunchVC.swift */; };
 		9393A1CC1D83AC3B0078503C /* MaterialView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 9393A1CB1D83AC3B0078503C /* MaterialView.swift */; };
+		93987D3A1DFDF0C400F29352 /* Ubuntu-L.ttf in Resources */ = {isa = PBXBuildFile; fileRef = 93987D2D1DFDF0C400F29352 /* Ubuntu-L.ttf */; };
+		93987D3B1DFDF0C400F29352 /* Ubuntu-LI.ttf in Resources */ = {isa = PBXBuildFile; fileRef = 93987D2E1DFDF0C400F29352 /* Ubuntu-LI.ttf */; };
+		93987D3C1DFDF0C400F29352 /* Ubuntu-RI.ttf in Resources */ = {isa = PBXBuildFile; fileRef = 93987D2F1DFDF0C400F29352 /* Ubuntu-RI.ttf */; };
+		93987D3D1DFDF0C400F29352 /* Ubuntu-MI.ttf in Resources */ = {isa = PBXBuildFile; fileRef = 93987D301DFDF0C400F29352 /* Ubuntu-MI.ttf */; };
+		93987D3E1DFDF0C400F29352 /* Ubuntu-BI.ttf in Resources */ = {isa = PBXBuildFile; fileRef = 93987D311DFDF0C400F29352 /* Ubuntu-BI.ttf */; };
+		93987D3F1DFDF0C400F29352 /* Ubuntu-R.ttf in Resources */ = {isa = PBXBuildFile; fileRef = 93987D321DFDF0C400F29352 /* Ubuntu-R.ttf */; };
+		93987D401DFDF0C400F29352 /* Ubuntu-C.ttf in Resources */ = {isa = PBXBuildFile; fileRef = 93987D331DFDF0C400F29352 /* Ubuntu-C.ttf */; };
+		93987D411DFDF0C400F29352 /* Ubuntu-M.ttf in Resources */ = {isa = PBXBuildFile; fileRef = 93987D341DFDF0C400F29352 /* Ubuntu-M.ttf */; };
+		93987D421DFDF0C400F29352 /* Ubuntu-B.ttf in Resources */ = {isa = PBXBuildFile; fileRef = 93987D351DFDF0C400F29352 /* Ubuntu-B.ttf */; };
+		93987D431DFDF0C400F29352 /* UbuntuMono-BI.ttf in Resources */ = {isa = PBXBuildFile; fileRef = 93987D361DFDF0C400F29352 /* UbuntuMono-BI.ttf */; };
+		93987D441DFDF0C400F29352 /* UbuntuMono-RI.ttf in Resources */ = {isa = PBXBuildFile; fileRef = 93987D371DFDF0C400F29352 /* UbuntuMono-RI.ttf */; };
+		93987D451DFDF0C400F29352 /* UbuntuMono-R.ttf in Resources */ = {isa = PBXBuildFile; fileRef = 93987D381DFDF0C400F29352 /* UbuntuMono-R.ttf */; };
+		93987D461DFDF0C400F29352 /* UbuntuMono-B.ttf in Resources */ = {isa = PBXBuildFile; fileRef = 93987D391DFDF0C400F29352 /* UbuntuMono-B.ttf */; };
 		939BEEEF1D7E484200F1C954 /* ActivityVC.swift in Sources */ = {isa = PBXBuildFile; fileRef = 939BEEEE1D7E484200F1C954 /* ActivityVC.swift */; };
 		939D3AE51D8B966400F0F064 /* LocationService.swift in Sources */ = {isa = PBXBuildFile; fileRef = 939D3AE41D8B966400F0F064 /* LocationService.swift */; };
 		93AA25EA1D844CB1002344D3 /* TransparentEmailField.swift in Sources */ = {isa = PBXBuildFile; fileRef = 93AA25E91D844CB1002344D3 /* TransparentEmailField.swift */; };
@@ -130,8 +147,25 @@
 		938A20DA1DF83AFF00BF0A6C /* SignUpTwoVC.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = SignUpTwoVC.swift; sourceTree = "<group>"; };
 		938A20DC1DF83FAA00BF0A6C /* SignUpThreeVC.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = SignUpThreeVC.swift; sourceTree = "<group>"; };
 		938CF36D1DE4CC53006A1833 /* BombVC.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = BombVC.swift; sourceTree = "<group>"; };
+		938D02771DFC6EB80019D5B9 /* TimeService.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = TimeService.swift; sourceTree = "<group>"; };
+		938D027C1DFCA3630019D5B9 /* Location.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = Location.swift; sourceTree = "<group>"; };
+		938D027E1DFCBB250019D5B9 /* repetitionDEMO.otf */ = {isa = PBXFileReference; lastKnownFileType = file; path = repetitionDEMO.otf; sourceTree = "<group>"; };
+		938DC2181E0233F600957766 /* CategoryFilterVC.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = CategoryFilterVC.swift; sourceTree = "<group>"; };
 		9390DC611DD8F0D700BCF212 /* LaunchVC.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = LaunchVC.swift; sourceTree = "<group>"; };
 		9393A1CB1D83AC3B0078503C /* MaterialView.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = MaterialView.swift; sourceTree = "<group>"; };
+		93987D2D1DFDF0C400F29352 /* Ubuntu-L.ttf */ = {isa = PBXFileReference; lastKnownFileType = file; path = "Ubuntu-L.ttf"; sourceTree = "<group>"; };
+		93987D2E1DFDF0C400F29352 /* Ubuntu-LI.ttf */ = {isa = PBXFileReference; lastKnownFileType = file; path = "Ubuntu-LI.ttf"; sourceTree = "<group>"; };
+		93987D2F1DFDF0C400F29352 /* Ubuntu-RI.ttf */ = {isa = PBXFileReference; lastKnownFileType = file; path = "Ubuntu-RI.ttf"; sourceTree = "<group>"; };
+		93987D301DFDF0C400F29352 /* Ubuntu-MI.ttf */ = {isa = PBXFileReference; lastKnownFileType = file; path = "Ubuntu-MI.ttf"; sourceTree = "<group>"; };
+		93987D311DFDF0C400F29352 /* Ubuntu-BI.ttf */ = {isa = PBXFileReference; lastKnownFileType = file; path = "Ubuntu-BI.ttf"; sourceTree = "<group>"; };
+		93987D321DFDF0C400F29352 /* Ubuntu-R.ttf */ = {isa = PBXFileReference; lastKnownFileType = file; path = "Ubuntu-R.ttf"; sourceTree = "<group>"; };
+		93987D331DFDF0C400F29352 /* Ubuntu-C.ttf */ = {isa = PBXFileReference; lastKnownFileType = file; path = "Ubuntu-C.ttf"; sourceTree = "<group>"; };
+		93987D341DFDF0C400F29352 /* Ubuntu-M.ttf */ = {isa = PBXFileReference; lastKnownFileType = file; path = "Ubuntu-M.ttf"; sourceTree = "<group>"; };
+		93987D351DFDF0C400F29352 /* Ubuntu-B.ttf */ = {isa = PBXFileReference; lastKnownFileType = file; path = "Ubuntu-B.ttf"; sourceTree = "<group>"; };
+		93987D361DFDF0C400F29352 /* UbuntuMono-BI.ttf */ = {isa = PBXFileReference; lastKnownFileType = file; path = "UbuntuMono-BI.ttf"; sourceTree = "<group>"; };
+		93987D371DFDF0C400F29352 /* UbuntuMono-RI.ttf */ = {isa = PBXFileReference; lastKnownFileType = file; path = "UbuntuMono-RI.ttf"; sourceTree = "<group>"; };
+		93987D381DFDF0C400F29352 /* UbuntuMono-R.ttf */ = {isa = PBXFileReference; lastKnownFileType = file; path = "UbuntuMono-R.ttf"; sourceTree = "<group>"; };
+		93987D391DFDF0C400F29352 /* UbuntuMono-B.ttf */ = {isa = PBXFileReference; lastKnownFileType = file; path = "UbuntuMono-B.ttf"; sourceTree = "<group>"; };
 		939BEEEE1D7E484200F1C954 /* ActivityVC.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = ActivityVC.swift; sourceTree = "<group>"; };
 		939D3AE41D8B966400F0F064 /* LocationService.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = LocationService.swift; sourceTree = "<group>"; };
 		93AA25E91D844CB1002344D3 /* TransparentEmailField.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = TransparentEmailField.swift; sourceTree = "<group>"; };
@@ -232,6 +266,7 @@
 		9340CA731D7DB10800AE1231 /* infobomb */ = {
 			isa = PBXGroup;
 			children = (
+				938D027B1DFCA2B80019D5B9 /* Struct */,
 				937131F41DACD905006CC35E /* Extensions */,
 				93EE29311DA9E2010082FDA5 /* Cloudinary */,
 				932E92871D7ED829003D9D4A /* MySideMenu */,
@@ -281,6 +316,7 @@
 				938A20D81DF834BD00BF0A6C /* SignUpOneVC.swift */,
 				938A20DA1DF83AFF00BF0A6C /* SignUpTwoVC.swift */,
 				938A20DC1DF83FAA00BF0A6C /* SignUpThreeVC.swift */,
+				938DC2181E0233F600957766 /* CategoryFilterVC.swift */,
 			);
 			name = Controller;
 			sourceTree = "<group>";
@@ -330,6 +366,20 @@
 		9340CA8A1D7DB44F00AE1231 /* Resources */ = {
 			isa = PBXGroup;
 			children = (
+				93987D2D1DFDF0C400F29352 /* Ubuntu-L.ttf */,
+				93987D2E1DFDF0C400F29352 /* Ubuntu-LI.ttf */,
+				93987D2F1DFDF0C400F29352 /* Ubuntu-RI.ttf */,
+				93987D301DFDF0C400F29352 /* Ubuntu-MI.ttf */,
+				93987D311DFDF0C400F29352 /* Ubuntu-BI.ttf */,
+				93987D321DFDF0C400F29352 /* Ubuntu-R.ttf */,
+				93987D331DFDF0C400F29352 /* Ubuntu-C.ttf */,
+				93987D341DFDF0C400F29352 /* Ubuntu-M.ttf */,
+				93987D351DFDF0C400F29352 /* Ubuntu-B.ttf */,
+				93987D361DFDF0C400F29352 /* UbuntuMono-BI.ttf */,
+				93987D371DFDF0C400F29352 /* UbuntuMono-RI.ttf */,
+				93987D381DFDF0C400F29352 /* UbuntuMono-R.ttf */,
+				93987D391DFDF0C400F29352 /* UbuntuMono-B.ttf */,
+				938D027E1DFCBB250019D5B9 /* repetitionDEMO.otf */,
 				93402D191DED304100B2B59A /* wave.mov */,
 				93AA25F31D859561002344D3 /* radar.mp3 */,
 				93AA25F41D859561002344D3 /* intro.mp3 */,
@@ -365,6 +415,15 @@
 				937131F51DACD925006CC35E /* UIImageExtension.swift */,
 			);
 			name = Extensions;
+			sourceTree = "<group>";
+		};
+		938D027B1DFCA2B80019D5B9 /* Struct */ = {
+			isa = PBXGroup;
+			children = (
+				938D02771DFC6EB80019D5B9 /* TimeService.swift */,
+				938D027C1DFCA3630019D5B9 /* Location.swift */,
+			);
+			name = Struct;
 			sourceTree = "<group>";
 		};
 		93EE29311DA9E2010082FDA5 /* Cloudinary */ = {
@@ -452,24 +511,38 @@
 			isa = PBXResourcesBuildPhase;
 			buildActionMask = 2147483647;
 			files = (
+				938D027F1DFCBB250019D5B9 /* repetitionDEMO.otf in Resources */,
 				935C20FE1D7F8AC300C41A47 /* NotoSans-Bold.ttf in Resources */,
 				93EE89011DF28E2600464129 /* animated-green-checkmark.gif in Resources */,
 				9340CA7F1D7DB10800AE1231 /* LaunchScreen.storyboard in Resources */,
 				9340CA9B1D7DED5900AE1231 /* gun-shot.mp3 in Resources */,
 				935C21011D7F8AC300C41A47 /* NotoSans-Regular.ttf in Resources */,
+				93987D411DFDF0C400F29352 /* Ubuntu-M.ttf in Resources */,
 				93AA25F51D859561002344D3 /* radar.mp3 in Resources */,
 				935C20FF1D7F8AC300C41A47 /* NotoSans-BoldItalic.ttf in Resources */,
 				9385B14F1DE8BAF7004087E9 /* radar-spinner.gif in Resources */,
+				93987D421DFDF0C400F29352 /* Ubuntu-B.ttf in Resources */,
+				93987D401DFDF0C400F29352 /* Ubuntu-C.ttf in Resources */,
+				93987D3B1DFDF0C400F29352 /* Ubuntu-LI.ttf in Resources */,
 				9340CA8F1D7DD15A00AE1231 /* blast.mp3 in Resources */,
+				93987D3D1DFDF0C400F29352 /* Ubuntu-MI.ttf in Resources */,
+				93987D3E1DFDF0C400F29352 /* Ubuntu-BI.ttf in Resources */,
 				93AA25F61D859561002344D3 /* intro.mp3 in Resources */,
 				935C21001D7F8AC300C41A47 /* NotoSans-Italic.ttf in Resources */,
 				93089D5B1DD8E7140047587C /* oilbats.basic.ttf in Resources */,
 				93402D1A1DED304100B2B59A /* wave.mov in Resources */,
 				93AD77501DE61C940038FE42 /* Main.storyboard in Resources */,
 				9340CA7C1D7DB10800AE1231 /* Assets.xcassets in Resources */,
+				93987D3A1DFDF0C400F29352 /* Ubuntu-L.ttf in Resources */,
+				93987D461DFDF0C400F29352 /* UbuntuMono-B.ttf in Resources */,
 				93C893101D823800008B792D /* Sdk in Resources */,
+				93987D431DFDF0C400F29352 /* UbuntuMono-BI.ttf in Resources */,
+				93987D3F1DFDF0C400F29352 /* Ubuntu-R.ttf in Resources */,
 				9340CA8D1D7DB64200AE1231 /* tosca_zero.otf in Resources */,
+				93987D3C1DFDF0C400F29352 /* Ubuntu-RI.ttf in Resources */,
+				93987D451DFDF0C400F29352 /* UbuntuMono-R.ttf in Resources */,
 				9340CA9D1D7E2BC200AE1231 /* GoogleService-Info.plist in Resources */,
+				93987D441DFDF0C400F29352 /* UbuntuMono-RI.ttf in Resources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
@@ -562,6 +635,8 @@
 				93AA25F81D85ACF4002344D3 /* TextPostVC.swift in Sources */,
 				93EFD5771D7F9EDE00455DF0 /* SubscriptionsVC.swift in Sources */,
 				935C20F91D7F36C200C41A47 /* LeftNavVC.swift in Sources */,
+				938DC2191E0233F600957766 /* CategoryFilterVC.swift in Sources */,
+				938D027D1DFCA3630019D5B9 /* Location.swift in Sources */,
 				93D179DB1DF4F3AA005C1EE7 /* ViralVC.swift in Sources */,
 				93C164591D8E447A004B0432 /* Post.swift in Sources */,
 				937131F81DACDB8D006CC35E /* NewPostNavBarView.swift in Sources */,
@@ -574,6 +649,7 @@
 				9340CA971D7DE10400AE1231 /* Constants.swift in Sources */,
 				93D179E11DF5F143005C1EE7 /* FollowerCell.swift in Sources */,
 				9315C06E1D8376130051BFCD /* FirebaseStorage.swift in Sources */,
+				938D02781DFC6EB80019D5B9 /* TimeService.swift in Sources */,
 				931479D01D88D34600F5E366 /* PostService.swift in Sources */,
 				937E3AEF1D8615A600BB7C01 /* CategoryCell.swift in Sources */,
 				939D3AE51D8B966400F0F064 /* LocationService.swift in Sources */,

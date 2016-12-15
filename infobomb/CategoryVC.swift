@@ -104,7 +104,6 @@ class CategoryVC: UIViewController, UITableViewDataSource, UITableViewDelegate, 
 //        locationService.addObserver(self, forKeyPath: "latitude", options: .New, context: &latitude)
 //        locationService.addObserver(self, forKeyPath: "longitude", options: .New, context: &longitude)
 
-        
         CategoryService.ds.REF_CATEGORIES.queryOrdered(byChild: "name").observe(FIRDataEventType.value, with: { (snapshot) in
             
             if let snapshots = snapshot.children.allObjects as? [FIRDataSnapshot] {
@@ -118,12 +117,10 @@ class CategoryVC: UIViewController, UITableViewDataSource, UITableViewDelegate, 
                         self.categories.append(category)
                     }
                 }
-                
             }
-            
             self.tableView.reloadData()
         })
-
+        
     }
     
 //    override func observeValueForKeyPath(keyPath: String?, ofObject object: AnyObject?, change: [String : AnyObject]?, context: UnsafeMutablePointer<Void>) {

@@ -33,6 +33,7 @@ class Post {
     fileprivate var _quoteType: String?
     fileprivate var _thumbnail: String?
     fileprivate var _shortUrl: String?
+    fileprivate var _timestamp: Int!
 
     
     var message: String? {
@@ -101,6 +102,10 @@ class Post {
     
     var dislikes: Int {
         return _dislikes
+    }
+    
+    var timestamp: Int {
+        return _timestamp
     }
     
     var distance: Int {
@@ -176,6 +181,9 @@ class Post {
         }
         if let audio = dictionary["audio"] as? String {
             self._audio = audio
+        }
+        if let timestamp = dictionary["created_at"]  as? Int {
+            self._timestamp = timestamp
         }
         if let quoteType = dictionary["quoteType"] as? String {
             self._quoteType = quoteType

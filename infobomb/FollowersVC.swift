@@ -64,7 +64,7 @@ class FollowersVC: UIViewController, UITableViewDataSource, UITableViewDelegate 
         self.searchBar.searchBarStyle = UISearchBarStyle.prominent
         self.searchBar.isTranslucent = false
         self.searchBar.barTintColor = UIColor.white
-
+        
         followersBtn.frame = CGRect(x: 0, y: 0, width: self.view.bounds.size.width / 2, height: 36)
         followingBtn.frame = CGRect(x: 0, y: 0, width: self.view.bounds.size.width / 2, height: 36)
         
@@ -154,21 +154,20 @@ class FollowersVC: UIViewController, UITableViewDataSource, UITableViewDelegate 
     }
     
     @IBAction func followersBtnPressed(_ sender: AnyObject) {
-        
 
-        self.followersBtn.titleLabel?.font = UIFont.boldSystemFont(ofSize: 18.0)
-        self.followingBtn.titleLabel?.font = UIFont.systemFont(ofSize: 18.0, weight: UIFontWeightRegular)
+        self.followersBtn.titleLabel?.font = UIFont(name: "Ubuntu-Bold", size: 18.0)
+        self.followingBtn.titleLabel?.font = UIFont(name: "Ubuntu", size: 18.0)
         self.lineView.removeFromSuperview()
         self.followersBtn.addSubview(lineView)
         self.noFollowersImageView.image = UIImage(named: "follower")
         self.noFollowersLbl.text = "You do not have any followers yet. They will show up here after you get some."
         getFollowers()
-
     }
     
     @IBAction func followingBtnPressed(_ sender: AnyObject) {
-        self.followingBtn.titleLabel?.font = UIFont.boldSystemFont(ofSize: 18.0)
-        self.followersBtn.titleLabel?.font = UIFont.systemFont(ofSize: 18.0, weight: UIFontWeightRegular)
+        
+        self.followingBtn.titleLabel?.font = UIFont(name: "Ubuntu-Bold", size: 18.0)
+        self.followersBtn.titleLabel?.font = UIFont(name: "Ubuntu", size: 18.0)
         self.lineView.removeFromSuperview()
         self.followingBtn.addSubview(lineView)
         self.noFollowersImageView.image = UIImage(named: "following-white")

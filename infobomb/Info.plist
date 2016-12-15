@@ -37,6 +37,16 @@
 		<string>NotoSans-BoldItalic.tff</string>
 		<string>NotoSans-Italic.tff</string>
 		<string>NotoSans-Regular.ttf</string>
+		<string>repetitionDEMO.otf</string>
+		<string>Ubuntu-L.ttf</string>
+		<string>Ubuntu-LI.ttf</string>
+		<string>Ubuntu-RI.ttf</string>
+		<string>Ubuntu-MI.ttf</string>
+		<string>Ubuntu-BI.ttf</string>
+		<string>Ubuntu-R.ttf</string>
+		<string>Ubuntu-C.ttf</string>
+		<string>Ubuntu-M.ttf</string>
+		<string>Ubuntu-B.ttf</string>
 	</array>
 	<key>UILaunchStoryboardName</key>
 	<string>LaunchScreen</string>
@@ -62,5 +72,7 @@
 	<false/>
 	<key>NSPhotoLibraryUsageDescription</key>
 	<string>InfoBomb needs access to your photo library to post media.</string>
+	<key>FirebaseAutomaticScreenReportingEnabled</key>
+	<false/>
 </dict>
 </plist>

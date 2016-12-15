@@ -14,7 +14,7 @@ class CategoryCell: UITableViewCell {
 
 
 
-    @IBOutlet weak var categoryImage: UIImageView!
+    @IBOutlet weak var categoryImage: UIImageView?
     @IBOutlet weak var categoryTxt: UILabel!
     @IBOutlet weak var categoryCheckmark: UIImageView!
     
@@ -24,8 +24,8 @@ class CategoryCell: UITableViewCell {
 
     override func draw(_ rect: CGRect) {
         
-        categoryImage.layer.cornerRadius = categoryImage.frame.size.width / 2
-        categoryImage.clipsToBounds = true
+        categoryImage?.layer.cornerRadius = (categoryImage?.frame.size.width)! / 2
+        categoryImage?.clipsToBounds = true
     }
     
     override func setSelected(_ selected: Bool, animated: Bool) {
@@ -43,31 +43,18 @@ class CategoryCell: UITableViewCell {
         //subscriptionRef = UserService.ds.REF_USER_CURRENT.child("subscriptions").child(category.name)
         
         if img != nil {
-            self.categoryImage.image = img
+            self.categoryImage?.image = img
         } else {
             
             request = Alamofire.request(category.image_path!).validate(contentType: ["image/*"]).response { response in
                 
                 if response.error == nil {
                     let img = UIImage(data: response.data!)!
-                    self.categoryImage.image = img
+                    self.categoryImage?.image = img
                     SubscriptionsVC.imageCache.setObject(img, forKey: self.category.image_path! as AnyObject)
                 }
             }
         }
-        
-//        subscriptionRef.child(category.name).observeSingleEventOfType(.Value, withBlock: { (snapshot) in
-//            
-//            if let doesNotExist = snapshot.value as? NSNull {
-//                self.subscriptionSwitch.on = false
-//            } else {
-//                self.subscriptionSwitch.on = true
-//            }
-//        })
-//        
-//        categorySwitch.addTarget(self, action: #selector(SubscriptionCell.categorySwitchPressed(_:)), forControlEvents: UIControlEvents.TouchUpInside)
     }
-    
-    
 
 }
