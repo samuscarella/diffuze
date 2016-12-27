@@ -14,7 +14,6 @@ class LeftNavVC: UITableViewController {
     
 
     @IBOutlet var table: UITableView!
-    
     @IBOutlet var navButtons: [UIButton]!
     @IBOutlet weak var activityBtn: UIButton!
     
@@ -23,9 +22,9 @@ class LeftNavVC: UITableViewController {
     override func viewDidLoad() {
         super.viewDidLoad()
         
-        //Subclass navigation bar after app is finished and all other non DRY
+        self.view.backgroundColor = UIColor.black
+        table.isScrollEnabled = false
         table.allowsSelection = false
-        table.isScrollEnabled = false;
         activityBtn.setTitleColor(CRIMSON, for: UIControlState())
     }
     

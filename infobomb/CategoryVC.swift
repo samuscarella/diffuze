@@ -38,6 +38,7 @@ class CategoryVC: UIViewController, UITableViewDataSource, UITableViewDelegate, 
     var locationService: LocationService!
     var post = [String:AnyObject]()
     var postImg: Data?
+    var fileExtension: String?
     
 //    var locationManager: CLLocationManager!
 //    var currentLocation: CLLocation!
@@ -68,7 +69,7 @@ class CategoryVC: UIViewController, UITableViewDataSource, UITableViewDelegate, 
         
         let button: UIButton = UIButton(type: UIButtonType.custom)
         button.setImage(UIImage(named: "notification.png"), for: UIControlState())
-        button.addTarget(self, action: #selector(ActivityVC.notificationBtnPressed), for: UIControlEvents.touchUpInside)
+//        button.addTarget(self, action: #selector(ActivityVC.notificationBtnPressed), for: UIControlEvents.touchUpInside)
         button.frame = CGRect(x: 0, y: 0, width: 27, height: 27)
         let rightBarButton = UIBarButtonItem(customView: button)
         self.navigationItem.rightBarButtonItem = rightBarButton
@@ -156,8 +157,16 @@ class CategoryVC: UIViewController, UITableViewDataSource, UITableViewDelegate, 
             
             cell.configureCell(category, img: img)
             
+            if checked.count > 0 {
+                for i in 0...checked.count - 1 {
+                    if checked[i] == category.name {
+                        cell.categoryCheckmark.image = UIImage(named: "checked")
+                        break
+                    }
+                }
+            }
+
             return cell
-            
             
         } else {
             return CategoryCell()
@@ -165,30 +174,28 @@ class CategoryVC: UIViewController, UITableViewDataSource, UITableViewDelegate, 
     }
     
     func tableView(_ tableView: UITableView, didSelectRowAt indexPath: IndexPath) {
-        
-//        let category = categories[indexPath.row]
-        if let cell = tableView.cellForRow(at: indexPath) {
+ 
+        if let cell = tableView.cellForRow(at: indexPath) as? CategoryCell {
             
             let category = categories[(indexPath as NSIndexPath).row]
-//            print(category.categoryKey)
+            
             var doesItExist = false
             
             if checked.count == 0 {
                 checked.append(category.name)
-                cell.accessoryType = .checkmark
+                cell.categoryCheckmark.image = UIImage(named: "checked")
             } else if checked.count > 0 {
                 for i in 0...checked.count - 1 {
-//                    print(value)
                     if checked[i] == category.name {
                         doesItExist = true
                         checked.remove(at: i)
-                        cell.accessoryType = .none
+                        cell.categoryCheckmark.image = nil
                         break
                     }
                 }
                 if doesItExist == false {
                     checked.append(category.name)
-                    cell.accessoryType = .checkmark
+                    cell.categoryCheckmark.image = UIImage(named: "checked")
                 }
             }
             print(checked)
@@ -527,6 +534,9 @@ class CategoryVC: UIViewController, UITableViewDataSource, UITableViewDelegate, 
             bombVC.checked = self.checked
             bombVC.bombData = linkObj
             bombVC.previousVC = previousVC
+            if self.fileExtension != nil {
+                bombVC.fileExtension = self.fileExtension
+            }
         }
         
     }

@@ -71,6 +71,7 @@
 		93987D461DFDF0C400F29352 /* UbuntuMono-B.ttf in Resources */ = {isa = PBXBuildFile; fileRef = 93987D391DFDF0C400F29352 /* UbuntuMono-B.ttf */; };
 		939BEEEF1D7E484200F1C954 /* ActivityVC.swift in Sources */ = {isa = PBXBuildFile; fileRef = 939BEEEE1D7E484200F1C954 /* ActivityVC.swift */; };
 		939D3AE51D8B966400F0F064 /* LocationService.swift in Sources */ = {isa = PBXBuildFile; fileRef = 939D3AE41D8B966400F0F064 /* LocationService.swift */; };
+		93A21BB41E0F3A8C0092C340 /* SignUpFourVC.swift in Sources */ = {isa = PBXBuildFile; fileRef = 93A21BB31E0F3A8C0092C340 /* SignUpFourVC.swift */; };
 		93AA25EA1D844CB1002344D3 /* TransparentEmailField.swift in Sources */ = {isa = PBXBuildFile; fileRef = 93AA25E91D844CB1002344D3 /* TransparentEmailField.swift */; };
 		93AA25EC1D846509002344D3 /* User.swift in Sources */ = {isa = PBXBuildFile; fileRef = 93AA25EB1D846509002344D3 /* User.swift */; };
 		93AA25EE1D84C4BF002344D3 /* NewPostVC.swift in Sources */ = {isa = PBXBuildFile; fileRef = 93AA25ED1D84C4BF002344D3 /* NewPostVC.swift */; };
@@ -168,6 +169,7 @@
 		93987D391DFDF0C400F29352 /* UbuntuMono-B.ttf */ = {isa = PBXFileReference; lastKnownFileType = file; path = "UbuntuMono-B.ttf"; sourceTree = "<group>"; };
 		939BEEEE1D7E484200F1C954 /* ActivityVC.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = ActivityVC.swift; sourceTree = "<group>"; };
 		939D3AE41D8B966400F0F064 /* LocationService.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = LocationService.swift; sourceTree = "<group>"; };
+		93A21BB31E0F3A8C0092C340 /* SignUpFourVC.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = SignUpFourVC.swift; sourceTree = "<group>"; };
 		93AA25E91D844CB1002344D3 /* TransparentEmailField.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = TransparentEmailField.swift; sourceTree = "<group>"; };
 		93AA25EB1D846509002344D3 /* User.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = User.swift; sourceTree = "<group>"; };
 		93AA25ED1D84C4BF002344D3 /* NewPostVC.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = NewPostVC.swift; sourceTree = "<group>"; };
@@ -266,6 +268,7 @@
 		9340CA731D7DB10800AE1231 /* infobomb */ = {
 			isa = PBXGroup;
 			children = (
+				937E5AED1E08D9170085424C /* Enum */,
 				938D027B1DFCA2B80019D5B9 /* Struct */,
 				937131F41DACD905006CC35E /* Extensions */,
 				93EE29311DA9E2010082FDA5 /* Cloudinary */,
@@ -317,6 +320,7 @@
 				938A20DA1DF83AFF00BF0A6C /* SignUpTwoVC.swift */,
 				938A20DC1DF83FAA00BF0A6C /* SignUpThreeVC.swift */,
 				938DC2181E0233F600957766 /* CategoryFilterVC.swift */,
+				93A21BB31E0F3A8C0092C340 /* SignUpFourVC.swift */,
 			);
 			name = Controller;
 			sourceTree = "<group>";
@@ -415,6 +419,13 @@
 				937131F51DACD925006CC35E /* UIImageExtension.swift */,
 			);
 			name = Extensions;
+			sourceTree = "<group>";
+		};
+		937E5AED1E08D9170085424C /* Enum */ = {
+			isa = PBXGroup;
+			children = (
+			);
+			name = Enum;
 			sourceTree = "<group>";
 		};
 		938D027B1DFCA2B80019D5B9 /* Struct */ = {
@@ -645,6 +656,7 @@
 				938A20DD1DF83FAA00BF0A6C /* SignUpThreeVC.swift in Sources */,
 				937E3AEB1D85F64B00BB7C01 /* CategoryVC.swift in Sources */,
 				93BD5E301DF73B6D0022483A /* LoginVC.swift in Sources */,
+				93A21BB41E0F3A8C0092C340 /* SignUpFourVC.swift in Sources */,
 				93770C401DAA718C00A2A134 /* AudioPostVC.swift in Sources */,
 				9340CA971D7DE10400AE1231 /* Constants.swift in Sources */,
 				93D179E11DF5F143005C1EE7 /* FollowerCell.swift in Sources */,

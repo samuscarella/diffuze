@@ -15,10 +15,9 @@ import AVFoundation
 import GeoFire
 import QuartzCore
 
-// A protocol that the TableViewCell uses to inform its delegate of state change
 protocol TableViewCellDelegate {
-
-    func postDeleted(post: Post, action: String)
+    
+    func postManipulated(post: Post, action: String)
 }
 protocol ActivityTableViewCellDelegate {
     
@@ -95,6 +94,8 @@ class PostCell: UITableViewCell {
     var delegate: TableViewCellDelegate?
     var activityDelegate: ActivityTableViewCellDelegate?
     var postType: String!
+    var filterType: String?
+    var postObjRef: [String:Bool]!
     
     required init(coder aDecoder: NSCoder) {
         super.init(coder: aDecoder)!
@@ -118,56 +119,41 @@ class PostCell: UITableViewCell {
         notFollowingImage = UIImage(named: "follower-grey")
     }
     
-    func configureCell(_ post: Post, currentLocation: Dictionary<String, AnyObject>?, image: UIImage?, postType: String) {
+    func configureCell(_ post: Post, currentLocation: Dictionary<String, AnyObject>?, image: UIImage?, postType: String, filterType: String?) {
         
         self.post = post
         self.username.text = post.username
         self.postType = postType
+        self.postObjRef = [post.postKey:true]
         
-        let score = post.likes - post.dislikes
-        if score == 0 {
-            self.postScoreLbl.textColor = GOLDEN_YELLOW
-        } else if score > 0 {
-            self.postScoreLbl.textColor = UIColor.green
-        } else {
-            self.postScoreLbl.textColor = AUBURN_RED
-        }
-        self.postScoreLbl.text = "\(score)"
         
-        let date = NSDate()
-        let millisecondsDateOfPost = post.timestamp
-        let millisecondsDateOfNow = date.timeIntervalSince1970 * 1000
-        let millis = millisecondsDateOfNow - Double(millisecondsDateOfPost)
-        let timeService = TimeService()
-        self.timestamp.text = timeService.getTimeStampFromMilliSeconds(millis: millis)
-        
-        let geoFire = GeoFire(firebaseRef: geofireRef)!
-        
-        geoFire.getLocationForKey(currentUserID, withCallback: { (location, error) in
-            if (error != nil) {
-                print("An error occurred getting the location for \"firebase-hq\": \(error?.localizedDescription)")
-            } else if (location != nil) {
-                print("Location for current user is [\(location?.coordinate.latitude), \(location?.coordinate.longitude)]")
-                var locationDict: Dictionary<String,AnyObject> = [:]
-                locationDict["latitude"] = location?.coordinate.latitude as AnyObject?
-                locationDict["longitude"] = location?.coordinate.longitude as AnyObject?
-                let location = Location()
-                self.distanceAway.text = location.getDistanceBetweenUserAndPost(locationDict, post: post)
-            } else {
-                print("GeoFire does not contain a location for \"firebase-hq\"")
-            }
-        })
-        
-        undoQuoteDisplay()
         URL_BASE.child("users").child(self.post.user_id).observeSingleEvent(of: FIRDataEventType.value, with: { (snapshot) in
             
             let userDict = snapshot.value as? Dictionary<String, AnyObject> ?? [:]
             let key = userDict["user_ref"] as! String
             let user = User.init(userId: key, dictionary: userDict)
             
-            if let userPhoto = user.userPhoto {
-                let photoCheck = ActivityVC.imageCache.object(forKey: userPhoto as AnyObject) as? UIImage
-                print(photoCheck)
+            if let photoCheck = ActivityVC.imageCache.object(forKey: user.userPhoto as AnyObject) as? UIImage {
+                
+                self.profileImg.image = photoCheck
+            } else if let userPhoto = user.userPhoto {
+                
+                let url = URL(string: userPhoto)!
+                self.request = Alamofire.request(url, method: .get).response { response in
+                    
+                    if response.error == nil {
+                        
+                        let img = UIImage(data: response.data!)
+                        self.profileImg.image = img
+                        self.profileImg.layer.cornerRadius = self.profileImg.frame.size.height / 2
+                        self.profileImg.clipsToBounds = true
+                        ActivityVC.imageCache.setObject(img!, forKey: userPhoto as AnyObject)
+                    } else {
+                        print("\(response.error)")
+                    }
+                }
+            } else {
+                self.profileImg.image = UIImage(named: "user")
             }
             
             var numberOfFollowers = 0
@@ -201,6 +187,85 @@ class PostCell: UITableViewCell {
                 self.followersLbl.text = "\(numberOfFollowers) Followers"
             }
         })
+
+        self.audioTitleLbl.isHidden = true
+        self.audioTimeLbl.isHidden = true
+
+        undoQuoteDisplay()
+        
+        if postType == "activity" {
+            
+            URL_BASE.child("users").child(currentUserID).child("dislikes").observeSingleEvent(of: FIRDataEventType.value, with: { snapshot in
+                
+                let dislikedKeys = snapshot.children.allObjects as? [FIRDataSnapshot] ?? []
+                
+                for post in dislikedKeys {
+                    if self.post.postKey == post.key {
+                        self.neutralImageView.image = UIImage(named: "checkmark-red")
+                    }
+                }
+            })
+            URL_BASE.child("users").child(currentUserID).child("likes").observeSingleEvent(of: FIRDataEventType.value, with: { snapshot in
+                
+                let likedKeys = snapshot.children.allObjects as? [FIRDataSnapshot] ?? []
+                
+                for post in likedKeys {
+                    if self.post.postKey == post.key {
+                        self.neutralImageView.image = UIImage(named: "checkmark-green")
+                    }
+                }
+            })
+        }
+        
+        if filterType != nil {
+            self.filterType = filterType
+            
+            if filterType != "My Posts" {
+                
+                if filterType == "Liked" {
+                    self.neutralImageView.image = UIImage(named: "checkmark-green")
+                } else if filterType == "Disliked" {
+                    self.neutralImageView.image = UIImage(named: "checkmark-red")
+                }
+            } else {
+                self.neutralImageView.image = UIImage(named: "neutral")
+            }
+        }
+        
+        let score = post.likes - post.dislikes
+        if score == 0 {
+            self.postScoreLbl.textColor = NEUTRAL_YELLOW
+        } else if score > 0 {
+            self.postScoreLbl.textColor = LIKE_GREEN
+        } else {
+            self.postScoreLbl.textColor = DISLIKE_RED
+        }
+        self.postScoreLbl.text = "\(abs(score))"
+        
+        let date = NSDate()
+        let millisecondsDateOfPost = post.timestamp
+        let millisecondsDateOfNow = date.timeIntervalSince1970 * 1000
+        let millis = millisecondsDateOfNow - Double(millisecondsDateOfPost)
+        let timeService = TimeService()
+        self.timestamp.text = timeService.getTimeStampFromMilliSeconds(millis: millis)
+        
+        let geoFire = GeoFire(firebaseRef: geofireRef)!
+        
+        geoFire.getLocationForKey(currentUserID, withCallback: { (location, error) in
+            if (error != nil) {
+                print("An error occurred getting the location for \"firebase-hq\": \(error?.localizedDescription)")
+            } else if (location != nil) {
+                print("Location for current user is [\(location?.coordinate.latitude), \(location?.coordinate.longitude)]")
+                var locationDict: Dictionary<String,AnyObject> = [:]
+                locationDict["latitude"] = location?.coordinate.latitude as AnyObject?
+                locationDict["longitude"] = location?.coordinate.longitude as AnyObject?
+                let location = Location()
+                self.distanceAway.text = location.getDistanceBetweenUserAndPost(locationDict, post: post)
+            } else {
+                print("GeoFire does not contain a location for \"firebase-hq\"")
+            }
+        })
+        
         
         if post.type == "text" {
             
@@ -346,16 +411,14 @@ class PostCell: UITableViewCell {
             
         }
         
-//        if postType == "video" {
-//            getVideoDataFromServer(urlString: post.video!)
-//        }
-
         configureMediaViewUI()
         
         //Displays
         self.postImg.isHidden = false
         
         //Constraints
+        self.audioTitleLbl.isHidden = true
+        self.audioTimeLbl.isHidden = true
         self.linkViewHeight.constant = POST_IMAGE_HEIGHT
         self.audioViewHeight.constant = 0
         self.linkTitleHeight.constant = 0
@@ -401,8 +464,12 @@ class PostCell: UITableViewCell {
             self.linkTitle.isHidden = true
             self.linkURL.isHidden = true
             self.audioView.isHidden = false
+            self.audioTitleLbl.isHidden = false
+            self.audioTimeLbl.isHidden = false
 
             //Contstraints
+            self.audioView.layer.cornerRadius = 2
+            self.waveFormImg.layer.cornerRadius = 2
             self.audioViewHeight.constant = 50
             self.linkViewHeight.constant = 0
             self.messageHeight.constant = 0
@@ -416,6 +483,7 @@ class PostCell: UITableViewCell {
         self.linkShortUrlHeight.constant = 0
         self.linkViewHeight.constant = 0
         self.audioView.isHidden = true
+        self.postImg.isHidden = true
         
         if quoteType == "image" {
             
@@ -439,17 +507,13 @@ class PostCell: UITableViewCell {
             
         } else if quoteType == "text" {
             
-            let trimmedMessage = quoteText!.trimmingCharacters(in: CharacterSet.whitespacesAndNewlines)
+            trimmedMessage = quoteText!.trimmingCharacters(in: CharacterSet.whitespacesAndNewlines)
             self.message.textAlignment = .center
             self.message.textColor = UIColor.black
             self.message.text = trimmedMessage
-            self.message.font = UIFont(name: message.font.fontName, size: 14)
-            let height = heightForView(message, text: trimmedMessage)
+            self.message.font = UIFont(name: "Ubuntu", size: 14)
+            let height = heightForView(message, text: trimmedMessage!)
             self.messageHeight.constant = height
-            
-            self.postImg.isHidden = true
-            openQuote?.isHidden = false
-            closeQuote?.isHidden = false
         }
     }
     
@@ -512,28 +576,9 @@ class PostCell: UITableViewCell {
 
     }
     
-    func getVideoDataFromServer(urlString: String) {
-        
-        if let video = post.video! as String? {
-            
-            let url = URL(string: video)!
-            self.request = Alamofire.request(url, method: .get).response { response in
-                if response.error == nil {
-                    print("\(response.data)")
-                    self.videoData = response.data as NSData?
-                } else {
-                    print("\(response.error)")
-                }
-            }
-        }
-    }
     
     func undoQuoteDisplay() {
         
-        openQuoteHeight?.constant = 0
-        closeQuoteHeight?.constant = 0
-        openQuote?.isHidden = true
-        closeQuote?.isHidden = true
         self.message.textAlignment = .left
         self.message.font = UIFont(name: message.font.fontName, size: 12)
         self.message.textColor = UIColor.darkGray
@@ -545,6 +590,7 @@ class PostCell: UITableViewCell {
     }
     
     func heightForView(_ label:UILabel, text: String) -> CGFloat {
+        
         label.lineBreakMode = NSLineBreakMode.byWordWrapping
         label.text = text
         label.sizeToFit()
@@ -590,7 +636,7 @@ class PostCell: UITableViewCell {
     
     func handlePan(recognizer: UIPanGestureRecognizer) {
         
-        if self.postType != "myinfo" {
+        if self.filterType != "My Posts" {
             
             // 1
             if recognizer.state == .began {
@@ -614,36 +660,198 @@ class PostCell: UITableViewCell {
             // 3
             if recognizer.state == .ended {
                 
-                let originalFrame = CGRect(x: 0, y: frame.origin.y,
-                                           width: bounds.size.width, height: bounds.size.height)
+                let originalFrame = CGRect(x: 0, y: frame.origin.y, width: bounds.size.width, height: bounds.size.height)
+                
+                let radarPost = URL_BASE.child("users").child(currentUserID).child("radar").child(post.postKey)
+                
                 if deleteOnDragRelease {
-                    
+
                     if delegate != nil || activityDelegate != nil && post != nil {
                         
-                        if self.postType == "activity" {
+                        if self.postType == "activity" || self.postType == "Viral" {
+                            
+                            dislikePost()
                             activityDelegate!.postAction(action: "dislike")
-                            self.neutralImageView.image = UIImage(named: "red-checkmark")
+                            self.neutralImageView.image = UIImage(named: "checkmark-red")
+                            
                         } else if self.postType == "radar" {
-                            delegate!.postDeleted(post: post!, action: "dislike")
+                            
+                            dislikePost()
+                            radarPost.removeValue()
+                            delegate!.postManipulated(post: post!, action: "dislike")
+                            
+                        } else if self.postType == "myinfo" {
+
+                            dislikePost()
+                            if self.filterType == "Liked" {
+                                delegate!.postManipulated(post: post!, action: "dislike")
+                            } else if self.filterType == "Disliked" {
+                                activityDelegate!.postAction(action: "dislike")
+                            }
                         }
                     }
                 }
                 if likeOnDragRelease {
-                    
+
                     if delegate != nil || activityDelegate != nil && post != nil {
                         
-                        if self.postType == "activity" {
+                        if self.postType == "activity" || self.postType == "Viral" {
+                            
+                            likePost()
                             activityDelegate!.postAction(action: "like")
-                            self.neutralImageView.image = UIImage(named: "green-checkmark")
+                            self.neutralImageView.image = UIImage(named: "checkmark-green")
+                            
                         } else if self.postType == "radar" {
-                            delegate!.postDeleted(post: post!, action: "like")
+                            
+                            likePost()
+                            radarPost.removeValue()
+                            delegate!.postManipulated(post: post!, action: "like")
+                            
+                        } else if self.postType == "myinfo" {
+
+                            likePost()
+                            if self.filterType == "Liked" {
+                                activityDelegate!.postAction(action: "like")
+                            } else if self.filterType == "Disliked" {
+                                delegate!.postManipulated(post: post!, action: "like")
+                            }
                         }
                     }
                 }
-                if !deleteOnDragRelease && !likeOnDragRelease || self.postType == "activity" {
+                if !deleteOnDragRelease && !likeOnDragRelease || self.postType == "activity" || self.postType == "myinfo" || self.postType == "Viral" {
                     
                     UIView.animate(withDuration: 0.2, animations: {self.frame = originalFrame})
                 }
+            }
+        }
+    }
+    
+    func likePost() {
+        
+        let postRef = URL_BASE.child("posts").child(post.postKey)
+        
+        postRef.runTransactionBlock({ (currentData: FIRMutableData) -> FIRTransactionResult in
+            
+            if var post = currentData.value as? [String : AnyObject], let uid = FIRAuth.auth()?.currentUser?.uid {
+                
+                var likesDict: Dictionary<String,Bool>
+                var dislikesDict: Dictionary<String,Bool>
+
+                likesDict = post["user-likes"] as? [String : Bool] ?? [:]
+                dislikesDict = post["user-dislikes"] as? [String : Bool] ?? [:]
+                
+                var likeCount = post["likes"] as? Int ?? 0
+                var dislikeCount = post["dislikes"] as? Int ?? 0
+                
+                if likesDict[uid] == nil {
+                    URL_BASE.child("users").child(self.currentUserID).child("likes").updateChildValues(self.postObjRef)
+                    likeCount += 1
+                    likesDict[uid] = true
+                }
+                
+                if dislikesDict[uid] != nil {
+                    URL_BASE.child("users").child(self.currentUserID).child("dislikes").child(self.post.postKey).removeValue()
+                    dislikeCount -= 1
+                    dislikesDict.removeValue(forKey: uid)
+                }
+                
+                let interactions = likeCount + dislikeCount
+                let rating = Double(likeCount) / Double(interactions)
+                
+                post["likes"] = likeCount as AnyObject?
+                post["user-likes"] = likesDict as AnyObject?
+                post["dislikes"] = dislikeCount as AnyObject?
+                post["user-dislikes"] = dislikesDict as AnyObject?
+                post["rating"] = rating as AnyObject?
+                
+                // Set value and report transaction success
+                currentData.value = post
+                
+                return FIRTransactionResult.success(withValue: currentData)
+            }
+            return FIRTransactionResult.success(withValue: currentData)
+        }) { (error, committed, snapshot) in
+            if let error = error {
+                print(error.localizedDescription)
+            } else {
+
+                let postDict = snapshot?.value as! Dictionary<String,AnyObject>
+                let key = postDict["post_ref"] as! String
+                let post = Post(postKey: key, dictionary: postDict)
+                let score = post.likes - post.dislikes
+                if score == 0 {
+                    self.postScoreLbl.textColor = NEUTRAL_YELLOW
+                } else if score > 0 {
+                    self.postScoreLbl.textColor = LIKE_GREEN
+                } else {
+                    self.postScoreLbl.textColor = DISLIKE_RED
+                }
+                self.postScoreLbl.text = "\(abs(score))"
+            }
+        }
+    }
+    
+    func dislikePost() {
+        
+        let postRef = URL_BASE.child("posts").child(post.postKey)
+
+        postRef.runTransactionBlock({ (currentData: FIRMutableData) -> FIRTransactionResult in
+            
+            if var post = currentData.value as? [String : AnyObject], let uid = FIRAuth.auth()?.currentUser?.uid {
+                
+                var likesDict: Dictionary<String,Bool>
+                var dislikesDict: Dictionary<String,Bool>
+                
+                likesDict = post["user-likes"] as? [String : Bool] ?? [:]
+                dislikesDict = post["user-dislikes"] as? [String : Bool] ?? [:]
+                
+                var likeCount = post["likes"] as? Int ?? 0
+                var dislikeCount = post["dislikes"] as? Int ?? 0
+                
+                if likesDict[uid] != nil {
+                    URL_BASE.child("users").child(self.currentUserID).child("likes").child(self.post.postKey).removeValue()
+                    likeCount -= 1
+                    likesDict.removeValue(forKey: uid)
+                }
+                
+                if dislikesDict[uid] == nil {
+                    URL_BASE.child("users").child(self.currentUserID).child("dislikes").updateChildValues(self.postObjRef)
+                    dislikeCount += 1
+                    dislikesDict[uid] = true
+                }
+                
+                let interactions = likeCount + dislikeCount
+                let rating = Double(likeCount) / Double(interactions)
+                
+                post["likes"] = likeCount as AnyObject?
+                post["user-likes"] = likesDict as AnyObject?
+                post["dislikes"] = dislikeCount as AnyObject?
+                post["user-dislikes"] = dislikesDict as AnyObject?
+                post["rating"] = rating as AnyObject?
+                
+                currentData.value = post
+                
+                return FIRTransactionResult.success(withValue: currentData)
+            }
+            return FIRTransactionResult.success(withValue: currentData)
+        }) { (error, committed, snapshot) in
+            
+            if let error = error {
+                print(error.localizedDescription)
+            } else {
+                
+                let postDict = snapshot?.value as! Dictionary<String,AnyObject>
+                let key = postDict["post_ref"] as! String
+                let post = Post(postKey: key, dictionary: postDict)
+                let score = post.likes - post.dislikes
+                if score == 0 {
+                    self.postScoreLbl.textColor = NEUTRAL_YELLOW
+                } else if score > 0 {
+                    self.postScoreLbl.textColor = LIKE_GREEN
+                } else {
+                    self.postScoreLbl.textColor = DISLIKE_RED
+                }
+                self.postScoreLbl.text = "\(abs(score))"
             }
         }
     }

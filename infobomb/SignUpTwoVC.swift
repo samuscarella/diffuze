@@ -7,11 +7,13 @@
 //
 
 import UIKit
+import SCLAlertView
 
 class SignUpTwoVC: UIViewController {
 
     @IBOutlet weak var usernameField: UITextField!
     @IBOutlet weak var continueBtn: UIButton!
+    @IBOutlet weak var signUpBtnBottomConstraint: NSLayoutConstraint!
     
     var email: String!
 
@@ -24,12 +26,42 @@ class SignUpTwoVC: UIViewController {
         
         usernameField.attributedPlaceholder = NSAttributedString(string: "Username", attributes:[NSForegroundColorAttributeName: UIColor.lightGray])
         
+        NotificationCenter.default.addObserver(self, selector: #selector(SignUpTwoVC.keyboardWillShow(_:)), name: NSNotification.Name.UIKeyboardWillShow, object: nil)
+        
+        usernameField.autocorrectionType = .no
         continueBtn.layer.cornerRadius = 3
-
     }
-
+    
+    override func viewWillAppear(_ animated: Bool) {
+        
+        self.signUpBtnBottomConstraint.constant = 0
+    }
+    
+    func keyboardWillShow(_ notification: Notification) {
+        
+        if let keyboardSize = ((notification as NSNotification).userInfo?[UIKeyboardFrameBeginUserInfoKey] as? NSValue)?.cgRectValue {
+            
+            if view.frame.origin.y == 0 {
+                
+                self.signUpBtnBottomConstraint.constant = keyboardSize.height
+                
+                UIView.animate(withDuration: 0.9) {
+                    
+                    self.view.layoutIfNeeded()
+                }
+            }
+            else {
+                
+            }
+        }
+    }
+    
+    override func viewDidAppear(_ animated: Bool) {
+        self.signUpBtnBottomConstraint.constant = 0
+    }
+    
     @IBAction func backBtnPressed(_ sender: AnyObject) {
-        self.performSegue(withIdentifier: "GoToSignUpOne", sender: self)
+        self.performSegue(withIdentifier: "unwindToSignUpOneVC", sender: self)
     }
     
     @IBAction func unwindToSignUpTwo(_ segue: UIStoryboardSegue) {
@@ -38,20 +70,32 @@ class SignUpTwoVC: UIViewController {
     
     override func shouldPerformSegue(withIdentifier identifier: String, sender: Any?) -> Bool {
         
-        if usernameField.text != "" {
-            return true
+        let alertView = SCLAlertView()
+
+        if usernameField.text == "" {
+            
+            alertView.showError("Validation Error", subTitle: "\nUsername cannot be blank.", closeButtonTitle: "Ok", duration: 0.0, colorStyle: 0xff0000, colorTextButton: 0xffffff, circleIconImage: UIImage(named: "error-white"), animationStyle: .topToBottom)
+            return false
+        } else if (usernameField.text?.characters.count)! < 6 {
+            
+            alertView.showError("Validation Error", subTitle: "\nUsername must be at least 6 characters.", closeButtonTitle: "Ok", duration: 0.0, colorStyle: 0xff0000, colorTextButton: 0xffffff, circleIconImage: UIImage(named: "error-white"), animationStyle: .topToBottom)
+            return false
+        } else if (usernameField.text?.characters.count)! > 20 {
+            
+            alertView.showError("Validation Error", subTitle: "\nUsername can be no longer than 20 characters.", closeButtonTitle: "Ok", duration: 0.0, colorStyle: 0xff0000, colorTextButton: 0xffffff, circleIconImage: UIImage(named: "error-white"), animationStyle: .topToBottom)
+            return false
         }
-        return false
+        return true
     }
     
     override func prepare(for segue: UIStoryboardSegue, sender: Any!) {
         
-        
-        let nav = segue.destination as! UINavigationController;
-        let usernameView = nav.topViewController as! SignUpThreeVC
-        usernameView.username = usernameField.text!
-        usernameView.email = email
-        
+        if segue.identifier == "SignUpThreeVC" {
+            let nav = segue.destination as! SignUpThreeVC;
+            nav.username = usernameField.text!
+            nav.email = email
+        }
+        self.signUpBtnBottomConstraint.constant = 0
     }
 
 }

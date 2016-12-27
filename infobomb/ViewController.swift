@@ -33,7 +33,7 @@ class ViewController: UIViewController {
                 print("User is signed in: \(user.displayName!)")
                 UserDefaults.standard.setValue(user.uid, forKey: KEY_UID)
                 UserDefaults.standard.setValue(user.displayName, forKey: KEY_USERNAME)
-                //self.playIntroSound()
+                self.playIntroSound()
                 self.performSegue(withIdentifier: SEGUE_LOGGED_IN, sender: nil)
             } else {
                 print("User is not signed in.")

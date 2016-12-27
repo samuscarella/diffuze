@@ -248,14 +248,14 @@ class AudioPostVC: UIViewController, UITextFieldDelegate, AVAudioRecorderDelegat
             self.recordBtnMidView.layer.borderColor = POWDER_BLUE.cgColor
             self.recordBtnMidView.layer.borderWidth = 2
             
-            }, completion: { finished in
+        }, completion: { finished in
                 
         })
 
     }
     
     func textFieldDidBeginEditing(_ textField: UITextField) {
-        print("HERE")
+
         titleField.alpha = 1.0
     }
     
@@ -266,8 +266,16 @@ class AudioPostVC: UIViewController, UITextFieldDelegate, AVAudioRecorderDelegat
         }
     }
     
+    func textField(_ textField: UITextField, shouldChangeCharactersIn range: NSRange, replacementString string: String) -> Bool {
+        
+        if(string == "\n") {
+            textField.resignFirstResponder()
+            return false
+        }
+        return true
+    }
+    
     func dismissKeyboard() {
-
         view.endEditing(true)
     }
     
@@ -332,7 +340,6 @@ class AudioPostVC: UIViewController, UITextFieldDelegate, AVAudioRecorderDelegat
         recordBtn.isUserInteractionEnabled = true
         audioPlayer?.currentTime = 0
         updateDuration()
-
     }
     
     func updateTimeLbl(timer: Timer) {
@@ -384,19 +391,21 @@ class AudioPostVC: UIViewController, UITextFieldDelegate, AVAudioRecorderDelegat
     @IBAction func playbackAudioBtnPressed(_ sender: AnyObject) {
         
        if (audioPlayer?.isPlaying)! {
+        
                 recordBtn.isUserInteractionEnabled = true
                 audioPlayer?.pause()
                 let playImage = UIImage(named: "play-button")
                 playBtn.setImage(playImage, for: .normal)
         } else if audioPlayer != nil && !(audioPlayer?.isPlaying)! {
+        
             playAudio()
             updateSliderWithAudio()
             recordBtn.isUserInteractionEnabled = false
             Timer.scheduledTimer(timeInterval: 0.01, target: self, selector: #selector(AudioPostVC.updateDurationLbl(timer:)), userInfo: nil, repeats: true)
-
         }
 
     }
+    
     
     func playAudio() {
         audioPlayer?.play()
@@ -407,7 +416,7 @@ class AudioPostVC: UIViewController, UITextFieldDelegate, AVAudioRecorderDelegat
     
     func audioPlayerDidFinishPlaying(_ player: AVAudioPlayer, successfully flag: Bool) {
         
-        let playImage = UIImage(named: "play-buwtton")
+        let playImage = UIImage(named: "play-button")
         playBtn.setImage(playImage, for: .normal)
         updater.invalidate()
         audioSlider.value = 1
@@ -453,13 +462,9 @@ class AudioPostVC: UIViewController, UITextFieldDelegate, AVAudioRecorderDelegat
             }
         }
     }
-
-    @IBAction func updateAudioSlider(_ sender: AnyObject) {
-        
-//        audioRecorder.currentTime =
-    }
     
     @IBAction func backBtnPressed(_ sender: AnyObject) {
+        dismissKeyboard()
         self.performSegue(withIdentifier: "unwindToNewPost", sender: self)
     }
     

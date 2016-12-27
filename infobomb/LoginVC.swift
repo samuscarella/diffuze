@@ -9,18 +9,23 @@
 import UIKit
 import FirebaseAuth
 import AVFoundation
+import SCLAlertView
 
 class LoginVC: UIViewController {
     
     @IBOutlet weak var emailField: UITextField!
     @IBOutlet weak var passwordField: UITextField!
     @IBOutlet weak var loginBtn: UIButton!
+    @IBOutlet weak var backBtn: UIButton!
     
     var introMusic: AVAudioPlayer!
     
     override func viewDidLoad() {
         super.viewDidLoad()
         
+        
+        UIApplication.shared.statusBarStyle = .lightContent
+
         self.navigationController?.navigationBar.setBackgroundImage(UIImage(), for: .default)
         self.navigationController?.navigationBar.shadowImage = UIImage()
         self.navigationController?.navigationBar.isTranslucent = true
@@ -47,13 +52,9 @@ class LoginVC: UIViewController {
                     
                     print(error)
                     
-                    if error!._code == USER_NOT_FOUND {
-                        
-                        print("User not found. Attempting to create new user...")
-                        
-                    } else if error?._code == PASSWORD_NOT_FOUND {
-                        self.showErrorAlert("Could not login", msg: "Please check your username or password!")
-                    }
+                    let alertView = SCLAlertView()
+                    alertView.showError("Authentication Failure", subTitle: "\nInvalid Email and Password.", closeButtonTitle: "Ok", duration: 0.0, colorStyle: 0xff0000, colorTextButton: 0xffffff, circleIconImage: UIImage(named: "error-white"), animationStyle: .topToBottom)
+                    
                 } else {
                     
                     UserDefaults.standard.setValue(user!.uid, forKey: KEY_UID)
@@ -64,7 +65,9 @@ class LoginVC: UIViewController {
             }
             
         } else {
-            showErrorAlert("Username or Password is Invalid!", msg: "Please check your credentials and try again.")
+
+            let alertView = SCLAlertView()
+            alertView.showError("Authentication Failure", subTitle: "\nInvalid Email and Password.", closeButtonTitle: "Ok", duration: 0.0, colorStyle: 0xff0000, colorTextButton: 0xffffff, circleIconImage: UIImage(named: "error-white"), animationStyle: .topToBottom)
         }
 
     }

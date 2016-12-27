@@ -90,9 +90,15 @@ let NEW_VIDEO_POST = "newVideoPost"
 let QUOTE_POST_VC = "QuotePostVC"
 let BOMB_VC = "BombVC"
 
+//Images
+let CATEGORY_TITLE_ARRAY = ["All","Art","Business","Career","Do-It-Yourself","Economics","Education","Entertainment","Fashion","Finance","Fitness","Food","Gaming","Health","History","Humor","Law","Marketing","Medical","Military","Music","News","Other","Philosophy","Photography","Politics","Psychology","Relationships","Religion & Spirituality","Science","Sexuality","Social Media","Sociology","Sports","Technology","Travel"]
+let CATEGORY_IMAGE_ARRAY = ["all","arts-culture","business","career","diy","economics","education","entertainment","fashion","finance","fitness","food","gmaing","health","history","humor","law","marketing","medical","military","music","news","other","philopsophy","photography","politics","psychology","relationships","religion-spirituality","science","sexuality","social-media","sociology","sports","technology","travel"]
+
 //Status Codes
 let USER_NOT_FOUND = 17011
 let PASSWORD_NOT_FOUND = 17009
+let MAX_DISTANCE: Double = 6327
+let TARGET_SUBS: Int = 100
 
 //Colors
 let BABY_BLUE: UIColor = UIColor(red: 82.0 / 255.0, green: 178.0 / 255.0, blue: 207.0 / 255.0, alpha: 1)
@@ -104,7 +110,10 @@ let OCEAN_BLUE = UIColor(red: 25.0 / 255.0, green: 100.0 / 255.0, blue: 126.0 / 
 let POWDER_BLUE = UIColor(red: 143.0 / 255.0, green: 191.0 / 255.0, blue: 224.0 / 255.0, alpha: 1)
 let PURPLE = UIColor(red: 107.0 / 255.0, green: 78.0 / 255.0, blue: 113.0 / 255.0, alpha: 1)
 let DARK_GREY: UIColor = UIColor(red: 85.0 / 255.0, green: 85.0 / 255.0, blue: 85.0 / 255.0, alpha: 1)
-let SUPER_DARK_GREY: UIColor = UIColor(colorLiteralRed: 46.0, green: 46.0, blue: 46.0, alpha: 1)
+let SUPER_DARK_GREY: UIColor = UIColor(red: 46.0, green: 46.0, blue: 46.0, alpha: 1)
+let LIKE_GREEN: UIColor = UIColor(red: 8.0 / 255.0, green: 160.0 / 255.0, blue: 69.0 / 255.0, alpha: 1)
+let DISLIKE_RED: UIColor = UIColor(red: 221.0 / 255.0, green: 4.0 / 255.0, blue: 38.0 / 255.0, alpha: 1)
+let NEUTRAL_YELLOW: UIColor = UIColor(red: 245.0 / 255.0, green: 187.0 / 255.0, blue: 0.0 / 255.0, alpha: 1)
 let DARK_GREEN: UIColor = UIColor(red: 101.0 / 255.0, green: 145.0 / 255.0, blue: 87.0 / 255.0, alpha: 1)
 let AUBURN_RED: UIColor = UIColor(red: 140.0 / 255.0, green: 39.0 / 255.0, blue: 30.0 / 255.0, alpha: 1)
 let FIRE_ORANGE: UIColor = UIColor(red: 255.0 / 255.0, green: 126.0 / 255.0, blue: 0.0 / 255.0, alpha: 1)

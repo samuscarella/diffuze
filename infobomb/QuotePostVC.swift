@@ -31,7 +31,6 @@ class QuotePostVC: UIViewController, UINavigationControllerDelegate, UITextViewD
         
         imagePicker.delegate = self
         textField.delegate = self
-        authorField.delegate = self
         
         UIApplication.shared.statusBarStyle = .lightContent
         self.navigationController?.navigationBar.setBackgroundImage(UIImage(), for: .default)
@@ -93,11 +92,8 @@ class QuotePostVC: UIViewController, UINavigationControllerDelegate, UITextViewD
                 imagePreview.contentMode = .scaleAspectFill
                 imagePreview.image = pickedImage
                 textField.text = ""
-                authorField.text = ""
                 applyPlaceholderStyle(aTextview: textField!, placeholderText: PLACEHOLDER_TEXT)
                 imagePreview.clipsToBounds = true
-                imagePreview.layer.borderWidth = 1
-                imagePreview.layer.borderColor = ANTI_FLASH_WHITE.cgColor
                 noImageView.isHidden = true
                 linkObj["image"] = UIImageJPEGRepresentation(pickedImage, 0.25) as AnyObject?
                 linkObj["text"] = nil
@@ -149,7 +145,7 @@ class QuotePostVC: UIViewController, UINavigationControllerDelegate, UITextViewD
     
     func textField(_ textField: UITextField, shouldChangeCharactersIn range: NSRange, replacementString string: String) -> Bool {
         
-        if textField.text != "" {
+        if textField.text != "" && textField.text != PLACEHOLDER_TEXT {
             imagePreview.image = nil
             linkObj["image"] = nil
             noImageView.isHidden = false
@@ -160,7 +156,7 @@ class QuotePostVC: UIViewController, UINavigationControllerDelegate, UITextViewD
     
     func textView(_ textView: UITextView, shouldChangeTextIn range: NSRange, replacementText text: String) -> Bool {
         
-        if textView.text != "" {
+        if textView.text != "" && textView.text != PLACEHOLDER_TEXT {
             imagePreview.image = nil
             noImageView.isHidden = false
         }
@@ -195,7 +191,6 @@ class QuotePostVC: UIViewController, UINavigationControllerDelegate, UITextViewD
     }
     
     func dismissKeyboard() {
-        
         view.endEditing(true)
     }
     
@@ -215,7 +210,7 @@ class QuotePostVC: UIViewController, UINavigationControllerDelegate, UITextViewD
             let nav = segue.destination as! UINavigationController
             let categoryView = nav.topViewController as! CategoryVC
             
-            if textField.text != "Enter Text Without Quotations..." && textField.text != "" {
+            if textField.text != PLACEHOLDER_TEXT && textField.text != "" {
                 linkObj["text"] = textField.text! as NSString
                 
                 if let author = authorField.text, authorField.text != "" {
@@ -234,6 +229,7 @@ class QuotePostVC: UIViewController, UINavigationControllerDelegate, UITextViewD
     }
 
     @IBAction func backBtnPressed(_ sender: AnyObject) {
+        dismissKeyboard()
         self.performSegue(withIdentifier: "unwindToNewPost", sender: self)
     }
 }

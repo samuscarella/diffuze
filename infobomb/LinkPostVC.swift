@@ -12,11 +12,9 @@ import UIKit
 import SwiftLinkPreview
 import Alamofire
 
-class LinkPostVC: UIViewController {
+class LinkPostVC: UIViewController, UITextViewDelegate, UITextFieldDelegate {
 
     @IBOutlet weak var backBtn: UIBarButtonItem!
-    @IBOutlet weak var linkHeaderView: MaterialView!
-    @IBOutlet weak var linkHeader: MaterialView!
     @IBOutlet weak var textField: UITextField!
     @IBOutlet weak var websitePreview: MaterialImgView!
     @IBOutlet weak var websiteTitle: UILabel!
@@ -24,9 +22,10 @@ class LinkPostVC: UIViewController {
     @IBOutlet weak var websiteDescription: UILabel!
     @IBOutlet weak var chooseCategories: MaterialButton!
     @IBOutlet weak var noPreviewAvailable: MaterialUIView!
-    
     @IBOutlet weak var messageField: MaterialTextView!
+    
     let slp = SwiftLinkPreview()
+    let PLACEHOLDER_TEXT = "Enter Text..."
     
     var request: Request?
     var webTitle: String?
@@ -35,8 +34,8 @@ class LinkPostVC: UIViewController {
     var webCanonicalUrl: String?
     var webFinalUrl: String?
     var linkObj: [String:AnyObject] = [:]
-    
     var linkData: Bool = false
+    var timer: Timer?
     
     override func viewDidLoad() {
         super.viewDidLoad()
@@ -55,13 +54,12 @@ class LinkPostVC: UIViewController {
         self.navigationController?.navigationBar.isTranslucent = true
 
 //        NotificationCenter.default.addObserver(self, selector: #selector(LinkPostVC.keyboardWillShow(_:)), name: NSNotification.Name.UIKeyboardWillShow, object: nil)
-        NotificationCenter.default.addObserver(self, selector: #selector(LinkPostVC.getPreview), name: NSNotification.Name.UIKeyboardWillHide, object: nil)
-
+//        NotificationCenter.default.addObserver(self, selector: #selector(LinkPostVC.getPreview), name: NSNotification.Name.UIKeyboardWillHide, object: nil)
         
         let tap: UITapGestureRecognizer = UITapGestureRecognizer(target: self, action: #selector(LinkPostVC.dismissKeyboard))
+        //let tap2: UITapGestureRecognizer = UITapGestureRecognizer(target: self, action: #selector(LinkPostVC.getPreview))
         view.addGestureRecognizer(tap)
-//        let tap2: UITapGestureRecognizer = UITapGestureRecognizer(target: self, action: #selector(LinkPostVC.getPreview))
-//        view.addGestureRecognizer(tap2)
+        //view.addGestureRecognizer(tap2)
         
         let customView = UIView()
         customView.frame = CGRect(x: 0, y: 0, width: 36, height: 36)
@@ -74,26 +72,76 @@ class LinkPostVC: UIViewController {
         customView.layer.cornerRadius = customView.frame.size.width / 2
         customView.clipsToBounds = true
         
+        messageField.delegate = self
+        textField.delegate = self
+        
+        applyPlaceholderStyle(aTextview: messageField!, placeholderText: PLACEHOLDER_TEXT)
+        
         imageView.center = (imageView.superview?.center)!
         
         self.navigationItem.titleView = customView
         
         let button: UIButton = UIButton(type: UIButtonType.custom)
         button.setImage(UIImage(named: "notification.png"), for: UIControlState())
-        button.addTarget(self, action: #selector(ActivityVC.notificationBtnPressed), for: UIControlEvents.touchUpInside)
+        //button.addTarget(self, action: #selector(LinkPostVC.notificationBtnPressed), for: UIControlEvents.touchUpInside)
         button.frame = CGRect(x: 0, y: 0, width: 27, height: 27)
         let rightBarButton = UIBarButtonItem(customView: button)
         self.navigationItem.rightBarButtonItem = rightBarButton
-
-
     }
     
     //Calls this function when the tap is recognized.
     func dismissKeyboard() {
-        //Causes the view (or one of its embedded text fields) to resign the first responder status.
+
+        getPreview()
         view.endEditing(true)
     }
     
+    func textField(_ textField: UITextField, shouldChangeCharactersIn range: NSRange, replacementString string: String) -> Bool {
+        
+        timer?.invalidate()
+        
+        if(string == "\n") {
+            textField.resignFirstResponder()
+            return false
+        }
+        
+        timer = Timer.scheduledTimer(timeInterval: 1.0, target: self, selector: #selector(self.getPreview), userInfo: nil, repeats: false)
+
+        return true
+    }
+    
+    func applyPlaceholderStyle(aTextview: UITextView, placeholderText: String)
+    {
+
+        aTextview.textColor = UIColor.lightGray
+        aTextview.text = placeholderText
+        aTextview.textAlignment = .center
+    }
+    
+    func applyNonPlaceholderStyle(aTextview: UITextView)
+    {
+
+        aTextview.textColor = UIColor.darkText
+        aTextview.alpha = 1.0
+        aTextview.textAlignment = .left
+    }
+    
+    func textViewShouldBeginEditing(_ aTextView: UITextView) -> Bool {
+        
+        if aTextView == messageField && aTextView.text == PLACEHOLDER_TEXT
+        {
+            moveCursorToStart(aTextView: aTextView)
+        }
+        return true
+    }
+
+    func moveCursorToStart(aTextView: UITextView)
+    {
+        DispatchQueue.main.async {
+            aTextView.selectedRange = NSMakeRange(0, 0);
+        }
+    }
+
 //    func keyboardWillShow(_ notification: Notification) {
 //        
 //        if let keyboardSize = ((notification as NSNotification).userInfo?[UIKeyboardFrameBeginUserInfoKey] as? NSValue)?.cgRectValue {
@@ -131,17 +179,42 @@ class LinkPostVC: UIViewController {
         return false
     }
     
+    func textView(_ textView: UITextView, shouldChangeTextIn range: NSRange, replacementText text: String) -> Bool {
+        
+        if(text == "\n") {
+            textView.resignFirstResponder()
+            getPreview()
+            return false
+        }
+        
+        let newLength = textView.text.utf16.count + text.utf16.count - range.length
+        if newLength > 0 {
+            if textView == messageField && textView.text == PLACEHOLDER_TEXT {
+                if text.utf16.count == 0 {
+                    return false
+                }
+                applyNonPlaceholderStyle(aTextview: textView)
+                messageField.text = ""
+            }
+            return true
+        } else{
+            applyPlaceholderStyle(aTextview: textView, placeholderText: PLACEHOLDER_TEXT)
+            moveCursorToStart(aTextView: textView)
+            return false
+        }
+    }
+    
     func getPreview() {
         
         if textField.text != "" {
             
             slp.cancel()
-            
-            //add timer to stop app from crashing send notification after time runs out to cancel request
+                        
             slp.preview(
                 textField.text,
                 onSuccess: { result in
                     
+                    print("Getting Preview...\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n")
                     print("\(result)")
                     
                     self.linkObj.removeAll()
@@ -175,19 +248,25 @@ class LinkPostVC: UIViewController {
                     if let imageUrl = result["image"] as? String, imageUrl != ""  {
                         
                         self.request = Alamofire.request(imageUrl).validate(contentType: ["image/png", "image/jpg", "image/jpeg", "image/gif"]).response {  response in
-                            //TODO: convert svg to png to allow more image previews
+
                             if response.error == nil {
                                 if let imgData = response.data as Data? {
-                                    let img = UIImage(data: imgData as Data)!
-                                    self.websitePreview.isHidden = false
-                                    self.websitePreview.image = img
-                                    self.linkObj["image"] = imgData as AnyObject?
-                                    self.linkData = true
+                                    
+                                    if imgData.count == 0 {
+                                        self.websitePreview.isHidden = false
+                                        self.websitePreview.image = UIImage(named: "no-image")
+                                    } else {
+                                        let img = UIImage(data: imgData as Data)!
+                                        self.websitePreview.isHidden = false
+                                        self.websitePreview.image = img
+                                        self.linkObj["image"] = imgData as AnyObject?
+                                        self.linkData = true
+                                    }
                                 }
                             } else {
                                 print("Image Preview Error: \(response.error)")
-                                //add stock no image photo
-                                self.websitePreview.isHidden = true
+                                self.websitePreview.isHidden = false
+                                self.websitePreview.image = UIImage(named: "no-image")
                             }
                             
                             print("\(self.linkObj["title"])\n\n\n\n")
@@ -195,7 +274,6 @@ class LinkPostVC: UIViewController {
                             print("\(self.linkObj["image"])\n\n\n\n")
                             print("\(self.linkObj["canonicalUrl"])\n\n\n\n")
                             print("\(self.linkObj["url"])\n\n\n\n")
-
                         }
                     } else {
                         if self.linkData {
@@ -205,6 +283,8 @@ class LinkPostVC: UIViewController {
                             print("\(self.linkObj["canonicalUrl"])\n\n\n\n")
                             print("\(self.linkObj["url"])\n\n\n\n")
                         }
+                        self.websitePreview.isHidden = false
+                        self.websitePreview.image = UIImage(named: "no-image")
                         self.websitePreview.isHidden = true
                     }
                     if self.linkData {
@@ -220,19 +300,17 @@ class LinkPostVC: UIViewController {
                     self.linkData = false
                     self.noPreviewAvailable.isHidden = false
                 }
-                
-                
             )
 
         } else {
             self.noPreviewAvailable.isHidden = false
             print("There is no text entered.")
         }
-
+        
     }
     
-
     @IBAction func backBtnPressed(_ sender: AnyObject) {
+        dismissKeyboard()
         self.performSegue(withIdentifier: "unwindToNewPost", sender: self)
     }
     
@@ -260,6 +338,7 @@ class LinkPostVC: UIViewController {
                 }
                 categoryView.previousVC = LINK_POST_VC
                 categoryView.linkObj = self.linkObj
+                slp.cancel()
             }
          }
  

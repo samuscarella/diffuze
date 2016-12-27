@@ -11,9 +11,7 @@ import UIKit
 class TextPostVC: UIViewController, UITextViewDelegate {
 
     @IBOutlet weak var backBtn: UIBarButtonItem!
-    @IBOutlet weak var textImgView: MaterialView!
     @IBOutlet weak var textField: MaterialTextView!
-    @IBOutlet weak var textHeader: MaterialView!
     @IBOutlet weak var chooseCategoriesBtn: MaterialButton!
     @IBOutlet weak var chooseCategoriesBtnBottomConstraint: NSLayoutConstraint!
     
@@ -55,7 +53,7 @@ class TextPostVC: UIViewController, UITextViewDelegate {
         
         let button: UIButton = UIButton(type: UIButtonType.custom)
         button.setImage(UIImage(named: "notification.png"), for: UIControlState())
-        button.addTarget(self, action: #selector(ActivityVC.notificationBtnPressed), for: UIControlEvents.touchUpInside)
+//        button.addTarget(self, action: #selector(ActivityVC.notificationBtnPressed), for: UIControlEvents.touchUpInside)
         button.frame = CGRect(x: 0, y: 0, width: 27, height: 27)
         let rightBarButton = UIBarButtonItem(customView: button)
         self.navigationItem.rightBarButtonItem = rightBarButton
@@ -143,7 +141,6 @@ class TextPostVC: UIViewController, UITextViewDelegate {
         }
     }
     
-
     func keyboardWillShow(_ notification: Notification) {
         
         if let keyboardSize = ((notification as NSNotification).userInfo?[UIKeyboardFrameBeginUserInfoKey] as? NSValue)?.cgRectValue {

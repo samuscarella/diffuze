@@ -9,7 +9,7 @@
 import UIKit
 import Firebase
 
-class MyInfoVC: UIViewController, UITableViewDelegate, UITableViewDataSource, UIPickerViewDelegate, UIPickerViewDataSource {
+class MyInfoVC: UIViewController, UITableViewDelegate, UITableViewDataSource, UIPickerViewDelegate, UIPickerViewDataSource, TableViewCellDelegate, ActivityTableViewCellDelegate {
     
     @IBOutlet weak var darkendViewBtn: UIButton!
     @IBOutlet weak var menuBtn: UIBarButtonItem!
@@ -18,20 +18,33 @@ class MyInfoVC: UIViewController, UITableViewDelegate, UITableViewDataSource, UI
     @IBOutlet weak var categoryFilterBtn: UIButton!
     @IBOutlet weak var tableView: UITableView!
     @IBOutlet weak var pickerView: UIPickerView!
+    @IBOutlet weak var scoreView: UIView!
+    @IBOutlet weak var scoreLbl: UILabel!
+    @IBOutlet weak var noPostsLbl: UILabel!
+    @IBOutlet weak var noPostsImageView: UIImageView!
+    @IBOutlet weak var backgroundView: UIView!
     
     let personalDataSource = ["My Posts","Liked","Disliked"]
     let postTypeDataSource = ["All","Text","Link","Image","Video","Audio","Quote"]
-    let categoryDataSource = ["All"]
 
     var posts = [Post]()
     var currentLocation: [String:AnyObject] = [:]
     var personalFilterOption: String!
     var postTypeFilterOption: String!
-    var categoryFilterOption: String!
+    var categoryFilterOptions: [String]?
     var personalFilterActive = false
     var postTypeFilterActive = false
     var categoryFilterActive = false
-    
+    var myGroup = DispatchGroup()
+    var previousPersonalFilterRow: Int!
+    var previousPostTypeFilterRow: Int!
+    var comingFromCategoryFilterVC = false
+    var userFollowersToPass: String!
+    var mediaImageToPass: UIImage?
+    var videoDataToPass: NSData?
+    var followingImgToPass: UIImage!
+    var postToPass: Post!
+    var userPhotoToPass: UIImage?
     
     override func viewDidLoad() {
         super.viewDidLoad()
@@ -43,13 +56,12 @@ class MyInfoVC: UIViewController, UITableViewDelegate, UITableViewDataSource, UI
         self.navigationController?.navigationBar.shadowImage = UIImage()
         self.navigationController?.navigationBar.isTranslucent = true
         
-        personalFilterBtn.imageEdgeInsets = UIEdgeInsetsMake(30, 75, 30, 75)
-        personalFilterBtn.setImage(UIImage(named: "filter-slider-black"), for: .normal)
-        postTypeFilterBtn.imageEdgeInsets = UIEdgeInsetsMake(30, 75, 30, 75)
-        postTypeFilterBtn.setImage(UIImage(named: "funnel-black"), for: .highlighted)
-        categoryFilterBtn.imageEdgeInsets = UIEdgeInsetsMake(30, 75, 30, 75)
-        categoryFilterBtn.setImage(UIImage(named: "categories-icon"), for: .highlighted)
+        personalFilterBtn.setImage(UIImage(named: "star-black"), for: .highlighted)
+        postTypeFilterBtn.setImage(UIImage(named: "funnel-black-small"), for: .highlighted)
+        categoryFilterBtn.setImage(UIImage(named: "category-black-small"), for: .highlighted)
         
+        noPostsLbl.isHidden = true
+        noPostsImageView.isHidden = true
         
         let customView = UIView()
         customView.frame = CGRect(x: 0, y: 0, width: 36, height: 36)
@@ -67,7 +79,7 @@ class MyInfoVC: UIViewController, UITableViewDelegate, UITableViewDataSource, UI
         
         let button: UIButton = UIButton(type: UIButtonType.custom)
         button.setImage(UIImage(named: "notification.png"), for: UIControlState())
-        button.addTarget(self, action: #selector(MyInfoVC.notificationBtnPressed), for: UIControlEvents.touchUpInside)
+//        button.addTarget(self, action: #selector(MyInfoVC.notificationBtnPressed), for: UIControlEvents.touchUpInside)
         button.frame = CGRect(x: 0, y: 0, width: 27, height: 27)
         let rightBarButton = UIBarButtonItem(customView: button)
         self.navigationItem.rightBarButtonItem = rightBarButton
@@ -82,41 +94,70 @@ class MyInfoVC: UIViewController, UITableViewDelegate, UITableViewDataSource, UI
         tableView.dataSource = self
         tableView.rowHeight = UITableViewAutomaticDimension
         tableView.estimatedRowHeight = 300
-        
-        personalFilterOption = "My Posts"
-        postTypeFilterOption = "All"
-        categoryFilterOption = "All"
-        
-        let iD = UserService.ds.currentUserID
-        URL_BASE.child("user-posts").child(iD).observeSingleEvent(of: FIRDataEventType.value, with: { (snapshot) in
-            
-            let value = snapshot.value as? NSDictionary ?? [:]
-            for post in value {
-                let key = post.key as! String
-                let postDict = post.value as! Dictionary<String,AnyObject>
-                let post = Post(postKey: key, dictionary: postDict)
-                self.posts.append(post)
-            }
-            self.tableView.reloadData()
-        })
 
+        if !comingFromCategoryFilterVC {
+            categoryFilterOptions?.removeAll()
+            personalFilterOption = "My Posts"
+            postTypeFilterOption = "All"
+            previousPersonalFilterRow = 0
+            previousPostTypeFilterRow = 0
+            refreshPostFeed()
+        }
+        
+        print("VDL: \(categoryFilterOptions)")
+        
         if revealViewController() != nil {
             menuButton.addTarget(revealViewController(), action: #selector(SWRevealViewController.revealToggle(_:)), for: UIControlEvents.touchUpInside)
         }
+    }
+    
+    func postAction(action: String) {
+        
+        showScoreView(action: action)
+    }
+    
+    func postManipulated(post: Post, action: String) {
 
+        let  index = (posts as NSArray).index(of: post)
+        if index == NSNotFound { return }
+        
+        posts.remove(at: index)
+        
+        tableView.beginUpdates()
+        let indexPathForRow = NSIndexPath(row: index, section: 0)
+        tableView.deleteRows(at: [indexPathForRow as IndexPath], with: .fade)
+        
+        tableView.endUpdates()
+        
+        showScoreView(action: action)
+    }
+    
+    func showScoreView(action: String) {
+        
+        self.scoreView.isHidden = false
+        self.scoreView.alpha = 1
+        
+        if action == "dislike" {
+            self.scoreLbl.textColor = UIColor.red
+            self.scoreLbl.text = "-1"
+        } else if action == "like" {
+            self.scoreLbl.textColor = UIColor.green
+            self.scoreLbl.text = "+1"
+        }
+        UIView.animate(withDuration: 1, animations: {
+            self.scoreView.alpha = 0
+            }, completion: { finished in
+                if !finished {
+                    return
+                }
+                self.scoreView.isHidden = true
+        })
     }
     
     func notificationBtnPressed() {
         
     }
-    
-//    private func tableView(_ collectionView: UICollectionView, didSelectItemAtIndexPath indexPath: IndexPath) {
-//        
-//        var post: Post!
-//        post = posts[(indexPath as NSIndexPath).row]
-//        performSegue(withIdentifier: "PostDetailVC", sender: post)
-//    }
-    
+        
     func numberOfComponents(in pickerView: UIPickerView) -> Int {
         return 1
     }
@@ -127,8 +168,6 @@ class MyInfoVC: UIViewController, UITableViewDelegate, UITableViewDataSource, UI
             return personalDataSource.count
         } else if postTypeFilterActive {
             return postTypeDataSource.count
-        } else if categoryFilterActive {
-            return categoryDataSource.count
         }
         return personalDataSource.count
     }
@@ -139,19 +178,28 @@ class MyInfoVC: UIViewController, UITableViewDelegate, UITableViewDataSource, UI
             return personalDataSource[row]
         } else if postTypeFilterActive {
             return postTypeDataSource[row]
-        } else if categoryFilterActive {
-            return categoryDataSource[row]
         }
         return personalDataSource[row]
     }
     
-    func  pickerView(_ pickerView: UIPickerView, didSelectRow row: Int, inComponent component: Int) {
+    func pickerView(_ pickerView: UIPickerView, didSelectRow row: Int, inComponent component: Int) {
+        
+        if darkendViewBtn.isHidden {
+            
+            if personalFilterActive {
+                self.pickerView.selectRow(previousPersonalFilterRow, inComponent: 0, animated: false)
+            } else if postTypeFilterActive {
+                self.pickerView.selectRow(previousPostTypeFilterRow, inComponent: 0, animated: false)
+            }
+            return
+        }
+        
         if personalFilterActive {
             self.personalFilterOption = personalDataSource[row]
+            previousPersonalFilterRow = row
         } else if postTypeFilterActive {
             self.postTypeFilterOption = postTypeDataSource[row]
-        } else if categoryFilterActive {
-            self.categoryFilterOption = categoryDataSource[row]
+            previousPostTypeFilterRow = row
         }
     }
     
@@ -160,20 +208,99 @@ class MyInfoVC: UIViewController, UITableViewDelegate, UITableViewDataSource, UI
     }
     
     func tableView(_ tableView: UITableView, numberOfRowsInSection section: Int) -> Int {
+        
+        if posts.count == 0 {
+            noPostsLbl.isHidden = false
+            noPostsImageView.isHidden = false
+        } else {
+            noPostsLbl.isHidden = true
+            noPostsImageView.isHidden = true
+        }
+        
+        if personalFilterOption == "My Posts" {
+            
+            if postTypeFilterOption == "All" && posts.count == 0 {
+                noPostsLbl.text = "You have not created any posts"
+                noPostsImageView.image = UIImage(named: "folder")
+            } else {
+                getNoPostTypeMessage()
+            }
+        } else if personalFilterOption == "Liked" && posts.count == 0 {
+            
+            if postTypeFilterOption == "All" {
+                noPostsLbl.text = "You have not liked any posts"
+                noPostsImageView.image = UIImage(named: "plus-white")
+            } else {
+                getNoPostTypeMessage()
+            }
+        } else if personalFilterOption == "Disliked" && posts.count == 0 {
+                
+            if postTypeFilterOption == "All" {
+                noPostsLbl.text = "You have not disliked any posts"
+                noPostsImageView.image = UIImage(named: "minus-white")
+            } else {
+                getNoPostTypeMessage()
+            }
+        }
+        if categoryFilterOptions != nil && (categoryFilterOptions?.count)! > 0  && posts.count == 0 {
+            
+            noPostsLbl.text = "There are no posts from the selected categories matching your criteria"
+            noPostsImageView.image = UIImage(named: "category")
+        }
         return posts.count
     }
+    
+    func getNoPostTypeMessage() {
+        
+         if postTypeFilterOption == "Text" {
+            noPostsLbl.text = "There are no text posts matching your criteria"
+            noPostsImageView.image = UIImage(named: "font")
+        } else if postTypeFilterOption == "Link" {
+            noPostsLbl.text = "There are no link posts matching your criteria"
+            noPostsImageView.image = UIImage(named: "link-white")
+        } else if postTypeFilterOption == "Image" {
+            noPostsLbl.text = "There are no image posts matching your criteria"
+            noPostsImageView.image = UIImage(named: "camera-white")
+        } else if postTypeFilterOption == "Video" {
+            noPostsLbl.text = "There are no video posts matching your criteria"
+            noPostsImageView.image = UIImage(named: "camcorder-white")
+        } else if postTypeFilterOption == "Audio" {
+            noPostsLbl.text = "There are no audio posts matching your criteria"
+            noPostsImageView.image = UIImage(named: "mic-white")
+        } else if postTypeFilterOption == "Quote" {
+            noPostsLbl.text = "There are no quote posts matching your criteria"
+            noPostsImageView.image = UIImage(named: "two-quotes-white")
+        }
+    }
+    
+    func tableView(_ tableView: UITableView, didSelectRowAt indexPath: IndexPath) {
+        
+        let indexPath = tableView.indexPathForSelectedRow
+        let currentCell = tableView.cellForRow(at: indexPath!) as! PostCell
+        
+        userFollowersToPass = currentCell.followersLbl.text!
+        postToPass = currentCell.post
+        mediaImageToPass = currentCell.postImg.image
+        videoDataToPass = currentCell.videoData
+        followingImgToPass = currentCell.neutralImageView.image
+        userPhotoToPass = currentCell.profileImg.image
+        
+        performSegue(withIdentifier: "PostDetailVC", sender: self)
+    }
+
     
     func tableView(_ tableView: UITableView, cellForRowAt indexPath: IndexPath) -> UITableViewCell {
         
         if posts.count > 0 {
+            
             let post = posts[(indexPath as NSIndexPath).row]
             
             if let cell = tableView.dequeueReusableCell(withIdentifier: "PostCell", for: indexPath) as? PostCell {
                 
                 cell.request?.cancel()
                 
-                let userLat = currentLocation["latitude"] as? Double
-                let userLong = currentLocation["longitude"] as? Double
+//                let userLat = currentLocation["latitude"] as? Double
+//                let userLong = currentLocation["longitude"] as? Double
                 
                 var img: UIImage?
                 
@@ -182,15 +309,18 @@ class MyInfoVC: UIViewController, UITableViewDelegate, UITableViewDataSource, UI
                 } else if let postImgUrl = post.thumbnail {
                     img = ActivityVC.imageCache.object(forKey: postImgUrl as AnyObject) as? UIImage
                 }
-                                
-                cell.configureCell(post, currentLocation: currentLocation, image: img, postType: "myinfo")
+                
+                cell.configureCell(post, currentLocation: currentLocation, image: img, postType: "myinfo", filterType: self.personalFilterOption)
+                
+                cell.delegate = self
+                cell.activityDelegate = self
                 
                 return cell
             } else {
-                return PostCell(coder: NSCoder())
+                return PostCell()
             }
         }
-        return PostCell(coder: NSCoder())
+        return PostCell()
     }
     
     func tableView(_ tableView: UITableView, heightForRowAt indexPath: IndexPath) -> CGFloat {
@@ -198,27 +328,28 @@ class MyInfoVC: UIViewController, UITableViewDelegate, UITableViewDataSource, UI
         
     }
     
-    func tableView(_ tableView: UITableView, didSelectRowAt indexPath: IndexPath) {
-        self.performSegue(withIdentifier: "PostDetailVC", sender: posts[indexPath.row])
-    }
+//    func tableView(_ tableView: UITableView, didSelectRowAt indexPath: IndexPath) {
+//        self.performSegue(withIdentifier: "PostDetailVC", sender: posts[indexPath.row])
+//    }
     
     @IBAction func personalFilterBtnPressed(_ sender: AnyObject) {
         
-            personalFilterActive = true
-            postTypeFilterActive = false
-            categoryFilterActive = false
-            pickerView.isHidden = false
-            darkendViewBtn.isHidden = false
-            darkendViewBtn.isUserInteractionEnabled = true
-            darkendViewBtn.alpha = 0.0
+        personalFilterActive = true
+        postTypeFilterActive = false
+        categoryFilterActive = false
+        pickerView.isHidden = false
+        darkendViewBtn.isHidden = false
+        darkendViewBtn.isUserInteractionEnabled = true
+        darkendViewBtn.alpha = 0.0
             
-            UIView.animate(withDuration: 0.5, animations: {
+        UIView.animate(withDuration: 0.25, animations: {
+        
+            self.darkendViewBtn.alpha = 0.75
+        }, completion: { finished in
                 
-                self.darkendViewBtn.alpha = 0.75
-            }, completion: { finished in
-                
-            })
+        })
         pickerView.reloadAllComponents()
+        self.pickerView.selectRow(previousPersonalFilterRow, inComponent: 0, animated: false)
     }
     
     @IBAction func postTypeFilterBtnPressed(_ sender: AnyObject) {
@@ -231,13 +362,14 @@ class MyInfoVC: UIViewController, UITableViewDelegate, UITableViewDataSource, UI
         darkendViewBtn.isUserInteractionEnabled = true
         darkendViewBtn.alpha = 0.0
         
-        UIView.animate(withDuration: 0.5, animations: {
+        UIView.animate(withDuration: 0.25, animations: {
             
             self.darkendViewBtn.alpha = 0.75
         }, completion: { finished in
                 
         })
         pickerView.reloadAllComponents()
+        self.pickerView.selectRow(previousPostTypeFilterRow, inComponent: 0, animated: false)
     }
     
     @IBAction func darkenedViewBtnPressed(_ sender: AnyObject) {
@@ -247,14 +379,205 @@ class MyInfoVC: UIViewController, UITableViewDelegate, UITableViewDataSource, UI
         darkendViewBtn.isUserInteractionEnabled = false
         darkendViewBtn.alpha = 0.0
         
-        print(personalFilterOption)
-        print(postTypeFilterOption)
-        print(categoryFilterOption)
+        refreshPostFeed()
+    }
+    
+    func filterPostFeedType() {
+        
+        if previousPostTypeFilterRow == 0 {
+            return
+        } else {
+            var i = 0
+            while(posts.count > 0 && i < posts.count) {
+                var shouldRemoveFromPosts = true
+                if posts[i].type == postTypeFilterOption.lowercased() {
+                    shouldRemoveFromPosts = false
+                }
+                if shouldRemoveFromPosts {
+                    print("removing")
+                    self.posts.remove(at: i)
+                } else {
+                    i += 1
+                }
+            }
+        }
+        tableView.reloadData()
+    }
+    
+    func filterPostFeedCategories() {
+        
+        if categoryFilterOptions?.count == 0 || categoryFilterOptions == nil {
+            return
+        }
+        var i = 0
+        while(posts.count > 0 && i < posts.count) {
+            var shouldRemoveFromPosts = true
+            print(posts.count)
+            for cat in posts[i].categories {
+                for fo in categoryFilterOptions! {
+                    if fo == cat {
+                        shouldRemoveFromPosts = false
+                    }
+                }
+            }
+            if shouldRemoveFromPosts {
+                print("Removing")
+                self.posts.remove(at: i)
+            } else {
+                i += 1
+            }
+        }
+        tableView.reloadData()
+    }
+    
+    func refreshPostFeed() {
+        
+        let currentUserID = UserService.ds.currentUserID
+        
+        self.posts = []
+        
+        if personalFilterOption == "My Posts" {
+            
+            URL_BASE.child("posts").queryOrdered(byChild: "user_id").queryEqual(toValue: currentUserID).observeSingleEvent(of: FIRDataEventType.value, with: { snapshot in
+
+                let userPosts = snapshot.children.allObjects as? [FIRDataSnapshot] ?? []
+                
+                if userPosts.count == 0 {
+                    
+                    self.noPostsLbl.isHidden = false
+                    self.noPostsImageView.isHidden = false
+                    self.noPostsLbl.text = "You have not created any posts"
+                    self.noPostsImageView.image = UIImage(named: "folder")
+                }
+                
+                for post in userPosts {
+                    
+                    if let postDict = post.value as? Dictionary<String,AnyObject> {
+                        let key = post.key
+                        let post = Post(postKey: key, dictionary: postDict)
+                        self.posts.append(post)
+                    }
+                }
+                if self.posts.count > 0 {
+                    
+                    self.filterPostFeedType()
+                    self.filterPostFeedCategories()
+                    self.tableView.isHidden = false
+                    self.posts.reverse()
+                }
+                self.tableView.reloadData()
+            })
+            
+        } else if personalFilterOption == "Liked" {
+            
+            URL_BASE.child("users").child(currentUserID).child("likes").observeSingleEvent(of: FIRDataEventType.value, with: { snapshot in
+                
+                let likedKeys = snapshot.children.allObjects as? [FIRDataSnapshot] ?? []
+                
+                if likedKeys.count == 0 {
+                    
+                    self.noPostsLbl.isHidden = false
+                    self.noPostsImageView.isHidden = false
+                    self.noPostsLbl.text = "You have not liked any posts"
+                    self.noPostsImageView.image = UIImage(named: "plus-white")
+                }
+
+                for post in likedKeys {
+                    
+                    self.myGroup.enter()
+                    URL_BASE.child("posts").child(post.key).observeSingleEvent(of: FIRDataEventType.value, with: { snapshot in
+                        
+                        let postDict = snapshot.value as! Dictionary<String,AnyObject>
+                        let post = Post(postKey: post.key, dictionary: postDict)
+                        self.posts.append(post)
+                        self.myGroup.leave()
+                    })
+                }
+                self.myGroup.notify(queue: DispatchQueue.main, execute: {
+                    if self.posts.count > 0 {
+                        self.filterPostFeedType()
+                        self.filterPostFeedCategories()
+                        self.posts.reverse()
+                        self.tableView.isHidden = false
+                    } else {
+                        self.noPostsLbl.text = "You have not liked any posts"
+                        self.noPostsImageView.image = UIImage(named: "plus-white")
+                        self.tableView.isHidden = true
+                    }
+                    self.tableView.reloadData()
+                })
+            })
+
+        } else if personalFilterOption == "Disliked" {
+            
+            URL_BASE.child("users").child(currentUserID).child("dislikes").observeSingleEvent(of: FIRDataEventType.value, with: { snapshot in
+                
+                let dislikedKeys = snapshot.children.allObjects as? [FIRDataSnapshot] ?? []
+                
+                if dislikedKeys.count == 0 {
+                    
+                    self.noPostsLbl.isHidden = false
+                    self.noPostsImageView.isHidden = false
+                    self.noPostsLbl.text = "You have not disliked any posts."
+                    self.noPostsImageView.image = UIImage(named: "minus-white")
+                }
+                
+                for post in dislikedKeys {
+
+                    self.myGroup.enter()
+                    URL_BASE.child("posts").child(post.key).observeSingleEvent(of: FIRDataEventType.value, with: { snapshot in
+                        
+                        let postDict = snapshot.value as! Dictionary<String,AnyObject>
+                        let post = Post(postKey: post.key, dictionary: postDict)
+                        self.posts.append(post)
+                        self.myGroup.leave()
+                    })
+                }
+                self.myGroup.notify(queue: DispatchQueue.main, execute: {
+                    
+                    if self.posts.count > 0 {
+                        self.filterPostFeedType()
+                        self.filterPostFeedCategories()
+                        self.posts.reverse()
+                        self.tableView.isHidden = false
+                    } else {
+                        self.noPostsLbl.text = "You have not disliked any posts."
+                        self.noPostsImageView.image = UIImage(named: "minus-white")
+                        self.tableView.isHidden = true
+                    }
+                    self.tableView.reloadData()
+                })
+            })
+        }
     }
     
     @IBAction func unwindToMyInfoVC(_ segue: UIStoryboardSegue) {
-        
-        
+        if let sourceViewController = segue.source as? CategoryFilterVC {
+            self.categoryFilterOptions = sourceViewController.checked
+            self.comingFromCategoryFilterVC = sourceViewController.comingFromCategoryVC
+            refreshPostFeed()
+        }
     }
+        
+    override func prepare(for segue: UIStoryboardSegue, sender: Any?) {
+        
+        if segue.identifier == "CategoryFilterVC" {
 
+            let vC = segue.destination as! CategoryFilterVC
+            if categoryFilterOptions != nil && (categoryFilterOptions?.count)! > 0 {
+                vC.checked = categoryFilterOptions!
+            }
+            vC.previousVC = "MyInfoVC"
+        } else if segue.identifier == "PostDetailVC" {
+            
+            let nav = segue.destination as! UINavigationController
+            let vC = nav.topViewController as! PostDetailVC
+            vC.followers = userFollowersToPass
+            vC.post = postToPass
+            vC.mediaImage = mediaImageToPass
+            vC.followingStatus = followingImgToPass
+            vC.userPhotoPostDetail = userPhotoToPass
+            vC.previousVC = "MyInfoVC"
+        }
+    }
 }
