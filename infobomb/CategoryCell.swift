@@ -38,7 +38,7 @@ class CategoryCell: UITableViewCell {
         
         self.category = category
         self.categoryTxt.text = category.name
-        self.categoryCheckmark.isHidden = true
+        self.categoryCheckmark.image = nil
         
         //subscriptionRef = UserService.ds.REF_USER_CURRENT.child("subscriptions").child(category.name)
         

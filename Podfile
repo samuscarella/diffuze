@@ -14,4 +14,5 @@ target ‘infobomb’ do
  pod ‘Pulsator’
  pod ‘FDWaveformView’
  pod 'SwiftyGif'
+ pod 'SCLAlertView'
 end

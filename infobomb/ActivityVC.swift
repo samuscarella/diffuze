@@ -12,11 +12,15 @@ import Pulsator
 import Firebase
 import AVFoundation
 import GeoFire
+import SCLAlertView
 
 //private var latitude: Double = 0.0
 //private var longitude: Double = 0.0
 
-class ActivityVC: UIViewController, CLLocationManagerDelegate, UITableViewDelegate, UITableViewDataSource, TableViewCellDelegate {
+//ADD GREY IMAGE TO FOLLOWERSVC WHEN USER HAS NO FOLLOWERS
+//UPDATE TRIM WHITESPACE METHOD IN BOMBVC NOT POSTCELL
+
+class ActivityVC: UIViewController, CLLocationManagerDelegate, UITableViewDelegate, UITableViewDataSource, UIPickerViewDelegate, UIPickerViewDataSource, TableViewCellDelegate {
     
     @IBOutlet weak var notificationBtn: UIBarButtonItem!
     @IBOutlet weak var pulseImg: UIImageView!
@@ -26,12 +30,15 @@ class ActivityVC: UIViewController, CLLocationManagerDelegate, UITableViewDelega
     @IBOutlet weak var scoreLbl: UILabel!
     @IBOutlet weak var categoryFilterBtn: UIButton!
     @IBOutlet weak var postTypeFilterBtn: UIButton!
+    @IBOutlet weak var pickerView: UIPickerView!
+    @IBOutlet weak var darkendViewBtn: UIButton!
     
     static var imageCache = NSCache<AnyObject, AnyObject>()
     
     let pulsator = Pulsator()
     let userID = FIRAuth.auth()?.currentUser?.uid
     let iD = UserService.ds.currentUserID
+    let postTypeDataSource = ["All","Text","Link","Image","Video","Audio","Quote"]
 
     var locationService: LocationService!
     var currentLocation: [String:AnyObject] = [:]
@@ -44,9 +51,26 @@ class ActivityVC: UIViewController, CLLocationManagerDelegate, UITableViewDelega
     var followingImage: UIImage!
     var notFollowingImage: UIImage!
     var lineView: UIView!
+    var comingFromCategoryFilterVC = false
+    var postTypeFilterActive = false
+    var categoryFilterActive = false
+    var postTypeFilterOption: String!
+    var categoryFilterOptions: [String]?
+    var previousPostTypeFilterRow: Int!
+    var postToPass: Post!
+    var userFollowersToPass: String!
+    var mediaImageToPass: UIImage?
+    var videoDataToPass: NSData?
+    var followingImgToPass: UIImage!
+    var myGroup = DispatchGroup()
+    var userPhotoToPass: UIImage?
+    var didJustLogIn = false
 
     override func viewDidLoad() {
         super.viewDidLoad()
+        
+        pickerView.delegate = self
+        pickerView.dataSource = self
         
         UserDefaults.standard.setValue(false, forKey: "_UIConstraintBasedLayoutLogUnsatisfiable")
         self.view.backgroundColor = SMOKY_BLACK
@@ -56,10 +80,8 @@ class ActivityVC: UIViewController, CLLocationManagerDelegate, UITableViewDelega
         followingImage = UIImage(named: "following-blue")
         notFollowingImage = UIImage(named: "follower-grey")
         
-        postTypeFilterBtn.imageEdgeInsets = UIEdgeInsetsMake(30, 80, 30, 80)
-        postTypeFilterBtn.setImage(UIImage(named: "funnel-black"), for: .highlighted)
-        categoryFilterBtn.imageEdgeInsets = UIEdgeInsetsMake(30, 80, 30, 80)
-        categoryFilterBtn.setImage(UIImage(named: "categories-icon"), for: .highlighted)
+        postTypeFilterBtn.setImage(UIImage(named: "funnel-black-small"), for: .highlighted)
+        categoryFilterBtn.setImage(UIImage(named: "category-black-small"), for: .highlighted)
         
         self.navigationController?.navigationBar.setBackgroundImage(UIImage(), for: .default)
         self.navigationController?.navigationBar.shadowImage = UIImage()
@@ -99,11 +121,11 @@ class ActivityVC: UIViewController, CLLocationManagerDelegate, UITableViewDelega
         
         UserService.ds.REF_USER_CURRENT.observeSingleEvent(of: FIRDataEventType.value, with: { (snapshot) in
             
-                let value = snapshot.value as? NSDictionary
-                let latitude = value!["latitude"]
-                let longitude = value!["longitude"]
-                self.currentLocation["latitude"] = latitude as AnyObject?
-                self.currentLocation["longitude"] = longitude as AnyObject?
+              //  let value = snapshot.value as? NSDictionary
+              //  let latitude = value!["latitude"]
+              //  let longitude = value!["longitude"]
+              //  self.currentLocation["latitude"] = latitude as AnyObject?
+              //  self.currentLocation["longitude"] = longitude as AnyObject?
 //              self.tableView.reloadData()
         })
 
@@ -117,38 +139,27 @@ class ActivityVC: UIViewController, CLLocationManagerDelegate, UITableViewDelega
         pulsator.pulseInterval = 2
         pulseImg.layer.superlayer?.insertSublayer(pulsator, below: pulseImg.layer)
         pulsator.start()
- 
+        
         tableView.delegate = self
         tableView.dataSource = self
         tableView.rowHeight = UITableViewAutomaticDimension
         tableView.estimatedRowHeight = 300
         tableView.isHidden = true
         
+        if !comingFromCategoryFilterVC {
+            categoryFilterOptions?.removeAll()
+            postTypeFilterOption = "All"
+            previousPostTypeFilterRow = 0
+            refreshPostFeed()
+        }
+        
         let currentUserID = UserDefaults.standard.object(forKey: KEY_UID) as! String
         
-        URL_BASE.child("user-radar").child(currentUserID).observeSingleEvent(of: FIRDataEventType.value, with: { (snapshot) in
-            
-            if let radarPosts = snapshot.children.allObjects as? [FIRDataSnapshot] {
-                
-                self.posts = []
-                for post in radarPosts {
-                    if let postDict = post.value as? Dictionary<String, AnyObject> {
-                        
-                        let post = Post(postKey: post.key, dictionary: postDict)
-                        self.posts.append(post)
-                    }
-                }
-            }
-            if self.posts.count > 0 {
-                self.tableView.reloadData()
-                self.tableView.isHidden = false
-            }
-        })
-
+            getRadarPosts()
         URL_BASE.child("users").child(currentUserID).child("following").observe(FIRDataEventType.value, with: { (snapshot) in
             
             let followingUsers = snapshot.children.allObjects as? [FIRDataSnapshot] ?? []
-
+            
             let cells = self.tableView.visibleCells as? [PostCell] ?? []
             
             if followingUsers.count > 0 {
@@ -194,6 +205,15 @@ class ActivityVC: UIViewController, CLLocationManagerDelegate, UITableViewDelega
 //        }
 //    }
     
+    override func viewDidAppear(_ animated: Bool) {
+        
+        if didJustLogIn {
+            
+            let alertView = SCLAlertView()
+            alertView.showInfo("Tip", subTitle: "\nWelcome to Diffuze! When posts reach your location, they will show up here in the radar feed.", closeButtonTitle: "Ok", duration: 0.0, colorStyle: 0xFACE00, colorTextButton: 0x000000, circleIconImage: UIImage(named: "error-white"), animationStyle: .topToBottom)
+        }
+    }
+    
     override func viewDidLayoutSubviews() {
         super.viewDidLayoutSubviews()
         
@@ -206,10 +226,64 @@ class ActivityVC: UIViewController, CLLocationManagerDelegate, UITableViewDelega
     
     override func viewWillDisappear(_ animated: Bool) {
         NotificationCenter.default.removeObserver(self)
+        didJustLogIn = false
     }
     
+    @IBAction func postTypeFilterBtnPressed(_ sender: AnyObject) {
+        postTypeFilterActive = true
+        categoryFilterActive = false
+        pickerView.isHidden = false
+        darkendViewBtn.isHidden = false
+        darkendViewBtn.isUserInteractionEnabled = true
+        darkendViewBtn.alpha = 0.0
+        
+        UIView.animate(withDuration: 0.25, animations: {
+            
+            self.darkendViewBtn.alpha = 0.75
+            }, completion: { finished in
+                
+        })
+        pickerView.reloadAllComponents()
+        self.pickerView.selectRow(previousPostTypeFilterRow, inComponent: 0, animated: false)
+    }
+        
+    func numberOfComponents(in pickerView: UIPickerView) -> Int {
+        return 1
+    }
     
-    func postDeleted(post: Post, action: String) {
+    func pickerView(_ pickerView: UIPickerView, numberOfRowsInComponent component: Int) -> Int {
+        
+         if postTypeFilterActive {
+            return postTypeDataSource.count
+        }
+        return postTypeDataSource.count
+    }
+    
+    func pickerView(_ pickerView: UIPickerView, titleForRow row: Int, forComponent component: Int) -> String? {
+        
+        if postTypeFilterActive {
+            return postTypeDataSource[row]
+        }
+        return postTypeDataSource[row]
+    }
+    
+    func pickerView(_ pickerView: UIPickerView, didSelectRow row: Int, inComponent component: Int) {
+        
+        if darkendViewBtn.isHidden {
+            
+            if postTypeFilterActive {
+                self.pickerView.selectRow(previousPostTypeFilterRow, inComponent: 0, animated: false)
+            }
+            return
+        }
+        
+       if postTypeFilterActive {
+            self.postTypeFilterOption = postTypeDataSource[row]
+            previousPostTypeFilterRow = row
+        }
+    }
+
+    func postManipulated(post: Post, action: String) {
         
         let index = (posts as NSArray).index(of: post)
         if index == NSNotFound { return }
@@ -226,12 +300,6 @@ class ActivityVC: UIViewController, CLLocationManagerDelegate, UITableViewDelega
         showScoreView(action: action)
     }
     
-    private func tableView(_ collectionView: UICollectionView, didSelectItemAtIndexPath indexPath: IndexPath) {
-        
-        var post: Post!
-        post = posts[(indexPath as NSIndexPath).row]
-        performSegue(withIdentifier: "PostDetailVC", sender: post)
-    }
     
     func numberOfSections(in tableView: UITableView) -> Int {
         return 1
@@ -242,6 +310,11 @@ class ActivityVC: UIViewController, CLLocationManagerDelegate, UITableViewDelega
         if posts.count > 0 {
             pulseImg.isHidden = true
             pulsator.stop()
+        } else {
+            pulseImg.isHidden = false
+            if !pulsator.isPulsating {
+                pulsator.start()
+            }
         }
         return posts.count
     }
@@ -265,17 +338,17 @@ class ActivityVC: UIViewController, CLLocationManagerDelegate, UITableViewDelega
                 } else if let postImgUrl = post.thumbnail {
                     img = ActivityVC.imageCache.object(forKey: postImgUrl as AnyObject) as? UIImage
                 }
-                
+                                
                 cell.delegate = self
                 
-                cell.configureCell(post, currentLocation: currentLocation, image: img, postType: "radar")
+                cell.configureCell(post, currentLocation: currentLocation, image: img, postType: "radar", filterType: nil)
                 
                 return cell
             } else {
-                return PostCell(coder: NSCoder())
+                return PostCell()
             }
         }
-        return PostCell(coder: NSCoder())
+        return PostCell()
     }
     
     func tableView(_ tableView: UITableView, heightForRowAt indexPath: IndexPath) -> CGFloat {
@@ -284,10 +357,22 @@ class ActivityVC: UIViewController, CLLocationManagerDelegate, UITableViewDelega
     }
     
     func tableView(_ tableView: UITableView, didSelectRowAt indexPath: IndexPath) {
-        self.performSegue(withIdentifier: "PostDetailVC", sender: posts[indexPath.row])
+        
+        let indexPath = tableView.indexPathForSelectedRow
+        let currentCell = tableView.cellForRow(at: indexPath!) as! PostCell
+        
+        userFollowersToPass = currentCell.followersLbl.text!
+        postToPass = currentCell.post
+        mediaImageToPass = currentCell.postImg.image
+        videoDataToPass = currentCell.videoData
+        followingImgToPass = currentCell.followerBtn.imageView?.image
+        userPhotoToPass = currentCell.profileImg.image
+        
+        performSegue(withIdentifier: "PostDetailVC", sender: self)
     }
     
     func shake() {
+        
         let animation = CABasicAnimation(keyPath: "position")
         animation.duration = 0.1
         animation.repeatCount = Float.infinity
@@ -298,6 +383,7 @@ class ActivityVC: UIViewController, CLLocationManagerDelegate, UITableViewDelega
     }
     
     func heightForView(_ label:UILabel, text: String, font:UIFont) -> CGFloat {
+        
         label.numberOfLines = 0
         label.lineBreakMode = NSLineBreakMode.byWordWrapping
         label.font = font
@@ -309,6 +395,63 @@ class ActivityVC: UIViewController, CLLocationManagerDelegate, UITableViewDelega
     
     func notificationBtnPressed() {
         
+    }
+    
+    func filterPostFeedType() {
+        
+        if previousPostTypeFilterRow == 0 {
+            return
+        } else {
+            
+            var i = 0
+            
+            while(posts.count > 0 && i < posts.count) {
+                
+                var shouldRemoveFromPosts = true
+                
+                if posts[i].type == postTypeFilterOption.lowercased() {
+                    shouldRemoveFromPosts = false
+                }
+                if shouldRemoveFromPosts {
+                    self.posts.remove(at: i)
+                } else {
+                    i += 1
+                }
+            }
+        }
+        tableView.reloadData()
+    }
+    
+    func filterPostFeedCategories() {
+        
+        if categoryFilterOptions?.count == 0 || categoryFilterOptions == nil {
+            return
+        }
+        var i = 0
+        while(posts.count > 0 && i < posts.count) {
+            var shouldRemoveFromPosts = true
+            print(posts.count)
+            for cat in posts[i].categories {
+                for fo in categoryFilterOptions! {
+                    if fo == cat {
+                        shouldRemoveFromPosts = false
+                    }
+                }
+            }
+            if shouldRemoveFromPosts {
+
+                self.posts.remove(at: i)
+            } else {
+                i += 1
+            }
+        }
+        tableView.reloadData()
+    }
+    
+    func refreshPostFeed() {
+        
+        self.filterPostFeedType()
+        self.filterPostFeedCategories()
     }
     
     func showScoreView(action: String) {
@@ -333,12 +476,91 @@ class ActivityVC: UIViewController, CLLocationManagerDelegate, UITableViewDelega
         })
     }
     
+    func getRadarPosts() {
+        
+        URL_BASE.child("users").child(iD).child("radar").observeSingleEvent(of: FIRDataEventType.value, with: { (snapshot) in
+            
+            self.posts = []
+            if let radarPostKeys = snapshot.children.allObjects as? [FIRDataSnapshot] {
+                
+                for postKey in radarPostKeys {
+                    
+                    let key = postKey.key
+                    
+                    self.myGroup.enter()
+                    URL_BASE.child("posts").child(key).observeSingleEvent(of: FIRDataEventType.value, with: { (snap) in
+                        
+                        if let radarPost = snap.value as? Dictionary<String,AnyObject> {
+                            let postKey = radarPost["post_ref"] as! String
+                            print(radarPost)
+                            let post = Post(postKey: postKey, dictionary: radarPost)
+                            if post.active {
+                                self.posts.append(post)
+                            }
+                        }
+                        self.myGroup.leave()
+                    })
+                }
+                
+                self.myGroup.notify(queue: DispatchQueue.main, execute: {
+                    
+                    if self.posts.count > 0 {
+                        self.refreshPostFeed()
+                        self.posts.reverse()
+                        self.tableView.isHidden = false
+                    }
+                    self.tableView.reloadData()
+                })
+                
+            }
+        })
+    }
+    
+    @IBAction func darkenedViewBtnPressed(_ sender: AnyObject) {
+        
+        pickerView.isHidden = true
+        darkendViewBtn.isHidden = true
+        darkendViewBtn.isUserInteractionEnabled = false
+        darkendViewBtn.alpha = 0.0
+        
+        print(previousPostTypeFilterRow)
+        
+        getRadarPosts()
+    }
+    
+    override func prepare(for segue: UIStoryboardSegue, sender: Any?) {
+        
+        if segue.identifier == "CategoryFilterVC" {
+            
+            let vC = segue.destination as! CategoryFilterVC
+            if categoryFilterOptions != nil && (categoryFilterOptions?.count)! > 0 {
+                vC.checked = categoryFilterOptions!
+            }
+            vC.previousVC = "RadarVC"
+        } else if segue.identifier == "PostDetailVC" {
+            
+            let nav = segue.destination as! UINavigationController
+            let vC = nav.topViewController as! PostDetailVC
+            vC.followers = userFollowersToPass
+            vC.post = postToPass
+            vC.mediaImage = mediaImageToPass
+            vC.followingStatus = followingImgToPass
+            vC.userPhotoPostDetail = userPhotoToPass
+            vC.previousVC = "RadarVC"
+        }
+    }
+    
     @IBAction func unwindToActivityPost(_ segue: UIStoryboardSegue) {
         
     }
 
     @IBAction func unwindToActivityVC(_ segue: UIStoryboardSegue) {
         
+        if let sourceViewController = segue.source as? CategoryFilterVC {
+            self.categoryFilterOptions = sourceViewController.checked
+            self.comingFromCategoryFilterVC = sourceViewController.comingFromCategoryVC
+            getRadarPosts()
+        }
     }
 
 }

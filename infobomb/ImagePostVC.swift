@@ -32,6 +32,7 @@ class ImagePostVC: UIViewController, UINavigationControllerDelegate, UITextViewD
     var linkObj: [String:AnyObject] = [:]
     var videoPath: NSURL? = NSURL(string: "")!
     var previousVC: String!
+    var fileExtension: String?
     
     override func viewDidLoad() {
         super.viewDidLoad()
@@ -73,7 +74,7 @@ class ImagePostVC: UIViewController, UINavigationControllerDelegate, UITextViewD
             noMediaImg.image = UIImage(named: "no-video")
         }
         
-        let imageView = UIImageView(image:logo)
+        let imageView = UIImageView(image: logo)
         if previousVC == NEW_IMAGE_POST {
             imageView.frame = CGRect(x: 0, y: 0, width: 27, height: 27)
         } else {
@@ -94,7 +95,7 @@ class ImagePostVC: UIViewController, UINavigationControllerDelegate, UITextViewD
         
         let button: UIButton = UIButton(type: UIButtonType.custom)
         button.setImage(UIImage(named: "notification.png"), for: UIControlState())
-        button.addTarget(self, action: #selector(ActivityVC.notificationBtnPressed), for: UIControlEvents.touchUpInside)
+//        button.addTarget(self, action: #selector(ActivityVC.notificationBtnPressed), for: UIControlEvents.touchUpInside)
         button.frame = CGRect(x: 0, y: 0, width: 27, height: 27)
         let rightBarButton = UIBarButtonItem(customView: button)
         self.navigationItem.rightBarButtonItem = rightBarButton
@@ -128,7 +129,7 @@ class ImagePostVC: UIViewController, UINavigationControllerDelegate, UITextViewD
         dismiss(animated: true, completion: nil)
         
         if mediaType.isEqual(to: "public.image") {
-        
+            
             if let pickedImage = info[UIImagePickerControllerOriginalImage] as? UIImage {
                 
                 imageView.contentMode = .scaleAspectFill
@@ -136,6 +137,7 @@ class ImagePostVC: UIViewController, UINavigationControllerDelegate, UITextViewD
                 imageView.clipsToBounds = true
                 chooseImgIcon.isHidden = false
                 noImageView.isHidden = true
+                videoView.isHidden = false
                 linkObj["image"] = UIImageJPEGRepresentation(pickedImage, 0.25) as AnyObject?
             }
             
@@ -145,6 +147,10 @@ class ImagePostVC: UIViewController, UINavigationControllerDelegate, UITextViewD
              
                 let asset = AVURLAsset(url: videoURL as URL, options: nil)
                 let imgGenerator = AVAssetImageGenerator(asset: asset)
+                
+                if let fileExt = videoURL.pathExtension {
+                    self.fileExtension = fileExt
+                }
                 
                 var imgPreview: NSData?
                 
@@ -159,14 +165,16 @@ class ImagePostVC: UIViewController, UINavigationControllerDelegate, UITextViewD
                     print(err.debugDescription)
                 }
                 
-//                player = AVPlayer(url: videoURL as URL)
-//                self.videoLayer = AVPlayerLayer(player: player)
-//                self.videoLayer?.videoGravity = AVLayerVideoGravityResizeAspectFill
-//                self.videoLayer?.frame = videoView.bounds
-//                self.videoView.layer.addSublayer(videoLayer!)
-//                self.videoView.playerLayer = videoLayer
-//                self.videoView.bringSubview(toFront: self.chooseMediaIcon)
-//                self.videoView.isHidden = false
+                player = AVPlayer(url: videoURL as URL)
+                self.videoLayer = AVPlayerLayer(player: player)
+                self.videoLayer?.videoGravity = AVLayerVideoGravityResizeAspectFill
+                self.videoLayer?.frame = videoView.bounds
+                self.videoView.layer.addSublayer(videoLayer!)
+                self.videoView.playerLayer = videoLayer
+                self.videoView.bringSubview(toFront: self.chooseMediaIcon)
+                self.videoView.isHidden = false
+                self.imageView.isHidden = true
+                player!.play()
                 if let videoData = NSData(contentsOf: videoURL as URL) {
                     self.linkObj["video"] = videoData
                 }
@@ -223,6 +231,11 @@ class ImagePostVC: UIViewController, UINavigationControllerDelegate, UITextViewD
     }
     
     func textView(_ textView: UITextView, shouldChangeTextIn range: NSRange, replacementText text: String) -> Bool {
+        
+        if(text == "\n") {
+            textView.resignFirstResponder()
+            return false
+        }
         // remove the placeholder text when they start typing
         // first, see if the field is empty
         // if it's not empty, then the text should be black and not italic
@@ -251,13 +264,13 @@ class ImagePostVC: UIViewController, UINavigationControllerDelegate, UITextViewD
             return false
         }
     }
-    
-    
+        
     func dismissKeyboard() {
         view.endEditing(true)
     }
     
     @IBAction func backBtnPressed(_ sender: AnyObject) {
+        dismissKeyboard()
         if previousVC == NEW_IMAGE_POST {
             self.performSegue(withIdentifier: "unwindToNewPost", sender: self)
         } else if previousVC == NEW_VIDEO_POST {
@@ -307,6 +320,10 @@ class ImagePostVC: UIViewController, UINavigationControllerDelegate, UITextViewD
                 }
                 categoryView.previousVC = VIDEO_POST_VC
                 categoryView.linkObj = self.linkObj
+                
+                if self.fileExtension != nil {
+                    categoryView.fileExtension = self.fileExtension
+                }
                 
             }
         }

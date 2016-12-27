@@ -28,13 +28,12 @@ class FollowerCell: UITableViewCell {
         super.setSelected(selected, animated: animated)
     }
     
-    func configueCell(user: User,img: UIImage?) {
+    func configueCell(user: User, img: UIImage?) {
         self.usernameLbl.text = user.username
         
-        if let photo = user.userPhoto {
             if img != nil {
                 self.userPhotoImageView.image = img
-            } else {
+            } else if let photo = user.userPhoto {
                 
                 let url = URL(string: photo)!
                 self.request = Alamofire.request(url, method: .get).response { response in
@@ -43,12 +42,14 @@ class FollowerCell: UITableViewCell {
                         let data = response.data as NSData?
                         let img = UIImage(data: data as! Data)
                         self.userPhotoImageView.image = img
+                        FollowersVC.imageCache.setObject(img!, forKey: photo as AnyObject)
                     } else {
                         print("\(response.error)")
                     }
                 }
+            } else {
+                self.userPhotoImageView.image = UIImage(named: "user")
             }
-        }
         
         if let followers = user.followers {
             if followers.count == 1 {

@@ -51,6 +51,7 @@ PODS:
   - GoogleToolboxForMac/NSString+URLArguments (2.1.0)
   - GTMSessionFetcher/Core (1.1.7)
   - Pulsator (0.2.0)
+  - SCLAlertView (0.7.0)
   - SwiftLinkPreview (1.0.1)
   - SwiftyGif (3.0.0)
 
@@ -64,6 +65,7 @@ DEPENDENCIES:
   - Firebase/Storage
   - GeoFire (from `git@github.com:firebase/geofire-objc.git`)
   - Pulsator
+  - SCLAlertView
   - SwiftLinkPreview (~> 1.0.1)
   - SwiftyGif
 
@@ -92,9 +94,10 @@ SPEC CHECKSUMS:
   GoogleToolboxForMac: 2b2596cbb7186865e98cadf2b1e262d851c2b168
   GTMSessionFetcher: a1f8ed39e4fe21c68957daed472c7afbcdf29166
   Pulsator: 0df1d24c09354555be8f4c386ba7c4df297690eb
+  SCLAlertView: 8a14ffc40590c619e183eed2298b854385f30be1
   SwiftLinkPreview: 977461879ae31f9e2d1bf2fafba0553d99eacbb9
   SwiftyGif: d6b4d63de2a2a5134d8b54ba5719837319d77ef0
 
-PODFILE CHECKSUM: fd724e1c806cd2cb727fd1d50d5b847ceec81a83
+PODFILE CHECKSUM: 9e4db1a263b8d0332fa0a2952936f16af7cde6a6
 
 COCOAPODS: 1.1.0.beta.1

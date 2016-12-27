@@ -15,6 +15,7 @@ class Post {
     fileprivate var _text: String?
     fileprivate var _type: String!
     fileprivate var _categories: [String]!
+    fileprivate var _views: [String]!
     fileprivate var _postKey: String!
     fileprivate var _postRef: FIRDatabaseReference!
     fileprivate var _user_id: String!
@@ -33,8 +34,14 @@ class Post {
     fileprivate var _quoteType: String?
     fileprivate var _thumbnail: String?
     fileprivate var _shortUrl: String?
-    fileprivate var _timestamp: Int!
-
+    fileprivate var _url: String?
+    fileprivate var _active: Bool!
+    fileprivate var _timestamp: Double!
+    fileprivate var _extension: String?
+    fileprivate var _download: String?
+    fileprivate var _usersInRadius: Int!
+    fileprivate var _viewCount: Int!
+    fileprivate var _rating: Double!
     
     var message: String? {
         return _message
@@ -52,12 +59,40 @@ class Post {
         return _video
     }
     
+    var ext: String? {
+        return _extension
+    }
+    
+    var download: String? {
+        return _download
+    }
+    
     var audio: String? {
         return _audio
     }
     
     var thumbnail: String? {
         return _thumbnail
+    }
+    
+    var viewCount: Int {
+        return _viewCount
+    }
+    
+    var views: [String] {
+        return _views
+    }
+    
+    var rating: Double {
+        return _rating
+    }
+    
+    var usersInRadius: Int {
+        return _usersInRadius
+    }
+    
+    var distance: Int {
+        return _distance
     }
     
     var categories: [String]! {
@@ -104,12 +139,12 @@ class Post {
         return _dislikes
     }
     
-    var timestamp: Int {
-        return _timestamp
+    var active: Bool {
+        return _active
     }
     
-    var distance: Int {
-        return _distance
+    var timestamp: Double {
+        return _timestamp
     }
     
     var title: String? {
@@ -118,6 +153,10 @@ class Post {
     
     var shortUrl: String? {
         return _shortUrl
+    }
+    
+    var url: String? {
+        return _url
     }
     
     var postKey: String {
@@ -170,6 +209,9 @@ class Post {
         if let shortUrl = dictionary["shortUrl"] as? String {
             self._shortUrl = shortUrl
         }
+        if let url = dictionary["url"] as? String {
+            self._url = url
+        }
         if let author = dictionary["author"] as? String {
             self._author = author
         }
@@ -179,26 +221,52 @@ class Post {
         if let video = dictionary["video"] as? String {
             self._video = video
         }
+        if let ext = dictionary["extension"] as? String {
+            self._extension = ext
+        }
+        if let download = dictionary["download"] as? String {
+            self._download = download
+        }
         if let audio = dictionary["audio"] as? String {
             self._audio = audio
         }
-        if let timestamp = dictionary["created_at"]  as? Int {
+        if let timestamp = dictionary["created_at"] as? Double {
             self._timestamp = timestamp
         }
         if let quoteType = dictionary["quoteType"] as? String {
             self._quoteType = quoteType
         }
+        if let distance = dictionary["distance"] as? Int {
+            self._distance = distance
+        }
+        if let uIR = dictionary["usersInRadius"] as? Int {
+            self._usersInRadius = uIR
+        }
         if let thumbnail = dictionary["thumbnail"] as? String {
             self._thumbnail = thumbnail
         }
-        if let categoryArray = dictionary["categories"] as? NSArray {
+        if let active = dictionary["active"] as? Bool {
+            self._active = active
+        }
+        if let viewCount = dictionary["viewCount"] as? Int {
+            self._viewCount = viewCount
+        }
+        if let rating = dictionary["rating"] as? Double {
+            self._rating = rating
+        }
+        if let viewsDict = dictionary["views"] as? Dictionary<String,AnyObject> {
+            
+            var views = [String]()
+            for(key, _) in viewsDict {
+                views.append(key)
+            }
+            self._views = views
+        }
+        if let categoryDict = dictionary["categories"] as? Dictionary<String,AnyObject> {
             
             var categoryNames = [String]()
-            for cat in categoryArray {
-                let categoryObj = cat as! Dictionary<String, AnyObject>
-                for(key, _) in categoryObj {
-                    categoryNames.append(key)
-                }
+            for(key, _) in categoryDict {
+                categoryNames.append(key)
             }
             self._categories = categoryNames
         }

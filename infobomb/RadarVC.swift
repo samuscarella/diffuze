@@ -14,7 +14,8 @@ class RadarVC: UIViewController, UITableViewDelegate, UITableViewDataSource, Act
     @IBOutlet weak var tableView: UITableView!
     @IBOutlet weak var scoreView: UIView!
     @IBOutlet weak var scoreLbl: UILabel!
-    @IBOutlet weak var neutralImageView: UIImageView!
+    @IBOutlet weak var noPostsLbl: UILabel!
+    @IBOutlet weak var noPostsImageView: UIImageView!
     
     let userID = FIRAuth.auth()?.currentUser?.uid
     let iD = UserService.ds.currentUserID
@@ -27,6 +28,11 @@ class RadarVC: UIViewController, UITableViewDelegate, UITableViewDataSource, Act
     var notFollowingImage: UIImage!
     var myGroup = DispatchGroup()
     var currentUserID: String!
+    var postToPass: Post!
+    var userFollowersToPass: String!
+    var mediaImageToPass: UIImage?
+    var videoDataToPass: NSData?
+    var userPhotoToPass: UIImage?
 
     override func viewDidLoad() {
         super.viewDidLoad()
@@ -51,7 +57,7 @@ class RadarVC: UIViewController, UITableViewDelegate, UITableViewDataSource, Act
         
         let button: UIButton = UIButton(type: UIButtonType.custom)
         button.setImage(UIImage(named: "notification.png"), for: UIControlState())
-        button.addTarget(self, action: #selector(ActivityVC.notificationBtnPressed), for: UIControlEvents.touchUpInside)
+//        button.addTarget(self, action: #selector(ActivityVC.notificationBtnPressed), for: UIControlEvents.touchUpInside)
         button.frame = CGRect(x: 0, y: 0, width: 27, height: 27)
         let rightBarButton = UIBarButtonItem(customView: button)
         self.navigationItem.rightBarButtonItem = rightBarButton
@@ -66,6 +72,9 @@ class RadarVC: UIViewController, UITableViewDelegate, UITableViewDataSource, Act
         //locationService.startTracking()
         //locationService.addObserver(self, forKeyPath: "latitude", options: .New, context: &latitude)
         //locationService.addObserver(self, forKeyPath: "longitude", options: .New, context: &longitude)
+        
+        noPostsLbl.isHidden = true
+        noPostsImageView.isHidden = true
         
         tableView.delegate = self
         tableView.dataSource = self
@@ -104,6 +113,8 @@ class RadarVC: UIViewController, UITableViewDelegate, UITableViewDataSource, Act
             }
             if followingUsers.count == 0 {
                 self.posts = []
+                self.noPostsLbl.isHidden = false
+                self.noPostsImageView.isHidden = false
             }
             self.tableView.reloadData()
         })
@@ -116,8 +127,12 @@ class RadarVC: UIViewController, UITableViewDelegate, UITableViewDataSource, Act
     }
     
     func postAction(action: String) {
-        print(423)
+
         showScoreView(action: action)
+    }
+    
+    func notificationBtnPressed() {
+        
     }
     
     func numberOfSections(in tableView: UITableView) -> Int {
@@ -127,6 +142,20 @@ class RadarVC: UIViewController, UITableViewDelegate, UITableViewDataSource, Act
     func tableView(_ tableView: UITableView, numberOfRowsInSection section: Int) -> Int {
         
         return posts.count
+    }
+    
+    func tableView(_ tableView: UITableView, didSelectRowAt indexPath: IndexPath) {
+        
+        let indexPath = tableView.indexPathForSelectedRow
+        let currentCell = tableView.cellForRow(at: indexPath!) as! PostCell
+        
+        userFollowersToPass = currentCell.followersLbl.text!
+        postToPass = currentCell.post
+        mediaImageToPass = currentCell.postImg.image
+        videoDataToPass = currentCell.videoData
+        userPhotoToPass = currentCell.profileImg.image
+        
+        performSegue(withIdentifier: "PostDetailVC", sender: self)
     }
     
     
@@ -150,16 +179,16 @@ class RadarVC: UIViewController, UITableViewDelegate, UITableViewDataSource, Act
                     img = ActivityVC.imageCache.object(forKey: url as AnyObject) as? UIImage
                 }
                 
-                cell.configureCell(post, currentLocation: currentLocation, image: img, postType: "activity")
+                cell.configureCell(post, currentLocation: currentLocation, image: img, postType: "activity", filterType: nil)
                 
                 cell.activityDelegate = self
                 
                 return cell
             } else {
-                return PostCell(coder: NSCoder())
+                return PostCell()
             }
         }
-        return PostCell(coder: NSCoder())
+        return PostCell()
     }
     
     func tableView(_ tableView: UITableView, heightForRowAt indexPath: IndexPath) -> CGFloat {
@@ -179,7 +208,7 @@ class RadarVC: UIViewController, UITableViewDelegate, UITableViewDataSource, Act
                 for user in followingUsers {
                     
                     self.myGroup.enter()
-                    let userRecentPost = URL_BASE.child("user-posts").child(user.key).queryLimited(toLast: 1)
+                    let userRecentPost = URL_BASE.child("posts").queryOrdered(byChild: "user_id").queryEqual(toValue: user.key).queryLimited(toLast: 1)
                     userRecentPost.observeSingleEvent(of: FIRDataEventType.value, with: { snapshot in
                         
                         let postObjects = snapshot.children.allObjects as? [FIRDataSnapshot] ?? []
@@ -193,14 +222,21 @@ class RadarVC: UIViewController, UITableViewDelegate, UITableViewDataSource, Act
                 }
                 
                 self.myGroup.notify(queue: DispatchQueue.main, execute: {
+                    
                     if self.posts.count > 0 {
+                       // self.posts.reverse()
                         self.tableView.reloadData()
                         self.tableView.isHidden = false
+                    } else {
+                        self.noPostsLbl.isHidden = false
+                        self.noPostsImageView.isHidden = false
                     }
                 })
                 
             } else {
                 self.posts = []
+                self.noPostsLbl.isHidden = false
+                self.noPostsImageView.isHidden = false
                 self.tableView.reloadData()
             }
             
@@ -224,10 +260,27 @@ class RadarVC: UIViewController, UITableViewDelegate, UITableViewDataSource, Act
             }, completion: { finished in
                 if !finished {
                     return
-                }
-                self.scoreView.isHidden = true
+            }
+            self.scoreView.isHidden = true
         })
     }
-
+    
+    @IBAction func unwindToRadarPost(_ segue: UIStoryboardSegue) {
+        
+    }
+    
+    override func prepare(for segue: UIStoryboardSegue, sender: Any?) {
+        
+        if segue.identifier == "PostDetailVC" {
+            
+            let nav = segue.destination as! UINavigationController
+            let vC = nav.topViewController as! PostDetailVC
+            vC.followers = userFollowersToPass
+            vC.post = postToPass
+            vC.mediaImage = mediaImageToPass
+            vC.userPhotoPostDetail = userPhotoToPass
+            vC.previousVC = "ActivityVC"
+        }
+    }
 
 }

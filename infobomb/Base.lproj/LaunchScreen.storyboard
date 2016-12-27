@@ -49,7 +49,7 @@
                                     </mask>
                                 </variation>
                             </imageView>
-                            <imageView userInteractionEnabled="NO" contentMode="scaleAspectFit" horizontalHuggingPriority="251" verticalHuggingPriority="251" image="infobomb-logo" translatesAutoresizingMaskIntoConstraints="NO" id="9ip-jY-o7A">
+                            <imageView userInteractionEnabled="NO" contentMode="scaleAspectFit" horizontalHuggingPriority="251" verticalHuggingPriority="251" image="diffuze" translatesAutoresizingMaskIntoConstraints="NO" id="9ip-jY-o7A">
                                 <constraints>
                                     <constraint firstAttribute="width" constant="273" id="hJb-Fo-7fM"/>
                                     <constraint firstAttribute="height" constant="70" id="tCi-US-vqQ"/>
@@ -68,13 +68,13 @@
                             <constraint firstItem="0ep-uN-wvT" firstAttribute="centerX" secondItem="Ze5-6b-2t3" secondAttribute="centerX" id="PDT-NV-l8e"/>
                             <constraint firstItem="0ep-uN-wvT" firstAttribute="centerX" secondItem="Ze5-6b-2t3" secondAttribute="centerX" id="PQf-7Y-iAn"/>
                             <constraint firstAttribute="trailingMargin" secondItem="0ep-uN-wvT" secondAttribute="trailing" constant="158" id="QYa-95-LRS"/>
+                            <constraint firstItem="9ip-jY-o7A" firstAttribute="top" secondItem="Llm-lL-Icb" secondAttribute="bottom" constant="150" id="UzJ-8t-rhi"/>
                             <constraint firstItem="xb3-aO-Qok" firstAttribute="top" secondItem="0ep-uN-wvT" secondAttribute="bottom" constant="-10" id="Y7e-dJ-xPn"/>
                             <constraint firstItem="xb3-aO-Qok" firstAttribute="top" secondItem="0ep-uN-wvT" secondAttribute="bottom" id="eGU-W7-WFg"/>
                             <constraint firstItem="0ep-uN-wvT" firstAttribute="centerX" secondItem="Ze5-6b-2t3" secondAttribute="centerX" id="k1e-UI-cva"/>
                             <constraint firstItem="0ep-uN-wvT" firstAttribute="centerX" secondItem="Ze5-6b-2t3" secondAttribute="centerX" id="kSy-EM-Nhm"/>
                             <constraint firstItem="0ep-uN-wvT" firstAttribute="leading" secondItem="Ze5-6b-2t3" secondAttribute="leadingMargin" id="mAa-po-plO"/>
                             <constraint firstItem="0ep-uN-wvT" firstAttribute="leading" secondItem="Ze5-6b-2t3" secondAttribute="leadingMargin" constant="157" id="nv0-o3-Aze"/>
-                            <constraint firstItem="xb3-aO-Qok" firstAttribute="top" secondItem="0ep-uN-wvT" secondAttribute="bottom" constant="119" id="qEe-ck-cag"/>
                             <constraint firstAttribute="trailingMargin" secondItem="0ep-uN-wvT" secondAttribute="trailing" id="uit-K1-kao"/>
                             <constraint firstAttribute="trailing" secondItem="0ep-uN-wvT" secondAttribute="trailing" id="uuI-qb-NbA"/>
                             <constraint firstItem="0ep-uN-wvT" firstAttribute="leading" secondItem="Ze5-6b-2t3" secondAttribute="leading" id="vuj-Wd-kjv"/>
@@ -111,7 +111,7 @@
         </scene>
     </scenes>
     <resources>
+        <image name="diffuze" width="900" height="300"/>
         <image name="exploding-sun" width="388" height="379"/>
-        <image name="infobomb-logo" width="700" height="180"/>
     </resources>
 </document>

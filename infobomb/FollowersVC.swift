@@ -9,7 +9,7 @@
 import UIKit
 import Firebase
 
-class FollowersVC: UIViewController, UITableViewDataSource, UITableViewDelegate {
+class FollowersVC: UIViewController, UITableViewDataSource, UITableViewDelegate, UISearchBarDelegate {
 
     @IBOutlet weak var searchBar: UISearchBar!
     @IBOutlet weak var followersBtn: UIButton!
@@ -21,15 +21,22 @@ class FollowersVC: UIViewController, UITableViewDataSource, UITableViewDelegate 
     var currentUserID: String!
     var lineView: UIView!
     var users = [User]()
+    var filteredUsers = [User]()
     var usersIds = [String]()
     var followingTableCurrent = true
     var followerTableCurrent = false
+    var inSearchMode = false
+    var myGroup = DispatchGroup()
+    var secondGroup = DispatchGroup()
     
     static var imageCache = NSCache<AnyObject, AnyObject>()
     
     override func viewDidLoad() {
         super.viewDidLoad()
         
+        searchBar.delegate = self
+        searchBar.returnKeyType = UIReturnKeyType.done
+
         self.navigationController?.navigationBar.setBackgroundImage(UIImage(), for: .default)
         self.navigationController?.navigationBar.shadowImage = UIImage()
         self.navigationController?.navigationBar.isTranslucent = true
@@ -50,7 +57,7 @@ class FollowersVC: UIViewController, UITableViewDataSource, UITableViewDelegate 
         
         let button: UIButton = UIButton(type: UIButtonType.custom)
         button.setImage(UIImage(named: "notification.png"), for: UIControlState())
-        button.addTarget(self, action: #selector(ActivityVC.notificationBtnPressed), for: UIControlEvents.touchUpInside)
+//        button.addTarget(self, action: #selector(ActivityVC.notificationBtnPressed), for: UIControlEvents.touchUpInside)
         button.frame = CGRect(x: 0, y: 0, width: 27, height: 27)
         let rightBarButton = UIBarButtonItem(customView: button)
         self.navigationItem.rightBarButtonItem = rightBarButton
@@ -76,8 +83,12 @@ class FollowersVC: UIViewController, UITableViewDataSource, UITableViewDelegate 
         tableView.dataSource = self
         
         currentUserID = UserDefaults.standard.object(forKey: KEY_UID) as! String
+        
+        self.noFollowersImageView.image = UIImage(named: "followers-grey")
+        self.noFollowersLbl.text = "You are not following anyone yet. They will show up here after you do."
 
-        URL_BASE.child("users").child(currentUserID).child("following").observe(FIRDataEventType.value, with: { (snapshot) in
+        getFollowing()
+       /* URL_BASE.child("users").child(currentUserID).child("following").observe(FIRDataEventType.value, with: { (snapshot) in
             
             let followingUsers = snapshot.children.allObjects as? [FIRDataSnapshot] ?? []
             
@@ -98,7 +109,7 @@ class FollowersVC: UIViewController, UITableViewDataSource, UITableViewDelegate 
                 })
             }
             
-        })
+        }) */
 
         //Burger side menu
         if revealViewController() != nil {
@@ -113,9 +124,15 @@ class FollowersVC: UIViewController, UITableViewDataSource, UITableViewDelegate 
     func tableView(_ tableView: UITableView, cellForRowAt indexPath: IndexPath) -> UITableViewCell {
         
         
-        if users.count > 0 {
+        if users.count > 0 || filteredUsers.count > 0 {
         
-            let user = users[(indexPath as NSIndexPath).row]
+            var user: User!
+            
+            if inSearchMode {
+                user = filteredUsers[(indexPath as NSIndexPath).row]
+            } else {
+                user = users[(indexPath as NSIndexPath).row]
+            }
 
             if let cell = tableView.dequeueReusableCell(withIdentifier: "FollowerCell") as? FollowerCell {
 
@@ -139,14 +156,28 @@ class FollowersVC: UIViewController, UITableViewDataSource, UITableViewDelegate 
     }
     
     func tableView(_ tableView: UITableView, numberOfRowsInSection section: Int) -> Int {
-        if users.count > 0 {
-            noFollowersImageView.isHidden = true
-            noFollowersLbl.isHidden = true
+        
+        if inSearchMode {
+            if filteredUsers.count > 0 {
+                noFollowersImageView.isHidden = true
+                noFollowersLbl.isHidden = true
+            } else {
+                noFollowersImageView.isHidden = false
+                noFollowersLbl.isHidden = false
+                noFollowersImageView.image = UIImage(named: "search-grey")
+                noFollowersLbl.text = "There are no results matching your search criteria"
+            }
+            return filteredUsers.count
         } else {
-            noFollowersImageView.isHidden = false
-            noFollowersLbl.isHidden = false
+            if users.count > 0 {
+                noFollowersImageView.isHidden = true
+                noFollowersLbl.isHidden = true
+            } else {
+                noFollowersImageView.isHidden = false
+                noFollowersLbl.isHidden = false
+            }
+            return users.count
         }
-        return users.count
     }
     
     func numberOfSections(in tableView: UITableView) -> Int {
@@ -159,7 +190,9 @@ class FollowersVC: UIViewController, UITableViewDataSource, UITableViewDelegate 
         self.followingBtn.titleLabel?.font = UIFont(name: "Ubuntu", size: 18.0)
         self.lineView.removeFromSuperview()
         self.followersBtn.addSubview(lineView)
-        self.noFollowersImageView.image = UIImage(named: "follower")
+        noFollowersImageView.isHidden = false
+        noFollowersLbl.isHidden = false
+        self.noFollowersImageView.image = UIImage(named: "follower-grey")
         self.noFollowersLbl.text = "You do not have any followers yet. They will show up here after you get some."
         getFollowers()
     }
@@ -170,9 +203,28 @@ class FollowersVC: UIViewController, UITableViewDataSource, UITableViewDelegate 
         self.followersBtn.titleLabel?.font = UIFont(name: "Ubuntu", size: 18.0)
         self.lineView.removeFromSuperview()
         self.followingBtn.addSubview(lineView)
-        self.noFollowersImageView.image = UIImage(named: "following-white")
+        noFollowersImageView.isHidden = false
+        noFollowersLbl.isHidden = false
+        self.noFollowersImageView.image = UIImage(named: "followers-grey")
         self.noFollowersLbl.text = "You are not following anyone yet. They will show up here after you do."
         getFollowing()
+    }
+    
+    func searchBarSearchButtonClicked(_ searchBar: UISearchBar) {
+        view.endEditing(true)
+    }
+    
+    func searchBar(_ searchBar: UISearchBar, textDidChange searchText: String) {
+        
+        if searchBar.text == nil || searchBar.text == "" {
+            inSearchMode = false
+            view.endEditing(true)
+        } else {
+            inSearchMode = true
+            let lower = searchBar.text?.lowercased()
+            filteredUsers = users.filter({$0.username.lowercased().range(of: lower!) != nil})
+        }
+        tableView.reloadData()
     }
     
     func getFollowing() {
@@ -184,10 +236,11 @@ class FollowersVC: UIViewController, UITableViewDataSource, UITableViewDelegate 
             let followingUsers = snapshot.children.allObjects as? [FIRDataSnapshot] ?? []
             
             if followingUsers.count == 0 {
-                self.noFollowersImageView.isHidden = false
-                self.noFollowersLbl.isHidden = false
                 self.users = []
                 self.tableView.reloadData()
+            } else {
+                self.noFollowersLbl.isHidden = true
+                self.noFollowersImageView.isHidden = true
             }
             
             for user in followingUsers {
@@ -195,17 +248,31 @@ class FollowersVC: UIViewController, UITableViewDataSource, UITableViewDelegate 
             }
             
             for id in self.usersIds {
+                
+                self.myGroup.enter()
                 URL_BASE.child("users").child(id).observeSingleEvent(of: FIRDataEventType.value, with: { (snapshot) in
                     
                     if let userDict = snapshot.value as? Dictionary<String,AnyObject> {
                         
                         let user = User.init(userId: userDict["user_ref"] as! String, dictionary: userDict)
-                        print(user)
                         self.users.append(user)
-                        self.tableView.reloadData()
                     }
+                    self.myGroup.leave()
                 })
             }
+            
+            self.myGroup.notify(queue: DispatchQueue.main, execute: {
+                
+                if self.users.count > 0 {
+                    self.noFollowersLbl.isHidden = true
+                    self.noFollowersImageView.isHidden = true
+                    self.tableView.reloadData()
+                } else {
+                    
+                    self.noFollowersLbl.isHidden = false
+                    self.noFollowersImageView.isHidden = false
+                }
+            })
         })
         
     }
@@ -219,10 +286,11 @@ class FollowersVC: UIViewController, UITableViewDataSource, UITableViewDelegate 
             let followers = snapshot.children.allObjects as? [FIRDataSnapshot] ?? []
             
             if followers.count == 0 {
-                self.noFollowersImageView.isHidden = false
-                self.noFollowersLbl.isHidden = false
                 self.users = []
                 self.tableView.reloadData()
+            } else {
+                self.noFollowersLbl.isHidden = true
+                self.noFollowersImageView.isHidden = true
             }
             
             for user in followers {
@@ -230,18 +298,31 @@ class FollowersVC: UIViewController, UITableViewDataSource, UITableViewDelegate 
             }
             
             for id in self.usersIds {
+                
+                self.secondGroup.enter()
                 URL_BASE.child("users").child(id).observeSingleEvent(of: FIRDataEventType.value, with: { (snapshot) in
                     
                     if let userDict = snapshot.value as? Dictionary<String,AnyObject> {
                         
                         let user = User.init(userId: userDict["user_ref"] as! String, dictionary: userDict)
-                        print(user)
                         self.users.append(user)
-                        self.tableView.reloadData()
                     }
+                    self.secondGroup.leave()
                 })
             }
             
+            self.secondGroup.notify(queue: DispatchQueue.main, execute: {
+                
+                if self.users.count > 0 {
+                    self.noFollowersLbl.isHidden = true
+                    self.noFollowersImageView.isHidden = true
+                    self.tableView.reloadData()
+                } else {
+                    
+                    self.noFollowersLbl.isHidden = false
+                    self.noFollowersImageView.isHidden = false
+                }
+            })
         })
     }
     
