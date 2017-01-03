@@ -7,6 +7,11 @@
 //
 
 import UIKit
+import GeoFire
+import FirebaseAuth
+
+private var latitude: Double = 0.0
+private var longitude: Double = 0.0
 
 class TextPostVC: UIViewController, UITextViewDelegate {
 
@@ -16,7 +21,14 @@ class TextPostVC: UIViewController, UITextViewDelegate {
     @IBOutlet weak var chooseCategoriesBtnBottomConstraint: NSLayoutConstraint!
     
     let PLACEHOLDER_TEXT = "Enter Text..."
+    let geofireRef = UserService.ds.REF_USER_LOCATIONS
+    let iD = UserService.ds.currentUserID
     
+    var categories = [Category]()
+    var locationService: LocationService!
+    var currentLocation: [String:AnyObject] = [:]
+    var geoFire: GeoFire!
+    var timer: Timer?
     var message: String!
     var linkObj: [String:AnyObject] = [:]
     
@@ -24,12 +36,6 @@ class TextPostVC: UIViewController, UITextViewDelegate {
         super.viewDidLoad()
         
         UserDefaults.standard.setValue(false, forKey: "_UIConstraintBasedLayoutLogUnsatisfiable")
-        print("TextPostVC")
-
-        //Subclass navigation bar after app is finished and all other non DRY
-//        let image = UIImage(named: "metal-bg.jpg")?.resizableImage(withCapInsets: UIEdgeInsetsMake(0, 15, 0, 15), resizingMode: UIImageResizingMode.stretch)
-//        self.navigationController?.navigationBar.setBackgroundImage(image, for: .default)
-//        self.navigationController?.navigationBar.titleTextAttributes = [NSFontAttributeName: UIFont(name: "TOSCA ZERO", size: 30)!]
         
         UIApplication.shared.statusBarStyle = .lightContent
         self.navigationController?.navigationBar.setBackgroundImage(UIImage(), for: .default)
@@ -66,13 +72,72 @@ class TextPostVC: UIViewController, UITextViewDelegate {
 
         let tap: UITapGestureRecognizer = UITapGestureRecognizer(target: self, action: #selector(TextPostVC.dismissKeyboard))
         view.addGestureRecognizer(tap)
-
+        
+        geoFire = GeoFire(firebaseRef: geofireRef)
+        
+        locationService = LocationService()
+        locationService.startTracking()
+        locationService.addObserver(self, forKeyPath: "latitude", options: .new, context: &latitude)
+        locationService.addObserver(self, forKeyPath: "longitude", options: .new, context: &longitude)
+        
+        
+        timer = Timer.scheduledTimer(timeInterval: 5.0, target: self, selector: #selector(self.updateUserLocation), userInfo: nil, repeats: true)
+        
+        NotificationCenter.default.addObserver(self, selector: #selector(self.terminateAuthentication), name: NSNotification.Name(rawValue: "userSignedOut"), object: nil)
     }
     
     override func viewDidAppear(_ animated: Bool) {
         self.chooseCategoriesBtnBottomConstraint.constant = 0
     }
     
+    override func observeValue(forKeyPath keyPath: String?, of object: Any?, change: [NSKeyValueChangeKey : Any]?, context: UnsafeMutableRawPointer?) {
+        
+        if context == &latitude {
+            latitude = Double(change![NSKeyValueChangeKey.newKey]! as! NSNumber)
+            currentLocation["latitude"] = latitude as AnyObject?
+        }
+        if context == &longitude {
+            longitude = Double(change![NSKeyValueChangeKey.newKey]! as! NSNumber)
+            currentLocation["longitude"] = longitude as AnyObject?
+        }
+    }
+    
+    func updateUserLocation() {
+        
+        if currentLocation["latitude"] != nil && currentLocation["longitude"] != nil {
+            
+            geoFire.setLocation(CLLocation(latitude: (currentLocation["latitude"] as? CLLocationDegrees)!, longitude: (currentLocation["longitude"] as? CLLocationDegrees)!), forKey: iD)
+            
+            if UserService.ds.REF_USER_CURRENT != nil {
+                let longRef = UserService.ds.REF_USER_CURRENT?.child("longitude")
+                let latRef = UserService.ds.REF_USER_CURRENT?.child("latitude")
+                
+                longRef?.setValue(currentLocation["longitude"])
+                latRef?.setValue(currentLocation["latitude"])
+            }
+            print(currentLocation)
+        }
+    }
+    
+    func terminateAuthentication() {
+        
+        do {
+            try FIRAuth.auth()!.signOut()
+            self.performSegue(withIdentifier: "unwindToLoginVC", sender: self)
+        } catch let err as NSError {
+            print(err)
+        }
+    }
+    
+    override func viewWillDisappear(_ animated: Bool) {
+        
+        timer?.invalidate()
+    }
+    
+    deinit {
+        locationService.removeObserver(self, forKeyPath: "latitude", context: &latitude)
+        locationService.removeObserver(self, forKeyPath: "longitude", context: &longitude)
+    }
     
     override var preferredStatusBarStyle: UIStatusBarStyle {
             return .lightContent
@@ -149,14 +214,8 @@ class TextPostVC: UIViewController, UITextViewDelegate {
                 UIView.animate(withDuration: 0.9) {
                     self.view.layoutIfNeeded()
                 }
-
-//                self.chooseCategoriesBtn.frame.origin.y -= keyboardSize.height
-            }
-            else {
-                
             }
         }
-        
     }
     
     func keyboardWillHide(_ notification: Notification) {

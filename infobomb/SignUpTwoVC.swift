@@ -19,7 +19,7 @@ class SignUpTwoVC: UIViewController {
 
     override func viewDidLoad() {
         super.viewDidLoad()
-
+        
         self.navigationController?.navigationBar.setBackgroundImage(UIImage(), for: .default)
         self.navigationController?.navigationBar.shadowImage = UIImage()
         self.navigationController?.navigationBar.isTranslucent = true
@@ -29,12 +29,18 @@ class SignUpTwoVC: UIViewController {
         NotificationCenter.default.addObserver(self, selector: #selector(SignUpTwoVC.keyboardWillShow(_:)), name: NSNotification.Name.UIKeyboardWillShow, object: nil)
         
         usernameField.autocorrectionType = .no
+        usernameField.becomeFirstResponder()
+        
         continueBtn.layer.cornerRadius = 3
     }
     
     override func viewWillAppear(_ animated: Bool) {
         
         self.signUpBtnBottomConstraint.constant = 0
+    }
+    
+    override func viewWillDisappear(_ animated: Bool) {
+        view.endEditing(true)
     }
     
     func keyboardWillShow(_ notification: Notification) {
@@ -45,19 +51,12 @@ class SignUpTwoVC: UIViewController {
                 
                 self.signUpBtnBottomConstraint.constant = keyboardSize.height
                 
-                UIView.animate(withDuration: 0.9) {
+                UIView.animate(withDuration: 0.3) {
                     
                     self.view.layoutIfNeeded()
                 }
             }
-            else {
-                
-            }
         }
-    }
-    
-    override func viewDidAppear(_ animated: Bool) {
-        self.signUpBtnBottomConstraint.constant = 0
     }
     
     @IBAction func backBtnPressed(_ sender: AnyObject) {
@@ -75,14 +74,17 @@ class SignUpTwoVC: UIViewController {
         if usernameField.text == "" {
             
             alertView.showError("Validation Error", subTitle: "\nUsername cannot be blank.", closeButtonTitle: "Ok", duration: 0.0, colorStyle: 0xff0000, colorTextButton: 0xffffff, circleIconImage: UIImage(named: "error-white"), animationStyle: .topToBottom)
+            alertView.view.frame.origin.y -= 90
             return false
         } else if (usernameField.text?.characters.count)! < 6 {
             
             alertView.showError("Validation Error", subTitle: "\nUsername must be at least 6 characters.", closeButtonTitle: "Ok", duration: 0.0, colorStyle: 0xff0000, colorTextButton: 0xffffff, circleIconImage: UIImage(named: "error-white"), animationStyle: .topToBottom)
+            alertView.view.frame.origin.y -= 90
             return false
         } else if (usernameField.text?.characters.count)! > 20 {
             
             alertView.showError("Validation Error", subTitle: "\nUsername can be no longer than 20 characters.", closeButtonTitle: "Ok", duration: 0.0, colorStyle: 0xff0000, colorTextButton: 0xffffff, circleIconImage: UIImage(named: "error-white"), animationStyle: .topToBottom)
+            alertView.view.frame.origin.y -= 90
             return false
         }
         return true

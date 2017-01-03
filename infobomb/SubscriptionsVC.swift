@@ -8,14 +8,25 @@
 
 import UIKit
 import Firebase
+import GeoFire
 
-class SubscriptionsVC: UIViewController, UITableViewDataSource, UITableViewDelegate {
+private var latitude: Double = 0.0
+private var longitude: Double = 0.0
+
+class SubscriptionsVC: UIViewController, UITableViewDataSource, UITableViewDelegate, CLLocationManagerDelegate {
     
     @IBOutlet weak var menuBtn: UIBarButtonItem!
     @IBOutlet weak var tableView: UITableView!
-//    @IBOutlet weak var subscriptionSwitch: UISwitch!
     
+    let geofireRef = UserService.ds.REF_USER_LOCATIONS
+    let iD = UserService.ds.currentUserID
+
     var categories = [Category]()
+    var locationService: LocationService!
+    var currentLocation: [String:AnyObject] = [:]
+    var geoFire: GeoFire!
+    var timer: Timer?
+    var subscribedToAll = false
     
     static var imageCache = NSCache<AnyObject, AnyObject>()
 
@@ -53,39 +64,122 @@ class SubscriptionsVC: UIViewController, UITableViewDataSource, UITableViewDeleg
         let leftBarButton = UIBarButtonItem(customView: menuButton)
         self.navigationItem.leftBarButtonItem = leftBarButton
 
-
-        NotificationCenter.default.addObserver(LocationService(), selector: #selector(LocationService.stopUpdatingLocation), name: NSNotification.Name(rawValue: "userSignedOut"), object: nil)
+        geoFire = GeoFire(firebaseRef: geofireRef)
+        
+        locationService = LocationService()
+        locationService.startTracking()
+        locationService.addObserver(self, forKeyPath: "latitude", options: .new, context: &latitude)
+        locationService.addObserver(self, forKeyPath: "longitude", options: .new, context: &longitude)
+        
+        timer = Timer.scheduledTimer(timeInterval: 5.0, target: self, selector: #selector(self.updateUserLocation), userInfo: nil, repeats: true)
+        
+        NotificationCenter.default.addObserver(self, selector: #selector(self.terminateAuthentication), name: NSNotification.Name(rawValue: "userSignedOut"), object: nil)
 
         tableView.delegate = self
         tableView.dataSource = self
-
-        CategoryService.ds.REF_CATEGORIES.queryOrdered(byChild: "name").observe(FIRDataEventType.value, with: { (snapshot) in
+        
+        URL_BASE.child("users").child(iD).child("subscriptions").child("All").observeSingleEvent(of: FIRDataEventType.value, with: { snapshot in
             
-            if let snapshots = snapshot.children.allObjects as? [FIRDataSnapshot] {
-                
-                self.categories = []
-                for snap in snapshots {
-                    
-                    if let categoryDict = snap.value as?  Dictionary<String, AnyObject> {
-                        let key = snap.key
-                        let category = Category(categoryKey: key, dictionary: categoryDict)
-                        self.categories.append(category)
+            let allSubscription = snapshot.value as? Bool ?? false
+            
+            if allSubscription {
+                self.subscribedToAll = true
+            }
+            
+            self.categories = []
+            for i in 0...CATEGORY_TITLE_ARRAY.count - 1 {
+                let category = Category(name: CATEGORY_TITLE_ARRAY[i], img: CATEGORY_IMAGE_ARRAY[i])
+                self.categories.append(category)
+            }
+            self.tableView.reloadData()
+        })
+        
+        URL_BASE.child("users").child(iD).child("subscriptions").observe(FIRDataEventType.value, with: { snapshot in
+            
+            let subscriptions = snapshot.children.allObjects as? [FIRDataSnapshot] ?? []
+            let cells = self.tableView.visibleCells as? [SubscriptionCell] ?? []
+            
+            self.subscribedToAll = false
+            for sub in subscriptions {
+                if sub.key == "All" {
+                    self.subscribedToAll = true
+                }
+            }
+            if self.subscribedToAll == true {
+                for cell in cells {
+                    cell.subscriptionSwitch.isOn = true
+                }
+            } else {
+                for cell in cells {
+                    var isSubscribedToCell = false
+                    for sub in subscriptions {
+                        if cell.category.name == sub.key {
+                            isSubscribedToCell = true
+                            cell.subscriptionSwitch.isOn = true
+                        }
+                    }
+                    if !isSubscribedToCell {
+                        cell.subscriptionSwitch.isOn = false
                     }
                 }
             }
-            
-            self.tableView.reloadData()
         })
-
         
         //Burger side menu
         if revealViewController() != nil {
             
             menuButton.addTarget(revealViewController(), action: #selector(SWRevealViewController.revealToggle(_:)), for: UIControlEvents.touchUpInside)
         }
-
     }
     
+    override func observeValue(forKeyPath keyPath: String?, of object: Any?, change: [NSKeyValueChangeKey : Any]?, context: UnsafeMutableRawPointer?) {
+        
+        if context == &latitude {
+            latitude = Double(change![NSKeyValueChangeKey.newKey]! as! NSNumber)
+            currentLocation["latitude"] = latitude as AnyObject?
+        }
+        if context == &longitude {
+            longitude = Double(change![NSKeyValueChangeKey.newKey]! as! NSNumber)
+            currentLocation["longitude"] = longitude as AnyObject?
+        }
+    }
+
+    override func viewWillDisappear(_ animated: Bool) {
+        
+        timer?.invalidate()
+    }
+    
+    func updateUserLocation() {
+        
+        if currentLocation["latitude"] != nil && currentLocation["longitude"] != nil {
+            
+            geoFire.setLocation(CLLocation(latitude: (currentLocation["latitude"] as? CLLocationDegrees)!, longitude: (currentLocation["longitude"] as? CLLocationDegrees)!), forKey: iD)
+            
+            if UserService.ds.REF_USER_CURRENT != nil {
+                let longRef = UserService.ds.REF_USER_CURRENT?.child("longitude")
+                let latRef = UserService.ds.REF_USER_CURRENT?.child("latitude")
+                
+                longRef?.setValue(currentLocation["longitude"])
+                latRef?.setValue(currentLocation["latitude"])
+            }
+            print(currentLocation)
+        }
+    }
+    
+    func terminateAuthentication() {
+        
+        do {
+            try FIRAuth.auth()!.signOut()
+            self.performSegue(withIdentifier: "unwindToLoginVC", sender: self)
+        } catch let err as NSError {
+            print(err)
+        }
+    }
+    
+    deinit {
+        locationService.removeObserver(self, forKeyPath: "latitude", context: &latitude)
+        locationService.removeObserver(self, forKeyPath: "longitude", context: &longitude)
+    }
 
     func tableView(_ tableView: UITableView, heightForRowAt indexPath: IndexPath) -> CGFloat {
         return 50.0
@@ -98,14 +192,8 @@ class SubscriptionsVC: UIViewController, UITableViewDataSource, UITableViewDeleg
         if let cell = tableView.dequeueReusableCell(withIdentifier: "SubscriptionCell") as? SubscriptionCell {
             
             cell.request?.cancel()
-        
-            var img: UIImage?
             
-            if let url = category.image_path {
-                img = SubscriptionsVC.imageCache.object(forKey: url as AnyObject) as? UIImage
-            }
-            
-            cell.configureCell(category, img: img)
+            cell.configureCell(category, subscribedToAll)
             
             return cell
             

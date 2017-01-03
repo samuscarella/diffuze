@@ -9,25 +9,42 @@
 import UIKit
 import Firebase
 import CoreLocation
+import GeoFire
 
-class LeftNavVC: UITableViewController {
+private var latitude: Double = 0.0
+private var longitude: Double = 0.0
+
+class LeftNavVC: UITableViewController, CLLocationManagerDelegate {
     
 
     @IBOutlet var table: UITableView!
     @IBOutlet var navButtons: [UIButton]!
     @IBOutlet weak var activityBtn: UIButton!
     
-    var locationManager: CLLocationManager!
+    var locationService: LocationService!
     
     override func viewDidLoad() {
         super.viewDidLoad()
         
+        locationService = LocationService()
+        
+        NotificationCenter.default.addObserver(self, selector: #selector(self.terminateAuthentication), name: NSNotification.Name(rawValue: "userSignedOut"), object: nil)
+
         self.view.backgroundColor = UIColor.black
         table.isScrollEnabled = false
         table.allowsSelection = false
         activityBtn.setTitleColor(CRIMSON, for: UIControlState())
     }
     
+    func terminateAuthentication() {
+        
+        do {
+            try FIRAuth.auth()!.signOut()
+            self.performSegue(withIdentifier: "unwindToLoginVC", sender: self)
+        } catch let err as NSError {
+            print(err)
+        }
+    }
     
     @IBAction func navBtnPressed(_ sender: AnyObject) {
         
@@ -62,10 +79,7 @@ class LeftNavVC: UITableViewController {
             
                 do {
                     try FIRAuth.auth()!.signOut()
-//                    NSNotificationCenter.defaultCenter().postNotificationName("userSignedOut", object: nil)
-                    UserDefaults.standard.removeObject(forKey: KEY_UID)
-                    UserDefaults.standard.removeObject(forKey: KEY_USERNAME)
-                    self.navigationController?.popToRootViewController(animated: true)
+                    locationService.stopUpdatingLocation()
                 } catch let err as NSError {
                     print(err)
                 }            
@@ -73,6 +87,5 @@ class LeftNavVC: UITableViewController {
         }
         
     }
-    
     
 }

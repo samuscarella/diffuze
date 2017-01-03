@@ -8,6 +8,7 @@
 
 import Foundation
 import CoreLocation
+import FirebaseAuth
 
 class LocationService: NSObject, CLLocationManagerDelegate {
     
@@ -31,23 +32,17 @@ class LocationService: NSObject, CLLocationManagerDelegate {
     
     func locationManager(_ manager: CLLocationManager, didUpdateLocations locations: [CLLocation]) {
     
-            currentLocation = locations.last! as CLLocation
-    
-            let longRef = UserService.ds.REF_USER_CURRENT.child("longitude")
-            let latRef = UserService.ds.REF_USER_CURRENT.child("latitude")
-    
-            longRef.setValue(currentLocation!.coordinate.longitude)
-            latRef.setValue(currentLocation!.coordinate.latitude)
+        currentLocation = locations.last! as CLLocation
         
-            latitude = Double(currentLocation.coordinate.latitude)
-            longitude = Double(currentLocation.coordinate.longitude)
+        latitude = Double(currentLocation.coordinate.latitude)
+        longitude = Double(currentLocation.coordinate.longitude)
         
-            NotificationCenter.default.post(name: Notification.Name(rawValue: "userUpdatedLocation"), object: nil)
+        NotificationCenter.default.post(name: Notification.Name(rawValue: "userUpdatedLocation"), object: nil)
     }
 
     
     func stopUpdatingLocation() {
-        locationManager.stopUpdatingLocation()
+        locationManager?.stopUpdatingLocation()
     }
     
     
@@ -71,15 +66,14 @@ class LocationService: NSObject, CLLocationManagerDelegate {
             print("Access Always")
             break
         case .restricted:
-            // restricted by e.g. parental controls. User can't enable Location Services
             print("Access Restricted")
+            NotificationCenter.default.post(name: NSNotification.Name(rawValue: "userSignedOut"), object: nil)
             break
         case .denied:
-            // user denied your app access to Location Services, but can grant access from Settings.app
-            locationManager.requestWhenInUseAuthorization()
+            
+            NotificationCenter.default.post(name: NSNotification.Name(rawValue: "userSignedOut"), object: nil)
             print("Access Denied")
             break
         }
     }
-
 }

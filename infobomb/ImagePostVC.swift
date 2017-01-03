@@ -8,9 +8,13 @@
 
 import UIKit
 import AVFoundation
+import GeoFire
+import FirebaseAuth
+
+private var latitude = 0.0
+private var longitude = 0.0
 
 class ImagePostVC: UIViewController, UINavigationControllerDelegate, UITextViewDelegate, UIImagePickerControllerDelegate {
-    
     
     @IBOutlet weak var noMediaImg: UIImageView!
     @IBOutlet weak var chooseMediaIcon: UIImageView!
@@ -26,7 +30,14 @@ class ImagePostVC: UIViewController, UINavigationControllerDelegate, UITextViewD
     
     let PLACEHOLDER_TEXT = "Enter Text..."
     let imagePicker = UIImagePickerController()
+    let geofireRef = UserService.ds.REF_USER_LOCATIONS
+    let iD = UserService.ds.currentUserID
     
+    var categories = [Category]()
+    var locationService: LocationService!
+    var currentLocation: [String:AnyObject] = [:]
+    var geoFire: GeoFire!
+    var timer: Timer?
     var videoLayer: AVPlayerLayer?
     var player: AVPlayer?
     var linkObj: [String:AnyObject] = [:]
@@ -45,6 +56,17 @@ class ImagePostVC: UIViewController, UINavigationControllerDelegate, UITextViewD
         
         imagePicker.delegate = self
         textField.delegate = self
+        
+        geoFire = GeoFire(firebaseRef: geofireRef)
+        
+        locationService = LocationService()
+        locationService.startTracking()
+        locationService.addObserver(self, forKeyPath: "latitude", options: .new, context: &latitude)
+        locationService.addObserver(self, forKeyPath: "longitude", options: .new, context: &longitude)
+        
+        timer = Timer.scheduledTimer(timeInterval: 5.0, target: self, selector: #selector(self.updateUserLocation), userInfo: nil, repeats: true)
+        
+        NotificationCenter.default.addObserver(self, selector: #selector(self.terminateAuthentication), name: NSNotification.Name(rawValue: "userSignedOut"), object: nil)
         
         UIApplication.shared.statusBarStyle = .lightContent
         self.navigationController?.navigationBar.setBackgroundImage(UIImage(), for: .default)
@@ -75,6 +97,7 @@ class ImagePostVC: UIViewController, UINavigationControllerDelegate, UITextViewD
         }
         
         let imageView = UIImageView(image: logo)
+        
         if previousVC == NEW_IMAGE_POST {
             imageView.frame = CGRect(x: 0, y: 0, width: 27, height: 27)
         } else {
@@ -89,9 +112,7 @@ class ImagePostVC: UIViewController, UINavigationControllerDelegate, UITextViewD
         
         self.navigationItem.titleView = customView
 
-        
         applyPlaceholderStyle(aTextview: textField!, placeholderText: PLACEHOLDER_TEXT)
-        
         
         let button: UIButton = UIButton(type: UIButtonType.custom)
         button.setImage(UIImage(named: "notification.png"), for: UIControlState())
@@ -106,6 +127,56 @@ class ImagePostVC: UIViewController, UINavigationControllerDelegate, UITextViewD
         let tap: UITapGestureRecognizer = UITapGestureRecognizer(target: self, action: #selector(ImagePostVC.dismissKeyboard))
         view.addGestureRecognizer(tap)
         
+    }
+    
+    override func observeValue(forKeyPath keyPath: String?, of object: Any?, change: [NSKeyValueChangeKey : Any]?, context: UnsafeMutableRawPointer?) {
+        
+        if context == &latitude {
+            latitude = Double(change![NSKeyValueChangeKey.newKey]! as! NSNumber)
+            currentLocation["latitude"] = latitude as AnyObject?
+        }
+        if context == &longitude {
+            longitude = Double(change![NSKeyValueChangeKey.newKey]! as! NSNumber)
+            currentLocation["longitude"] = longitude as AnyObject?
+        }
+    }
+    
+    func updateUserLocation() {
+        
+        if currentLocation["latitude"] != nil && currentLocation["longitude"] != nil {
+            
+            geoFire.setLocation(CLLocation(latitude: (currentLocation["latitude"] as? CLLocationDegrees)!, longitude: (currentLocation["longitude"] as? CLLocationDegrees)!), forKey: iD)
+            
+            if UserService.ds.REF_USER_CURRENT != nil {
+                let longRef = UserService.ds.REF_USER_CURRENT?.child("longitude")
+                let latRef = UserService.ds.REF_USER_CURRENT?.child("latitude")
+                
+                longRef?.setValue(currentLocation["longitude"])
+                latRef?.setValue(currentLocation["latitude"])
+            }
+            print(currentLocation)
+        }
+    }
+    
+    func terminateAuthentication() {
+        
+        do {
+            try FIRAuth.auth()!.signOut()
+            self.performSegue(withIdentifier: "unwindToLoginVC", sender: self)
+        } catch let err as NSError {
+            print(err)
+        }
+    }
+    
+    override func viewWillDisappear(_ animated: Bool) {
+        
+        timer?.invalidate()
+        timer = nil
+    }
+    
+    deinit {
+        locationService.removeObserver(self, forKeyPath: "latitude", context: &latitude)
+        locationService.removeObserver(self, forKeyPath: "longitude", context: &longitude)
     }
     
     @IBAction func pickImgBtnPressed(_ sender: AnyObject) {

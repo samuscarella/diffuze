@@ -34,9 +34,12 @@ class UserService {
         return _REF_USER_POSTS
     }
     
-    var REF_USER_CURRENT: FIRDatabaseReference {
-        let uid = UserDefaults.standard.value(forKey: KEY_UID) as! String
-        let user = URL_BASE.child("users").child(uid)
+    var REF_USER_CURRENT: FIRDatabaseReference? {
+        let uid = UserDefaults.standard.value(forKey: KEY_UID) as? String ?? ""
+        var user: FIRDatabaseReference?
+        if uid != "" {
+            user = URL_BASE.child("users").child(uid)
+        }
         return user
     }
     
@@ -50,7 +53,7 @@ class UserService {
         return userID
     }
     
-    func createFirebaseUser(_ uid: String, user: Dictionary<String, String>) {
+    func createFirebaseUser(_ uid: String, user: Dictionary<String, Any>) {
         REF_USERS.child(uid).updateChildValues(user)
     }
     

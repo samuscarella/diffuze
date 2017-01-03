@@ -39,6 +39,8 @@ class SignUpThreeVC: UIViewController {
         
         passwordField.autocorrectionType = .no
         confirmPasswordField.autocorrectionType = .no
+        
+        passwordField.becomeFirstResponder()
 
         completeBtn.layer.cornerRadius = 3
         //change back button from x to <-
@@ -46,6 +48,10 @@ class SignUpThreeVC: UIViewController {
     
     override func viewWillAppear(_ animated: Bool) {
         signUpBtnBottomConstraint.constant = 0
+    }
+    
+    override func viewWillDisappear(_ animated: Bool) {
+        view.endEditing(true)
     }
     
     @IBAction func finalizeBtnPressed(_ sender: AnyObject) {
@@ -99,7 +105,7 @@ class SignUpThreeVC: UIViewController {
         if let keyboardSize = ((notification as NSNotification).userInfo?[UIKeyboardFrameBeginUserInfoKey] as? NSValue)?.cgRectValue {
             if view.frame.origin.y == 0 {
                 self.signUpBtnBottomConstraint.constant = keyboardSize.height
-                UIView.animate(withDuration: 0.9) {
+                UIView.animate(withDuration: 0.3) {
                     self.view.layoutIfNeeded()
                 }
             }
@@ -107,10 +113,6 @@ class SignUpThreeVC: UIViewController {
                 
             }
         }
-    }
-    
-    override func viewDidAppear(_ animated: Bool) {
-        self.signUpBtnBottomConstraint.constant = 0
     }
 
     @IBAction func unwindToSignUpThree(_ segue: UIStoryboardSegue) {
@@ -149,23 +151,28 @@ class SignUpThreeVC: UIViewController {
         } else if (passwordField.text?.characters.count)! == 0 {
             
             alertView.showError("Validation Error", subTitle: "\nPassword cannot be blank.", closeButtonTitle: "Ok", duration: 0.0, colorStyle: 0xff0000, colorTextButton: 0xffffff, circleIconImage: UIImage(named: "error-white"), animationStyle: .topToBottom)
+            alertView.view.frame.origin.y -= 90
             return false
         } else if (passwordField.text?.characters.count)! < 6 {
             
             alertView.showError("Validation Error", subTitle: "\nPassword must be at least 6 characters long.", closeButtonTitle: "Ok", duration: 0.0, colorStyle: 0xff0000, colorTextButton: 0xffffff, circleIconImage: UIImage(named: "error-white"), animationStyle: .topToBottom)
+            alertView.view.frame.origin.y -= 90
             return false
         } else if (passwordField.text?.characters.count)! > 20 {
             
             alertView.showError("Validation Error", subTitle: "\nPassword cannot be longer than 20 characters in length.", closeButtonTitle: "Ok", duration: 0.0, colorStyle: 0xff0000, colorTextButton: 0xffffff, circleIconImage: UIImage(named: "error-white"), animationStyle: .topToBottom)
+            alertView.view.frame.origin.y -= 90
             return false
         } else if (passwordField.text?.characters.count)! > 5 && passwordField.text != confirmPasswordField.text {
             
             alertView.showError("Validation Error", subTitle: "\nPassword Confirmation does not match.", closeButtonTitle: "Ok", duration: 0.0, colorStyle: 0xff0000, colorTextButton: 0xffffff, circleIconImage: UIImage(named: "error-white"), animationStyle: .topToBottom)
+            alertView.view.frame.origin.y -= 90
             return false
         } else if passwordField.text == confirmPasswordField.text {
             return true
         }
         alertView.showError("Validation Error", subTitle: "\nCould not create password. Please try something else.", closeButtonTitle: "Ok", duration: 0.0, colorStyle: 0xff0000, colorTextButton: 0xffffff, circleIconImage: UIImage(named: "error-white"), animationStyle: .topToBottom)
+        alertView.view.frame.origin.y -= 90
         return false
     }
     

@@ -5,6 +5,10 @@ import Alamofire
 import AVFoundation
 import AVKit
 import Firebase
+import GeoFire
+
+private var latitude = 0.0
+private var longitude = 0.0
 
 class PostDetailVC: UIViewController, AVAudioPlayerDelegate {
 
@@ -44,7 +48,14 @@ class PostDetailVC: UIViewController, AVAudioPlayerDelegate {
     
     let currentUserID = UserDefaults.standard.object(forKey: KEY_UID) as! String
     let font = UIFont(name: "Ubuntu", size: 12.0)
+    let geofireRef = UserService.ds.REF_USER_LOCATIONS
+    let iD = UserService.ds.currentUserID
     
+    var categories = [Category]()
+    var locationService: LocationService!
+    var currentLocation: [String:AnyObject] = [:]
+    var geoFire: GeoFire!
+    var timer: Timer?
     var avPlayerViewController = AVPlayerViewController()
     var avPlayer:AVPlayer? = nil
     var post: Post!
@@ -68,9 +79,21 @@ class PostDetailVC: UIViewController, AVAudioPlayerDelegate {
         self.navigationController?.navigationBar.setBackgroundImage(UIImage(), for: .default)
         self.navigationController?.navigationBar.shadowImage = UIImage()
         self.navigationController?.navigationBar.isTranslucent = true
+        UIApplication.shared.statusBarStyle = .lightContent
         
         followingImage = UIImage(named: "following-blue")
         notFollowingImage = UIImage(named: "follower")
+        
+        geoFire = GeoFire(firebaseRef: geofireRef)
+        
+        locationService = LocationService()
+        locationService.startTracking()
+        locationService.addObserver(self, forKeyPath: "latitude", options: .new, context: &latitude)
+        locationService.addObserver(self, forKeyPath: "longitude", options: .new, context: &longitude)
+        
+        timer = Timer.scheduledTimer(timeInterval: 5.0, target: self, selector: #selector(self.updateUserLocation), userInfo: nil, repeats: true)
+        
+        NotificationCenter.default.addObserver(self, selector: #selector(self.terminateAuthentication), name: NSNotification.Name(rawValue: "userSignedOut"), object: nil)
         
         self.userPhotoImageView.frame = CGRect(x: 0, y: 0, width: 45, height: 45)
         
@@ -200,7 +223,7 @@ class PostDetailVC: UIViewController, AVAudioPlayerDelegate {
 
         } else if post.type == "audio" {
             
-            backgroundImageView.image = UIImage(named: "audio-bg")
+            backgroundImageView.image = UIImage(named: "audio-bg-2")
             mediaImageView.isHidden = true
             messageLbl.isHidden = true
             playVideoBtn.isHidden = true
@@ -328,18 +351,58 @@ class PostDetailVC: UIViewController, AVAudioPlayerDelegate {
         let rightBarButton = UIBarButtonItem(customView: button)
         self.navigationItem.rightBarButtonItem = rightBarButton
         
-//        if (messageLbl != nil) && messageLbl.text! != "" {
-//
-//            let height = heightForView(messageLbl, text: messageLbl.text!, font: font!)
-//            messageLbl.frame.size.height = height
-//            NotificationCenter.default.post(name: Notification.Name(rawValue: "messageHeightUpdated"), object: nil)
-//        } else {
-//            messageLbl.frame.size.height = 0.0
-//            NotificationCenter.default.post(name: Notification.Name(rawValue: "messageHeightUpdated"), object: nil)
-//        }
-        
     }
     
+    override func observeValue(forKeyPath keyPath: String?, of object: Any?, change: [NSKeyValueChangeKey : Any]?, context: UnsafeMutableRawPointer?) {
+        
+        if context == &latitude {
+            latitude = Double(change![NSKeyValueChangeKey.newKey]! as! NSNumber)
+            currentLocation["latitude"] = latitude as AnyObject?
+        }
+        if context == &longitude {
+            longitude = Double(change![NSKeyValueChangeKey.newKey]! as! NSNumber)
+            currentLocation["longitude"] = longitude as AnyObject?
+        }
+    }
+    
+    func updateUserLocation() {
+        
+        if currentLocation["latitude"] != nil && currentLocation["longitude"] != nil {
+            
+            geoFire.setLocation(CLLocation(latitude: (currentLocation["latitude"] as? CLLocationDegrees)!, longitude: (currentLocation["longitude"] as? CLLocationDegrees)!), forKey: iD)
+            
+            if UserService.ds.REF_USER_CURRENT != nil {
+                let longRef = UserService.ds.REF_USER_CURRENT?.child("longitude")
+                let latRef = UserService.ds.REF_USER_CURRENT?.child("latitude")
+                
+                longRef?.setValue(currentLocation["longitude"])
+                latRef?.setValue(currentLocation["latitude"])
+            }
+            print(currentLocation)
+        }
+    }
+    
+    func terminateAuthentication() {
+        
+        do {
+            try FIRAuth.auth()!.signOut()
+            self.performSegue(withIdentifier: "unwindToLoginVC", sender: self)
+        } catch let err as NSError {
+            print(err)
+        }
+    }
+    
+    override func viewWillDisappear(_ animated: Bool) {
+        
+        timer?.invalidate()
+        timer = nil
+    }
+
+    deinit {
+        locationService.removeObserver(self, forKeyPath: "latitude", context: &latitude)
+        locationService.removeObserver(self, forKeyPath: "longitude", context: &longitude)
+    }
+
     func notificationBtnPressed() {
         
     }

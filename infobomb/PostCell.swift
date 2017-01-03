@@ -130,61 +130,64 @@ class PostCell: UITableViewCell {
         URL_BASE.child("users").child(self.post.user_id).observeSingleEvent(of: FIRDataEventType.value, with: { (snapshot) in
             
             let userDict = snapshot.value as? Dictionary<String, AnyObject> ?? [:]
-            let key = userDict["user_ref"] as! String
-            let user = User.init(userId: key, dictionary: userDict)
             
-            if let photoCheck = ActivityVC.imageCache.object(forKey: user.userPhoto as AnyObject) as? UIImage {
+            if let key = userDict["user_id"] as? String {
                 
-                self.profileImg.image = photoCheck
-            } else if let userPhoto = user.userPhoto {
+                let user = User.init(userId: key, dictionary: userDict)
                 
-                let url = URL(string: userPhoto)!
-                self.request = Alamofire.request(url, method: .get).response { response in
+                if let photoCheck = ActivityVC.imageCache.object(forKey: user.userPhoto as AnyObject) as? UIImage {
                     
-                    if response.error == nil {
+                    self.profileImg.image = photoCheck
+                } else if let userPhoto = user.userPhoto {
+                    
+                    let url = URL(string: userPhoto)!
+                    self.request = Alamofire.request(url, method: .get).response { response in
                         
-                        let img = UIImage(data: response.data!)
-                        self.profileImg.image = img
-                        self.profileImg.layer.cornerRadius = self.profileImg.frame.size.height / 2
-                        self.profileImg.clipsToBounds = true
-                        ActivityVC.imageCache.setObject(img!, forKey: userPhoto as AnyObject)
-                    } else {
-                        print("\(response.error)")
+                        if response.error == nil {
+                            
+                            let img = UIImage(data: response.data!)
+                            self.profileImg.image = img
+                            self.profileImg.layer.cornerRadius = self.profileImg.frame.size.height / 2
+                            self.profileImg.clipsToBounds = true
+                            ActivityVC.imageCache.setObject(img!, forKey: userPhoto as AnyObject)
+                        } else {
+                            print("\(response.error)")
+                        }
                     }
+                } else {
+                    self.profileImg.image = UIImage(named: "user")
                 }
-            } else {
-                self.profileImg.image = UIImage(named: "user")
-            }
-            
-            var numberOfFollowers = 0
-            if let userFollowers = user.followers {
                 
-                numberOfFollowers = userFollowers.count
-                
-                var isFollowingPoster = false
-                for follower in userFollowers {
-                    if follower == self.currentUserID {
-                        isFollowingPoster = true
-                        break
+                var numberOfFollowers = 0
+                if let userFollowers = user.followers {
+                    
+                    numberOfFollowers = userFollowers.count
+                    
+                    var isFollowingPoster = false
+                    for follower in userFollowers {
+                        if follower == self.currentUserID {
+                            isFollowingPoster = true
+                            break
+                        }
                     }
-                }
-                if self.followerBtn != nil {
-                    if isFollowingPoster {
-                        self.followerBtn.setImage(UIImage(named: "following-blue"), for: .normal)
-                    } else {
+                    if self.followerBtn != nil {
+                        if isFollowingPoster {
+                            self.followerBtn.setImage(UIImage(named: "following-blue"), for: .normal)
+                        } else {
+                            self.followerBtn.setImage(UIImage(named: "follower-grey"), for: .normal)
+                        }
+                    }
+                } else {
+                    if self.followerBtn != nil {
                         self.followerBtn.setImage(UIImage(named: "follower-grey"), for: .normal)
                     }
                 }
-            } else {
-                if self.followerBtn != nil {
-                    self.followerBtn.setImage(UIImage(named: "follower-grey"), for: .normal)
+                
+                if numberOfFollowers == 1 {
+                    self.followersLbl.text = "\(numberOfFollowers) Follower"
+                } else {
+                    self.followersLbl.text = "\(numberOfFollowers) Followers"
                 }
-            }
-            
-            if numberOfFollowers == 1 {
-                self.followersLbl.text = "\(numberOfFollowers) Follower"
-            } else {
-                self.followersLbl.text = "\(numberOfFollowers) Followers"
             }
         })
 
@@ -255,7 +258,7 @@ class PostCell: UITableViewCell {
             if (error != nil) {
                 print("An error occurred getting the location for \"firebase-hq\": \(error?.localizedDescription)")
             } else if (location != nil) {
-                print("Location for current user is [\(location?.coordinate.latitude), \(location?.coordinate.longitude)]")
+
                 var locationDict: Dictionary<String,AnyObject> = [:]
                 locationDict["latitude"] = location?.coordinate.latitude as AnyObject?
                 locationDict["longitude"] = location?.coordinate.longitude as AnyObject?
@@ -519,24 +522,25 @@ class PostCell: UITableViewCell {
     
     func imageRotatedByDegrees(oldImage: UIImage, deg degrees: CGFloat) -> UIImage {
         
-        //Calculate the size of the rotated view's containing box for our drawing space
         let rotatedViewBox: UIView = UIView(frame: CGRect(x: 0, y: 0, width: oldImage.size.width, height: oldImage.size.height))
         let t: CGAffineTransform = CGAffineTransform(rotationAngle: degrees * CGFloat(M_PI / 180))
-        rotatedViewBox.transform = t
-        let rotatedSize: CGSize = rotatedViewBox.frame.size
-        //Create the bitmap context
-        UIGraphicsBeginImageContext(rotatedSize)
-        let bitmap: CGContext = UIGraphicsGetCurrentContext()!
-        //Move the origin to the middle of the image so we will rotate and scale around the center.
-        bitmap.translateBy(x: rotatedSize.width / 2, y: rotatedSize.height / 2)
-        //Rotate the image context
         
+        rotatedViewBox.transform = t
+        
+        let rotatedSize: CGSize = rotatedViewBox.frame.size
+        
+        UIGraphicsBeginImageContext(rotatedSize)
+        
+        let bitmap: CGContext = UIGraphicsGetCurrentContext()!
+        
+        bitmap.translateBy(x: rotatedSize.width / 2, y: rotatedSize.height / 2)
         bitmap.rotate(by: (degrees * CGFloat(M_PI / 180)))
-        //Now, draw the rotated/scaled image into the context
         bitmap.scaleBy(x: 1.0, y: -1.0)
         bitmap.draw(oldImage.cgImage!, in: CGRect(x: -oldImage.size.width / 2, y: -oldImage.size.height / 2, width: oldImage.size.width, height: oldImage.size.height))
+        
         let newImage: UIImage = UIGraphicsGetImageFromCurrentImageContext()!
         UIGraphicsEndImageContext()
+        
         return newImage
     }
     
@@ -774,11 +778,15 @@ class PostCell: UITableViewCell {
             if let error = error {
                 print(error.localizedDescription)
             } else {
+                
 
                 let postDict = snapshot?.value as! Dictionary<String,AnyObject>
                 let key = postDict["post_ref"] as! String
                 let post = Post(postKey: key, dictionary: postDict)
                 let score = post.likes - post.dislikes
+                
+                self.postInteractionCheck(post: postDict)
+
                 if score == 0 {
                     self.postScoreLbl.textColor = NEUTRAL_YELLOW
                 } else if score > 0 {
@@ -853,6 +861,15 @@ class PostCell: UITableViewCell {
                 }
                 self.postScoreLbl.text = "\(abs(score))"
             }
+        }
+    }
+    
+    func postInteractionCheck(post: Dictionary<String,AnyObject>) {
+        
+        let url = "https://nameless-chamber-44579.herokuapp.com/postInteraction"
+        Alamofire.request(url, method: .post, parameters: post, encoding: JSONEncoding.default).responseJSON { response in
+            
+            print(response.result.value)
         }
     }
     

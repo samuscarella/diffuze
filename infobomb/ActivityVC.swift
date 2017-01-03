@@ -13,12 +13,10 @@ import Firebase
 import AVFoundation
 import GeoFire
 import SCLAlertView
+import Alamofire
 
-//private var latitude: Double = 0.0
-//private var longitude: Double = 0.0
-
-//ADD GREY IMAGE TO FOLLOWERSVC WHEN USER HAS NO FOLLOWERS
-//UPDATE TRIM WHITESPACE METHOD IN BOMBVC NOT POSTCELL
+private var latitude: Double = 0.0
+private var longitude: Double = 0.0
 
 class ActivityVC: UIViewController, CLLocationManagerDelegate, UITableViewDelegate, UITableViewDataSource, UIPickerViewDelegate, UIPickerViewDataSource, TableViewCellDelegate {
     
@@ -32,20 +30,21 @@ class ActivityVC: UIViewController, CLLocationManagerDelegate, UITableViewDelega
     @IBOutlet weak var postTypeFilterBtn: UIButton!
     @IBOutlet weak var pickerView: UIPickerView!
     @IBOutlet weak var darkendViewBtn: UIButton!
+    @IBOutlet weak var userPhotoImageView: ShakeImage!
     
     static var imageCache = NSCache<AnyObject, AnyObject>()
     
     let pulsator = Pulsator()
     let userID = FIRAuth.auth()?.currentUser?.uid
     let iD = UserService.ds.currentUserID
+    let geofireRef = UserService.ds.REF_USER_LOCATIONS
     let postTypeDataSource = ["All","Text","Link","Image","Video","Audio","Quote"]
 
     var locationService: LocationService!
+    var geoFire: GeoFire!
     var currentLocation: [String:AnyObject] = [:]
     var posts = [Post]()
     var currentUser: NSDictionary = [:]
-    var latitude: Double = 0.0
-    var longitude: Double = 0.0
     var audioPlayerItem: AVPlayerItem?
     var audioPlayer: AVPlayer?
     var followingImage: UIImage!
@@ -64,13 +63,18 @@ class ActivityVC: UIViewController, CLLocationManagerDelegate, UITableViewDelega
     var followingImgToPass: UIImage!
     var myGroup = DispatchGroup()
     var userPhotoToPass: UIImage?
-    var didJustLogIn = false
+    var didJustLogIn: Bool?
+    var timer: Timer?
+    var comingFromBombVC = false
+    var userPhoto: UIImage?
 
     override func viewDidLoad() {
         super.viewDidLoad()
         
         pickerView.delegate = self
         pickerView.dataSource = self
+        
+        geoFire = GeoFire(firebaseRef: geofireRef)
         
         UserDefaults.standard.setValue(false, forKey: "_UIConstraintBasedLayoutLogUnsatisfiable")
         self.view.backgroundColor = SMOKY_BLACK
@@ -115,36 +119,28 @@ class ActivityVC: UIViewController, CLLocationManagerDelegate, UITableViewDelega
         self.navigationItem.leftBarButtonItem = leftBarButton
         locationService = LocationService()
         
-//        locationService.startTracking()
-//        locationService.addObserver(self, forKeyPath: "latitude", options: .New, context: &latitude)
-//        locationService.addObserver(self, forKeyPath: "longitude", options: .New, context: &longitude)
+        locationService.startTracking()
         
-        UserService.ds.REF_USER_CURRENT.observeSingleEvent(of: FIRDataEventType.value, with: { (snapshot) in
-            
-              //  let value = snapshot.value as? NSDictionary
-              //  let latitude = value!["latitude"]
-              //  let longitude = value!["longitude"]
-              //  self.currentLocation["latitude"] = latitude as AnyObject?
-              //  self.currentLocation["longitude"] = longitude as AnyObject?
-//              self.tableView.reloadData()
-        })
-
-//        NSNotificationCenter.defaultCenter().addObserver(self, selector: #selector(ActivityVC.refreshTableView), name: "userUpdatedLocation", object: nil)
-        NotificationCenter.default.addObserver(locationService, selector: #selector(locationService.stopUpdatingLocation), name: NSNotification.Name(rawValue: "userSignedOut"), object: nil)
+        locationService.addObserver(self, forKeyPath: "latitude", options: .new, context: &latitude)
+        locationService.addObserver(self, forKeyPath: "longitude", options: .new, context: &longitude)
         
-        pulsator.radius = 300.0
-        pulsator.backgroundColor = UIColor(red: 255.0, green: 0, blue: 0, alpha: 1).cgColor
-        pulsator.animationDuration = 4
-        pulsator.numPulse = 6
-        pulsator.pulseInterval = 2
-        pulseImg.layer.superlayer?.insertSublayer(pulsator, below: pulseImg.layer)
-        pulsator.start()
+        timer = Timer.scheduledTimer(timeInterval: 5.0, target: self, selector: #selector(self.updateUserLocation), userInfo: nil, repeats: true)
+    
+        NotificationCenter.default.addObserver(self, selector: #selector(self.terminateAuthentication), name: NSNotification.Name(rawValue: "userSignedOut"), object: nil)
         
         tableView.delegate = self
         tableView.dataSource = self
         tableView.rowHeight = UITableViewAutomaticDimension
         tableView.estimatedRowHeight = 300
         tableView.isHidden = true
+        
+        self.pulsator.radius = 300.0
+        self.pulsator.backgroundColor = UIColor(red: 255.0, green: 0, blue: 0, alpha: 1).cgColor
+        self.pulsator.animationDuration = 4
+        self.pulsator.numPulse = 6
+        self.pulsator.pulseInterval = 2
+        self.pulseImg.layer.superlayer?.insertSublayer(self.pulsator, below: self.pulseImg.layer)
+        self.pulsator.start()
         
         if !comingFromCategoryFilterVC {
             categoryFilterOptions?.removeAll()
@@ -155,7 +151,41 @@ class ActivityVC: UIViewController, CLLocationManagerDelegate, UITableViewDelega
         
         let currentUserID = UserDefaults.standard.object(forKey: KEY_UID) as! String
         
-            getRadarPosts()
+        URL_BASE.child("users").child(currentUserID).child("photo").observeSingleEvent(of: FIRDataEventType.value, with: { snapshot in
+            
+            let userPhotoString = snapshot.value as? String ?? ""
+            
+            if userPhotoString != "" {
+                
+                self.userPhoto = ActivityVC.imageCache.object(forKey: userPhotoString as AnyObject) as? UIImage
+
+                if self.userPhoto != nil {
+                    self.pulseImg.image = self.userPhoto
+                } else {
+                    
+                    let url = URL(string: userPhotoString)!
+                    Alamofire.request(url, method: .get).response { response in
+                        if response.error == nil {
+                            
+                            let img = UIImage(data: response.data!)
+                            self.pulseImg.image = img
+                            ActivityVC.imageCache.setObject(img!, forKey: userPhotoString as AnyObject)
+                            
+                        } else {
+                            print("\(response.error)")
+                        }
+                    }
+                    self.pulseImg.layer.cornerRadius = self.pulseImg.frame.size.height / 2
+                    self.pulseImg.clipsToBounds = true
+                }
+            } else {
+                print("User does not have a profile photo set!")
+                self.pulseImg.image = UIImage(named: "user")
+            }
+        })
+        
+        getRadarPosts()
+        
         URL_BASE.child("users").child(currentUserID).child("following").observe(FIRDataEventType.value, with: { (snapshot) in
             
             let followingUsers = snapshot.children.allObjects as? [FIRDataSnapshot] ?? []
@@ -182,36 +212,27 @@ class ActivityVC: UIViewController, CLLocationManagerDelegate, UITableViewDelega
             }
     
         })
-
+        
         if revealViewController() != nil {
             
             menuButton.addTarget(revealViewController(), action: #selector(SWRevealViewController.revealToggle(_:)), for: UIControlEvents.touchUpInside)
         }
     }
     
-//    override func observeValueForKeyPath(keyPath: String?, ofObject object: AnyObject?, change: [String : AnyObject]?, context: UnsafeMutablePointer<Void>) {
-//        
-//        if context == &latitude {
-//            latitude = Double(change![NSKeyValueChangeNewKey]! as! NSNumber)
-////            print("LatitudeOfUser: \(latitude)")
-//            currentLocation["latitude"] = latitude
-//            tableView.reloadData()
-//        }
-//        if context == &longitude {
-//            longitude = Double(change![NSKeyValueChangeNewKey]! as! NSNumber)
-////            print("LongitudeOfUser: \(longitude)")
-//            currentLocation["longitude"] = longitude
-//            tableView.reloadData()
-//        }
-//    }
+    override func observeValue(forKeyPath keyPath: String?, of object: Any?, change: [NSKeyValueChangeKey : Any]?, context: UnsafeMutableRawPointer?) {
+        
+        if context == &latitude {
+            latitude = Double(change![NSKeyValueChangeKey.newKey]! as! NSNumber)
+            currentLocation["latitude"] = latitude as AnyObject?
+        }
+        if context == &longitude {
+            longitude = Double(change![NSKeyValueChangeKey.newKey]! as! NSNumber)
+            currentLocation["longitude"] = longitude as AnyObject?
+        }
+    }
     
     override func viewDidAppear(_ animated: Bool) {
-        
-        if didJustLogIn {
-            
-            let alertView = SCLAlertView()
-            alertView.showInfo("Tip", subTitle: "\nWelcome to Diffuze! When posts reach your location, they will show up here in the radar feed.", closeButtonTitle: "Ok", duration: 0.0, colorStyle: 0xFACE00, colorTextButton: 0x000000, circleIconImage: UIImage(named: "error-white"), animationStyle: .topToBottom)
-        }
+    
     }
     
     override func viewDidLayoutSubviews() {
@@ -225,11 +246,43 @@ class ActivityVC: UIViewController, CLLocationManagerDelegate, UITableViewDelega
     }
     
     override func viewWillDisappear(_ animated: Bool) {
-        NotificationCenter.default.removeObserver(self)
-        didJustLogIn = false
+        timer?.invalidate()
+    }
+    
+    deinit {
+        locationService.removeObserver(self, forKeyPath: "latitude", context: &latitude)
+        locationService.removeObserver(self, forKeyPath: "longitude", context: &longitude)
+    }
+    
+    func updateUserLocation() {
+        
+        if currentLocation["latitude"] != nil && currentLocation["longitude"] != nil {
+            
+            geoFire.setLocation(CLLocation(latitude: (currentLocation["latitude"] as? CLLocationDegrees)!, longitude: (currentLocation["longitude"] as? CLLocationDegrees)!), forKey: iD)
+            
+            if UserService.ds.REF_USER_CURRENT != nil {
+                let longRef = UserService.ds.REF_USER_CURRENT?.child("longitude")
+                let latRef = UserService.ds.REF_USER_CURRENT?.child("latitude")
+                
+                longRef?.setValue(currentLocation["longitude"])
+                latRef?.setValue(currentLocation["latitude"])
+            }
+            print(currentLocation)
+        }
+    }
+        
+    func terminateAuthentication() {
+        
+        do {
+            try FIRAuth.auth()!.signOut()
+            self.performSegue(withIdentifier: "unwindToLoginVC", sender: self)
+        } catch let err as NSError {
+            print(err)
+        }
     }
     
     @IBAction func postTypeFilterBtnPressed(_ sender: AnyObject) {
+        
         postTypeFilterActive = true
         categoryFilterActive = false
         pickerView.isHidden = false
@@ -322,6 +375,7 @@ class ActivityVC: UIViewController, CLLocationManagerDelegate, UITableViewDelega
     func tableView(_ tableView: UITableView, cellForRowAt indexPath: IndexPath) -> UITableViewCell {
         
         if posts.count > 0 {
+            
             let post = posts[(indexPath as NSIndexPath).row]
             
             if let cell = tableView.dequeueReusableCell(withIdentifier: "PostCell", for: indexPath) as? PostCell {
@@ -430,7 +484,6 @@ class ActivityVC: UIViewController, CLLocationManagerDelegate, UITableViewDelega
         var i = 0
         while(posts.count > 0 && i < posts.count) {
             var shouldRemoveFromPosts = true
-            print(posts.count)
             for cat in posts[i].categories {
                 for fo in categoryFilterOptions! {
                     if fo == cat {
@@ -439,7 +492,6 @@ class ActivityVC: UIViewController, CLLocationManagerDelegate, UITableViewDelega
                 }
             }
             if shouldRemoveFromPosts {
-
                 self.posts.remove(at: i)
             } else {
                 i += 1
@@ -476,6 +528,27 @@ class ActivityVC: UIViewController, CLLocationManagerDelegate, UITableViewDelega
         })
     }
     
+    func getPostImageFromServer(urlString: String, postType: String) {
+        
+        let url = URL(string: urlString)!
+        Alamofire.request(url, method: .get).response { response in
+            if response.error == nil {
+                
+                let img = UIImage(data: response.data!)
+                
+                if postType == "image" || postType == "quote" {
+                    ActivityVC.imageCache.setObject(img!, forKey: urlString as AnyObject)
+                } else if postType == "video" {
+                    let imageStruct = ImageStruct()
+                    let rotatedImage = imageStruct.imageRotatedByDegrees(oldImage: img!, deg: 90)
+                    ActivityVC.imageCache.setObject(rotatedImage, forKey: urlString as AnyObject)
+                }
+            } else {
+                print("\(response.error)")
+            }
+        }
+    }
+    
     func getRadarPosts() {
         
         URL_BASE.child("users").child(iD).child("radar").observeSingleEvent(of: FIRDataEventType.value, with: { (snapshot) in
@@ -492,10 +565,15 @@ class ActivityVC: UIViewController, CLLocationManagerDelegate, UITableViewDelega
                         
                         if let radarPost = snap.value as? Dictionary<String,AnyObject> {
                             let postKey = radarPost["post_ref"] as! String
-                            print(radarPost)
                             let post = Post(postKey: postKey, dictionary: radarPost)
                             if post.active {
                                 self.posts.append(post)
+                            }
+                            if post.type == "image" || post.type == "quote" {
+                                //will still format quote posts same as image
+                                self.getPostImageFromServer(urlString: post.image!, postType: "image")
+                            } else if post.type == "video" {
+                                self.getPostImageFromServer(urlString: post.thumbnail!, postType: "video")
                             }
                         }
                         self.myGroup.leave()
@@ -523,8 +601,6 @@ class ActivityVC: UIViewController, CLLocationManagerDelegate, UITableViewDelega
         darkendViewBtn.isUserInteractionEnabled = false
         darkendViewBtn.alpha = 0.0
         
-        print(previousPostTypeFilterRow)
-        
         getRadarPosts()
     }
     
@@ -547,6 +623,10 @@ class ActivityVC: UIViewController, CLLocationManagerDelegate, UITableViewDelega
             vC.followingStatus = followingImgToPass
             vC.userPhotoPostDetail = userPhotoToPass
             vC.previousVC = "RadarVC"
+        } else if segue.identifier == "unwindToLoginVC" {
+        
+            let vC = segue.destination as! LoginVC
+            vC.noLocationAccess = true
         }
     }
     
