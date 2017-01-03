@@ -9,6 +9,7 @@
 import UIKit
 import Firebase
 import AVFoundation
+import SCLAlertView
 
 class SignUpFourVC: UIViewController, UIImagePickerControllerDelegate, UINavigationControllerDelegate {
     
@@ -18,11 +19,13 @@ class SignUpFourVC: UIViewController, UIImagePickerControllerDelegate, UINavigat
     @IBOutlet weak var photoImageView: UIImageView!
     
     let imagePicker = UIImagePickerController()
+    static var imageCache = NSCache<AnyObject, AnyObject>()
     
     var email: String!
     var username: String!
     var password: String!
     var introMusic: AVAudioPlayer!
+    var didJustLogIn = true
 
     override func viewDidLoad() {
         super.viewDidLoad()
@@ -98,22 +101,28 @@ class SignUpFourVC: UIViewController, UIImagePickerControllerDelegate, UINavigat
             
             if error != nil {
                 
-                print(error)
-                self.showErrorAlert("Could not create account", msg: "Problem creating account. Try something else")
+                let alertView = SCLAlertView()
+                
+                alertView.showError("Error", subTitle: "\nCould not create account. Please try something else.", closeButtonTitle: "Ok", duration: 0.0, colorStyle: 0xff0000, colorTextButton: 0xffffff, circleIconImage: UIImage(named: "error-white"), animationStyle: .topToBottom)
+                alertView.view.frame.origin.y -= 90
             } else {
                 
                 FIRAuth.auth()?.signIn(withEmail: self.email, password: self.password) { (user, error) in
                     
                     let user = FIRAuth.auth()?.currentUser
                     
+                    let subscriptions = ["All":true]
+                    
                     var userData = [
                         "email": self.email,
                         "username": self.username,
                         "provider": FIREBASE,
-                        "user_ref": user!.uid
-                    ]
+                        "user_id": user!.uid,
+                        "subscriptions": subscriptions
+                    ] as [String : Any]
                     
                     if let user = user {
+                        
                         let changeRequest = user.profileChangeRequest()
                         
                         changeRequest.displayName = self.username
@@ -145,14 +154,13 @@ class SignUpFourVC: UIViewController, UIImagePickerControllerDelegate, UINavigat
                                 
                                 userData["photo"] = downloadURL
 
-                                UserService.ds.createFirebaseUser(user!.uid, user: userData as! Dictionary<String, String>)
+                                UserService.ds.createFirebaseUser(user!.uid, user: userData)
                                 
                                 UserDefaults.standard.setValue(user!.uid, forKey: KEY_UID)
                                 UserDefaults.standard.setValue(self.username, forKey: KEY_USERNAME)
-                                
+                                                                
                                 self.playIntroSound()
-                                self.performSegue(withIdentifier:SEGUE_LOGGED_IN, sender: nil)
-
+                                self.performSegue(withIdentifier:SEGUE_LOGGED_IN, sender: self.didJustLogIn)
                             }
                         }
                     } else {
@@ -161,21 +169,11 @@ class SignUpFourVC: UIViewController, UIImagePickerControllerDelegate, UINavigat
                         UserDefaults.standard.setValue(self.username, forKey: KEY_USERNAME)
                         
                         self.playIntroSound()
-                        self.performSegue(withIdentifier:SEGUE_LOGGED_IN, sender: nil)
+                        self.performSegue(withIdentifier:SEGUE_LOGGED_IN, sender: self.didJustLogIn)
                     }
                 }
             }
         }
-    }
-    
-    override func prepare(for segue: UIStoryboardSegue, sender: Any!) {
-        
-        if (segue.identifier == SEGUE_LOGGED_IN) {
-            
-            let vC = segue.destination as! ActivityVC
-            vC.didJustLogIn = true
-        }
-        
     }
     
     @IBAction func backBtnPressed(_ sender: AnyObject) {

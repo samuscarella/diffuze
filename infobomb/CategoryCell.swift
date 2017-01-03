@@ -14,7 +14,7 @@ class CategoryCell: UITableViewCell {
 
 
 
-    @IBOutlet weak var categoryImage: UIImageView?
+    @IBOutlet weak var categoryImage: UIImageView!
     @IBOutlet weak var categoryTxt: UILabel!
     @IBOutlet weak var categoryCheckmark: UIImageView!
     
@@ -34,27 +34,12 @@ class CategoryCell: UITableViewCell {
         // Configure the view for the selected state
     }
     
-    func configureCell(_ category: Category, img: UIImage?) {
+    func configureCell(_ category: Category) {
         
         self.category = category
         self.categoryTxt.text = category.name
         self.categoryCheckmark.image = nil
-        
-        //subscriptionRef = UserService.ds.REF_USER_CURRENT.child("subscriptions").child(category.name)
-        
-        if img != nil {
-            self.categoryImage?.image = img
-        } else {
-            
-            request = Alamofire.request(category.image_path!).validate(contentType: ["image/*"]).response { response in
-                
-                if response.error == nil {
-                    let img = UIImage(data: response.data!)!
-                    self.categoryImage?.image = img
-                    SubscriptionsVC.imageCache.setObject(img, forKey: self.category.image_path! as AnyObject)
-                }
-            }
-        }
+        self.categoryImage.image = UIImage(named: category.imagePath)
     }
 
 }

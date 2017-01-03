@@ -30,6 +30,8 @@ class SignUpOneVC: UIViewController {
         NotificationCenter.default.addObserver(self, selector: #selector(SignUpOneVC.keyboardWillShow(_:)), name: NSNotification.Name.UIKeyboardWillShow, object: nil)
         
         emailField.autocorrectionType = .no
+        emailField.becomeFirstResponder()
+        
         continueBtn.layer.cornerRadius = 3
     }
     
@@ -38,7 +40,7 @@ class SignUpOneVC: UIViewController {
         if let keyboardSize = ((notification as NSNotification).userInfo?[UIKeyboardFrameBeginUserInfoKey] as? NSValue)?.cgRectValue {
             if view.frame.origin.y == 0 {
                 self.signUpBtnBottomConstraint.constant = keyboardSize.height
-                UIView.animate(withDuration: 0.9) {
+                UIView.animate(withDuration: 0.3) {
                     self.view.layoutIfNeeded()
                 }
             }
@@ -52,6 +54,10 @@ class SignUpOneVC: UIViewController {
     override func viewWillAppear(_ animated: Bool) {
         
         self.signUpBtnBottomConstraint.constant = 0
+    }
+    
+    override func viewWillDisappear(_ animated: Bool) {
+        view.endEditing(true)
     }
     
     @IBAction func goBackBtnPressed(_ sender: AnyObject) {
@@ -77,25 +83,9 @@ class SignUpOneVC: UIViewController {
         }
         let alertView = SCLAlertView()
         alertView.showError("Validation Error", subTitle: "\nEmail is Invalid. Please make sure it is a valid email.", closeButtonTitle: "Ok", duration: 0.0, colorStyle: 0xff0000, colorTextButton: 0xffffff, circleIconImage: UIImage(named: "error-white"), animationStyle: .topToBottom)
+        alertView.view.frame.origin.y -= 90
         return false
     }
-    
-    /*z
-     let appearance = SCLAlertView.SCLAppearance(
-     kTitleFont: UIFont(name: "HelveticaNeue", size: 20)!,
-     kTextFont: UIFont(name: "HelveticaNeue", size: 14)!,
-     kButtonFont: UIFont(name: "HelveticaNeue-Bold", size: 14)!,
-     showCloseButton: false
-     )
-     .showTitle(
-    "Congratulations", // Title of view
-    subTitle: "Operation successfully completed.", // String of view
-    duration: 2.0, // Duration to show before closing automatically, default: 0.0
-    completeText: "Done", // Optional button value, default: ""
-    style: .Success, // Styles - see below.
-    colorStyle: 0xA429FF,
-    colorTextButton: 0xFFFFFF
-    )*/
     
     override func prepare(for segue: UIStoryboardSegue, sender: Any!) {
         

@@ -7,7 +7,6 @@
 //
 
 
-
 #import "SWRevealViewController.h"
 #import "Cloudinary.h"
 

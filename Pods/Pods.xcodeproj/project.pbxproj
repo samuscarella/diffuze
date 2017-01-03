@@ -57,7 +57,7 @@
 		907AB123FBC8BC9340D5B7350CE828DF /* SessionDelegate.swift in Sources */ = {isa = PBXBuildFile; fileRef = 2A4B542096054217A6554383361252DF /* SessionDelegate.swift */; };
 		91C09AC2A52ED69A27C8D923139A006F /* Foundation.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = F7EDA3490B11860B14E74DB31C0F9500 /* Foundation.framework */; };
 		92A2E3F5CC362B7E0F3ABE903C4CDBEE /* QuartzCore.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = 62FD69843B1D3243AF0FE79D8EA99703 /* QuartzCore.framework */; };
-		93A21BB51E1028D20092C340 /* FirebaseDatabase.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = 0385FD26092ADEAA5AA1A65CC23863CE /* FirebaseDatabase.framework */; };
+		93262FB71E12F405008CAAF8 /* FirebaseDatabase.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = 0385FD26092ADEAA5AA1A65CC23863CE /* FirebaseDatabase.framework */; };
 		942E5040D1E972ADDF2DB2F58A69B9A6 /* GeoFire-umbrella.h in Headers */ = {isa = PBXBuildFile; fileRef = 57DD0C03B7E822DC25A234B9C12C47C2 /* GeoFire-umbrella.h */; settings = {ATTRIBUTES = (Public, ); }; };
 		9469DF81ECB494E84675969B5E13374C /* Alamofire-umbrella.h in Headers */ = {isa = PBXBuildFile; fileRef = A6F0136D18423B5559C76F7F9C41B4CA /* Alamofire-umbrella.h */; settings = {ATTRIBUTES = (Public, ); }; };
 		97259EA260C5939F58E2B4592149A581 /* Pods-infobomb-umbrella.h in Headers */ = {isa = PBXBuildFile; fileRef = 4C17D3700E6BBE9030F158F6BA499AAB /* Pods-infobomb-umbrella.h */; settings = {ATTRIBUTES = (Public, ); }; };
@@ -382,7 +382,7 @@
 			isa = PBXFrameworksBuildPhase;
 			buildActionMask = 2147483647;
 			files = (
-				93A21BB51E1028D20092C340 /* FirebaseDatabase.framework in Frameworks */,
+				93262FB71E12F405008CAAF8 /* FirebaseDatabase.framework in Frameworks */,
 				A3B194274307596B76B7937250147CA2 /* CoreLocation.framework in Frameworks */,
 				2E9E7D066249C95D3F055195ABD85B08 /* Foundation.framework in Frameworks */,
 				E514C58DD45A98FBE215C31697E4E322 /* GoogleToolboxForMac.framework in Frameworks */,

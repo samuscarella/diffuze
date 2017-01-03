@@ -8,6 +8,10 @@
 
 import UIKit
 import Firebase
+import GeoFire
+
+private var latitude: Double = 0.0
+private var longitude: Double = 0.0
 
 class MyInfoVC: UIViewController, UITableViewDelegate, UITableViewDataSource, UIPickerViewDelegate, UIPickerViewDataSource, TableViewCellDelegate, ActivityTableViewCellDelegate {
     
@@ -26,9 +30,15 @@ class MyInfoVC: UIViewController, UITableViewDelegate, UITableViewDataSource, UI
     
     let personalDataSource = ["My Posts","Liked","Disliked"]
     let postTypeDataSource = ["All","Text","Link","Image","Video","Audio","Quote"]
-
-    var posts = [Post]()
+    let geofireRef = UserService.ds.REF_USER_LOCATIONS
+    let iD = UserService.ds.currentUserID
+    
+    var categories = [Category]()
+    var locationService: LocationService!
     var currentLocation: [String:AnyObject] = [:]
+    var geoFire: GeoFire!
+    var timer: Timer?
+    var posts = [Post]()
     var personalFilterOption: String!
     var postTypeFilterOption: String!
     var categoryFilterOptions: [String]?
@@ -94,6 +104,17 @@ class MyInfoVC: UIViewController, UITableViewDelegate, UITableViewDataSource, UI
         tableView.dataSource = self
         tableView.rowHeight = UITableViewAutomaticDimension
         tableView.estimatedRowHeight = 300
+        
+        geoFire = GeoFire(firebaseRef: geofireRef)
+        
+        locationService = LocationService()
+        locationService.startTracking()
+        locationService.addObserver(self, forKeyPath: "latitude", options: .new, context: &latitude)
+        locationService.addObserver(self, forKeyPath: "longitude", options: .new, context: &longitude)
+        
+        timer = Timer.scheduledTimer(timeInterval: 5.0, target: self, selector: #selector(self.updateUserLocation), userInfo: nil, repeats: true)
+        
+        NotificationCenter.default.addObserver(self, selector: #selector(self.terminateAuthentication), name: NSNotification.Name(rawValue: "userSignedOut"), object: nil)
 
         if !comingFromCategoryFilterVC {
             categoryFilterOptions?.removeAll()
@@ -109,6 +130,55 @@ class MyInfoVC: UIViewController, UITableViewDelegate, UITableViewDataSource, UI
         if revealViewController() != nil {
             menuButton.addTarget(revealViewController(), action: #selector(SWRevealViewController.revealToggle(_:)), for: UIControlEvents.touchUpInside)
         }
+    }
+    
+    override func observeValue(forKeyPath keyPath: String?, of object: Any?, change: [NSKeyValueChangeKey : Any]?, context: UnsafeMutableRawPointer?) {
+        
+        if context == &latitude {
+            latitude = Double(change![NSKeyValueChangeKey.newKey]! as! NSNumber)
+            currentLocation["latitude"] = latitude as AnyObject?
+        }
+        if context == &longitude {
+            longitude = Double(change![NSKeyValueChangeKey.newKey]! as! NSNumber)
+            currentLocation["longitude"] = longitude as AnyObject?
+        }
+    }
+
+    func updateUserLocation() {
+        
+        if currentLocation["latitude"] != nil && currentLocation["longitude"] != nil {
+            
+            geoFire.setLocation(CLLocation(latitude: (currentLocation["latitude"] as? CLLocationDegrees)!, longitude: (currentLocation["longitude"] as? CLLocationDegrees)!), forKey: iD)
+            
+            if UserService.ds.REF_USER_CURRENT != nil {
+                let longRef = UserService.ds.REF_USER_CURRENT?.child("longitude")
+                let latRef = UserService.ds.REF_USER_CURRENT?.child("latitude")
+                
+                longRef?.setValue(currentLocation["longitude"])
+                latRef?.setValue(currentLocation["latitude"])
+            }
+            print(currentLocation)
+        }
+    }
+    
+    func terminateAuthentication() {
+        
+        do {
+            try FIRAuth.auth()!.signOut()
+            self.performSegue(withIdentifier: "unwindToLoginVC", sender: self)
+        } catch let err as NSError {
+            print(err)
+        }
+    }
+
+    override func viewWillDisappear(_ animated: Bool) {
+        
+        timer?.invalidate()
+    }
+    
+    deinit {
+        locationService.removeObserver(self, forKeyPath: "latitude", context: &latitude)
+        locationService.removeObserver(self, forKeyPath: "longitude", context: &longitude)
     }
     
     func postAction(action: String) {
@@ -254,7 +324,7 @@ class MyInfoVC: UIViewController, UITableViewDelegate, UITableViewDataSource, UI
         
          if postTypeFilterOption == "Text" {
             noPostsLbl.text = "There are no text posts matching your criteria"
-            noPostsImageView.image = UIImage(named: "font")
+            noPostsImageView.image = UIImage(named: "text-white")
         } else if postTypeFilterOption == "Link" {
             noPostsLbl.text = "There are no link posts matching your criteria"
             noPostsImageView.image = UIImage(named: "link-white")
@@ -487,9 +557,11 @@ class MyInfoVC: UIViewController, UITableViewDelegate, UITableViewDataSource, UI
                     self.myGroup.enter()
                     URL_BASE.child("posts").child(post.key).observeSingleEvent(of: FIRDataEventType.value, with: { snapshot in
                         
-                        let postDict = snapshot.value as! Dictionary<String,AnyObject>
-                        let post = Post(postKey: post.key, dictionary: postDict)
-                        self.posts.append(post)
+                        if let postDict = snapshot.value as? Dictionary<String,AnyObject> {
+                            
+                            let post = Post(postKey: post.key, dictionary: postDict)
+                            self.posts.append(post)
+                        }
                         self.myGroup.leave()
                     })
                 }
@@ -527,9 +599,11 @@ class MyInfoVC: UIViewController, UITableViewDelegate, UITableViewDataSource, UI
                     self.myGroup.enter()
                     URL_BASE.child("posts").child(post.key).observeSingleEvent(of: FIRDataEventType.value, with: { snapshot in
                         
-                        let postDict = snapshot.value as! Dictionary<String,AnyObject>
-                        let post = Post(postKey: post.key, dictionary: postDict)
-                        self.posts.append(post)
+                        if let postDict = snapshot.value as? Dictionary<String,AnyObject> {
+                            
+                            let post = Post(postKey: post.key, dictionary: postDict)
+                            self.posts.append(post)
+                        }
                         self.myGroup.leave()
                     })
                 }

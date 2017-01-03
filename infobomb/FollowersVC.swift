@@ -8,6 +8,10 @@
 
 import UIKit
 import Firebase
+import GeoFire
+
+private var latitude = 0.0
+private var longitude = 0.0
 
 class FollowersVC: UIViewController, UITableViewDataSource, UITableViewDelegate, UISearchBarDelegate {
 
@@ -18,6 +22,14 @@ class FollowersVC: UIViewController, UITableViewDataSource, UITableViewDelegate,
     @IBOutlet weak var noFollowersLbl: UILabel!
     @IBOutlet weak var tableView: UITableView!
     
+    let iD = UserService.ds.currentUserID
+    let geofireRef = UserService.ds.REF_USER_LOCATIONS
+    
+    var categories = [Category]()
+    var locationService: LocationService!
+    var currentLocation: [String:AnyObject] = [:]
+    var geoFire: GeoFire!
+    var timer: Timer?
     var currentUserID: String!
     var lineView: UIView!
     var users = [User]()
@@ -82,41 +94,80 @@ class FollowersVC: UIViewController, UITableViewDataSource, UITableViewDelegate,
         tableView.delegate = self
         tableView.dataSource = self
         
+        geoFire = GeoFire(firebaseRef: geofireRef)
+        
+        locationService = LocationService()
+        locationService.startTracking()
+        locationService.addObserver(self, forKeyPath: "latitude", options: .new, context: &latitude)
+        locationService.addObserver(self, forKeyPath: "longitude", options: .new, context: &longitude)
+        
+        timer = Timer.scheduledTimer(timeInterval: 5.0, target: self, selector: #selector(self.updateUserLocation), userInfo: nil, repeats: true)
+        
+        NotificationCenter.default.addObserver(self, selector: #selector(self.terminateAuthentication), name: NSNotification.Name(rawValue: "userSignedOut"), object: nil)
+        
         currentUserID = UserDefaults.standard.object(forKey: KEY_UID) as! String
         
         self.noFollowersImageView.image = UIImage(named: "followers-grey")
         self.noFollowersLbl.text = "You are not following anyone yet. They will show up here after you do."
 
         getFollowing()
-       /* URL_BASE.child("users").child(currentUserID).child("following").observe(FIRDataEventType.value, with: { (snapshot) in
-            
-            let followingUsers = snapshot.children.allObjects as? [FIRDataSnapshot] ?? []
-            
-            for user in followingUsers {
-                self.usersIds.append(user.key)
-            }
-            
-            for id in self.usersIds {
-                URL_BASE.child("users").child(id).observeSingleEvent(of: FIRDataEventType.value, with: { (snapshot) in
-                  
-                    if let userDict = snapshot.value as? Dictionary<String,AnyObject> {
-                        
-                        let user = User.init(userId: userDict["user_ref"] as! String, dictionary: userDict)
-                        print(user)
-                        self.users.append(user)
-                        self.tableView.reloadData()
-                    }
-                })
-            }
-            
-        }) */
-
+        
         //Burger side menu
         if revealViewController() != nil {
             menuButton.addTarget(revealViewController(), action: #selector(SWRevealViewController.revealToggle(_:)), for: UIControlEvents.touchUpInside)
         }
     }
     
+    override func observeValue(forKeyPath keyPath: String?, of object: Any?, change: [NSKeyValueChangeKey : Any]?, context: UnsafeMutableRawPointer?) {
+        
+        if context == &latitude {
+            latitude = Double(change![NSKeyValueChangeKey.newKey]! as! NSNumber)
+            currentLocation["latitude"] = latitude as AnyObject?
+        }
+        if context == &longitude {
+            longitude = Double(change![NSKeyValueChangeKey.newKey]! as! NSNumber)
+            currentLocation["longitude"] = longitude as AnyObject?
+        }
+    }
+    
+    func updateUserLocation() {
+        
+        if currentLocation["latitude"] != nil && currentLocation["longitude"] != nil {
+            
+            geoFire.setLocation(CLLocation(latitude: (currentLocation["latitude"] as? CLLocationDegrees)!, longitude: (currentLocation["longitude"] as? CLLocationDegrees)!), forKey: iD)
+            
+            if UserService.ds.REF_USER_CURRENT != nil {
+                let longRef = UserService.ds.REF_USER_CURRENT?.child("longitude")
+                let latRef = UserService.ds.REF_USER_CURRENT?.child("latitude")
+                
+                longRef?.setValue(currentLocation["longitude"])
+                latRef?.setValue(currentLocation["latitude"])
+            }
+            print(currentLocation)
+        }
+    }
+    
+    func terminateAuthentication() {
+        
+        do {
+            try FIRAuth.auth()!.signOut()
+            self.performSegue(withIdentifier: "unwindToLoginVC", sender: self)
+        } catch let err as NSError {
+            print(err)
+        }
+    }
+    
+    override func viewWillDisappear(_ animated: Bool) {
+        
+        timer?.invalidate()
+        timer = nil
+    }
+    
+    deinit {
+        locationService.removeObserver(self, forKeyPath: "latitude", context: &latitude)
+        locationService.removeObserver(self, forKeyPath: "longitude", context: &longitude)
+    }
+
     func tableView(_ tableView: UITableView, heightForRowAt indexPath: IndexPath) -> CGFloat {
         return 50.0
     }
@@ -192,7 +243,7 @@ class FollowersVC: UIViewController, UITableViewDataSource, UITableViewDelegate,
         self.followersBtn.addSubview(lineView)
         noFollowersImageView.isHidden = false
         noFollowersLbl.isHidden = false
-        self.noFollowersImageView.image = UIImage(named: "follower-grey")
+        self.noFollowersImageView.image = UIImage(named: "follower-1")
         self.noFollowersLbl.text = "You do not have any followers yet. They will show up here after you get some."
         getFollowers()
     }
@@ -254,7 +305,7 @@ class FollowersVC: UIViewController, UITableViewDataSource, UITableViewDelegate,
                     
                     if let userDict = snapshot.value as? Dictionary<String,AnyObject> {
                         
-                        let user = User.init(userId: userDict["user_ref"] as! String, dictionary: userDict)
+                        let user = User.init(userId: userDict["user_id"] as! String, dictionary: userDict)
                         self.users.append(user)
                     }
                     self.myGroup.leave()

@@ -10,6 +10,11 @@ import UIKit
 import AVFoundation
 import AVKit
 import Pulsator
+import GeoFire
+import FirebaseAuth
+
+private var latitude = 0.0
+private var longitude = 0.0
 
 class AudioPostVC: UIViewController, UITextFieldDelegate, AVAudioRecorderDelegate, AVAudioPlayerDelegate {
 
@@ -30,10 +35,15 @@ class AudioPostVC: UIViewController, UITextFieldDelegate, AVAudioRecorderDelegat
     @IBOutlet weak var savedTimeLbl: UILabel!
     @IBOutlet weak var restartBtn: UIButton!
     
-    var item: AVPlayerItem?
-    
     let pulsator = Pulsator()
-
+    let geofireRef = UserService.ds.REF_USER_LOCATIONS
+    let iD = UserService.ds.currentUserID
+    
+    var categories = [Category]()
+    var locationService: LocationService!
+    var currentLocation: [String:AnyObject] = [:]
+    var geoFire: GeoFire!
+    var timer: Timer?
     var recordingSession: AVAudioSession!
     var audioRecorder: AVAudioRecorder!
     var updater: CADisplayLink! = nil
@@ -41,6 +51,7 @@ class AudioPostVC: UIViewController, UITextFieldDelegate, AVAudioRecorderDelegat
     var player: AVPlayer?
     var audioPlayer: AVAudioPlayer?
     var audioURL = NSURL(string: "")
+    var item: AVPlayerItem?
     var linkObj: [String:AnyObject] = [:]
     
     override func viewDidLoad() {
@@ -48,10 +59,7 @@ class AudioPostVC: UIViewController, UITextFieldDelegate, AVAudioRecorderDelegat
 
         UserDefaults.standard.setValue(false, forKey: "_UIConstraintBasedLayoutLogUnsatisfiable")
         print("AudioPostVC")
-        
-        //        NotificationCenter.default.addObserver(self, selector: #selector(AudioPostVC.keyboardWillShow(_:)), name: NSNotification.Name.UIKeyboardWillShow, object: nil)
-        //        NotificationCenter.default.addObserver(self, selector: #selector(AudioPostVC.keyboardWillHide(_:)), name: NSNotification.Name.UIKeyboardWillHide, object: nil)
-        
+                
         UIApplication.shared.statusBarStyle = .lightContent
         self.navigationController?.navigationBar.setBackgroundImage(UIImage(), for: .default)
         self.navigationController?.navigationBar.shadowImage = UIImage()
@@ -115,12 +123,20 @@ class AudioPostVC: UIViewController, UITextFieldDelegate, AVAudioRecorderDelegat
           audioSlider.maximumValue = 100
         titleField.isHidden = true
         
-//        textField.delegate = self
+        geoFire = GeoFire(firebaseRef: geofireRef)
+        
+        locationService = LocationService()
+        locationService.startTracking()
+        locationService.addObserver(self, forKeyPath: "latitude", options: .new, context: &latitude)
+        locationService.addObserver(self, forKeyPath: "longitude", options: .new, context: &longitude)
+        
+        
+        timer = Timer.scheduledTimer(timeInterval: 5.0, target: self, selector: #selector(self.updateUserLocation), userInfo: nil, repeats: true)
+        
+        NotificationCenter.default.addObserver(self, selector: #selector(self.terminateAuthentication), name: NSNotification.Name(rawValue: "userSignedOut"), object: nil)
 
         let tap: UITapGestureRecognizer = UITapGestureRecognizer(target: self, action: #selector(AudioPostVC.dismissKeyboard))
         view.addGestureRecognizer(tap)
-
-//        applyPlaceholderStyle(aTextview: textField!, placeholderText: PLACEHOLDER_TEXT)
 
         recordingSession = AVAudioSession.sharedInstance()
         
@@ -137,8 +153,6 @@ class AudioPostVC: UIViewController, UITextFieldDelegate, AVAudioRecorderDelegat
         } catch {
             print("Failed to Record")
         }
-
-
     }
     
     override func viewDidLayoutSubviews() {
@@ -158,6 +172,56 @@ class AudioPostVC: UIViewController, UITextFieldDelegate, AVAudioRecorderDelegat
         
         NotificationCenter.default.addObserver(self, selector: #selector(AudioPostVC.playerItemDidReachEnd(notification:)), name: NSNotification.Name.AVPlayerItemDidPlayToEndTime, object: self.player?.currentItem)
         
+    }
+    
+    override func observeValue(forKeyPath keyPath: String?, of object: Any?, change: [NSKeyValueChangeKey : Any]?, context: UnsafeMutableRawPointer?) {
+        
+        if context == &latitude {
+            latitude = Double(change![NSKeyValueChangeKey.newKey]! as! NSNumber)
+            currentLocation["latitude"] = latitude as AnyObject?
+        }
+        if context == &longitude {
+            longitude = Double(change![NSKeyValueChangeKey.newKey]! as! NSNumber)
+            currentLocation["longitude"] = longitude as AnyObject?
+        }
+    }
+    
+    func updateUserLocation() {
+        
+        if currentLocation["latitude"] != nil && currentLocation["longitude"] != nil {
+            
+            geoFire.setLocation(CLLocation(latitude: (currentLocation["latitude"] as? CLLocationDegrees)!, longitude: (currentLocation["longitude"] as? CLLocationDegrees)!), forKey: iD)
+            
+            if UserService.ds.REF_USER_CURRENT != nil {
+                let longRef = UserService.ds.REF_USER_CURRENT?.child("longitude")
+                let latRef = UserService.ds.REF_USER_CURRENT?.child("latitude")
+                
+                longRef?.setValue(currentLocation["longitude"])
+                latRef?.setValue(currentLocation["latitude"])
+            }
+            print(currentLocation)
+        }
+    }
+    
+    func terminateAuthentication() {
+        
+        do {
+            try FIRAuth.auth()!.signOut()
+            self.performSegue(withIdentifier: "unwindToLoginVC", sender: self)
+        } catch let err as NSError {
+            print(err)
+        }
+    }
+    
+    override func viewWillDisappear(_ animated: Bool) {
+        
+        timer?.invalidate()
+        timer = nil
+    }
+    
+    deinit {
+        locationService.removeObserver(self, forKeyPath: "latitude", context: &latitude)
+        locationService.removeObserver(self, forKeyPath: "longitude", context: &longitude)
     }
     
     @IBAction func recordBtnPressed(_ sender: AnyObject) {
@@ -259,7 +323,6 @@ class AudioPostVC: UIViewController, UITextFieldDelegate, AVAudioRecorderDelegat
         titleField.alpha = 1.0
     }
     
-    
     func textFieldDidEndEditing(_ textField: UITextField) {
         if textField.text == "" {
             titleField.alpha = 0.3
@@ -279,7 +342,6 @@ class AudioPostVC: UIViewController, UITextFieldDelegate, AVAudioRecorderDelegat
         view.endEditing(true)
     }
     
-
     func playerItemDidReachEnd(notification: NSNotification) {
         self.player?.seek(to: kCMTimeZero)
         self.player?.play()

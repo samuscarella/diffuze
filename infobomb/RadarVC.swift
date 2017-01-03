@@ -8,6 +8,10 @@
 
 import UIKit
 import Firebase
+import GeoFire
+
+private var latitude = 0.0
+private var longitude = 0.0
 
 class RadarVC: UIViewController, UITableViewDelegate, UITableViewDataSource, ActivityTableViewCellDelegate {
 
@@ -19,9 +23,14 @@ class RadarVC: UIViewController, UITableViewDelegate, UITableViewDataSource, Act
     
     let userID = FIRAuth.auth()?.currentUser?.uid
     let iD = UserService.ds.currentUserID
-
+    let geofireRef = UserService.ds.REF_USER_LOCATIONS
+    
+    var categories = [Category]()
     var locationService: LocationService!
     var currentLocation: [String:AnyObject] = [:]
+    var geoFire: GeoFire!
+    var timer: Timer?
+    var linkObj: [String:AnyObject] = [:]
     var posts = [Post]()
     var currentUser: NSDictionary = [:]
     var followingImage: UIImage!
@@ -40,6 +49,7 @@ class RadarVC: UIViewController, UITableViewDelegate, UITableViewDataSource, Act
         self.navigationController?.navigationBar.setBackgroundImage(UIImage(), for: .default)
         self.navigationController?.navigationBar.shadowImage = UIImage()
         self.navigationController?.navigationBar.isTranslucent = true
+        UIApplication.shared.statusBarStyle = .lightContent
         
         let customView = UIView()
         customView.frame = CGRect(x: 0, y: 0, width: 36, height: 36)
@@ -67,12 +77,18 @@ class RadarVC: UIViewController, UITableViewDelegate, UITableViewDataSource, Act
         menuButton.frame = CGRect(x: 0, y: 0, width: 60, height: 30)
         let leftBarButton = UIBarButtonItem(customView: menuButton)
         self.navigationItem.leftBarButtonItem = leftBarButton
+
+        geoFire = GeoFire(firebaseRef: geofireRef)
+        
         locationService = LocationService()
+        locationService.startTracking()
+        locationService.addObserver(self, forKeyPath: "latitude", options: .new, context: &latitude)
+        locationService.addObserver(self, forKeyPath: "longitude", options: .new, context: &longitude)
         
-        //locationService.startTracking()
-        //locationService.addObserver(self, forKeyPath: "latitude", options: .New, context: &latitude)
-        //locationService.addObserver(self, forKeyPath: "longitude", options: .New, context: &longitude)
+        timer = Timer.scheduledTimer(timeInterval: 5.0, target: self, selector: #selector(self.updateUserLocation), userInfo: nil, repeats: true)
         
+        NotificationCenter.default.addObserver(self, selector: #selector(self.terminateAuthentication), name: NSNotification.Name(rawValue: "userSignedOut"), object: nil)
+
         noPostsLbl.isHidden = true
         noPostsImageView.isHidden = true
         
@@ -126,6 +142,56 @@ class RadarVC: UIViewController, UITableViewDelegate, UITableViewDataSource, Act
         }
     }
     
+    override func observeValue(forKeyPath keyPath: String?, of object: Any?, change: [NSKeyValueChangeKey : Any]?, context: UnsafeMutableRawPointer?) {
+        
+        if context == &latitude {
+            latitude = Double(change![NSKeyValueChangeKey.newKey]! as! NSNumber)
+            currentLocation["latitude"] = latitude as AnyObject?
+        }
+        if context == &longitude {
+            longitude = Double(change![NSKeyValueChangeKey.newKey]! as! NSNumber)
+            currentLocation["longitude"] = longitude as AnyObject?
+        }
+    }
+    
+    func updateUserLocation() {
+        
+        if currentLocation["latitude"] != nil && currentLocation["longitude"] != nil {
+            
+            geoFire.setLocation(CLLocation(latitude: (currentLocation["latitude"] as? CLLocationDegrees)!, longitude: (currentLocation["longitude"] as? CLLocationDegrees)!), forKey: iD)
+            
+            if UserService.ds.REF_USER_CURRENT != nil {
+                
+                let longRef = UserService.ds.REF_USER_CURRENT?.child("longitude")
+                let latRef = UserService.ds.REF_USER_CURRENT?.child("latitude")
+                
+                longRef?.setValue(currentLocation["longitude"])
+                latRef?.setValue(currentLocation["latitude"])
+            }
+            print(currentLocation)
+        }
+    }
+    
+    func terminateAuthentication() {
+        
+        do {
+            try FIRAuth.auth()!.signOut()
+            self.performSegue(withIdentifier: "unwindToLoginVC", sender: self)
+        } catch let err as NSError {
+            print(err)
+        }
+    }
+
+    override func viewWillDisappear(_ animated: Bool) {
+        
+        timer?.invalidate()
+    }
+    
+    deinit {
+        locationService.removeObserver(self, forKeyPath: "latitude", context: &latitude)
+        locationService.removeObserver(self, forKeyPath: "longitude", context: &longitude)
+    }
+
     func postAction(action: String) {
 
         showScoreView(action: action)

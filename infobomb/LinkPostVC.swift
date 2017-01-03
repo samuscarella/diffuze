@@ -11,8 +11,13 @@
 import UIKit
 import SwiftLinkPreview
 import Alamofire
+import GeoFire
+import FirebaseAuth
 
-class LinkPostVC: UIViewController, UITextViewDelegate, UITextFieldDelegate {
+private var latitude = 0.0
+private var longitude = 0.0
+
+class LinkPostVC: UIViewController, UITextViewDelegate, UITextFieldDelegate, CLLocationManagerDelegate {
 
     @IBOutlet weak var backBtn: UIBarButtonItem!
     @IBOutlet weak var textField: UITextField!
@@ -26,7 +31,14 @@ class LinkPostVC: UIViewController, UITextViewDelegate, UITextFieldDelegate {
     
     let slp = SwiftLinkPreview()
     let PLACEHOLDER_TEXT = "Enter Text..."
+    let geofireRef = UserService.ds.REF_USER_LOCATIONS
+    let iD = UserService.ds.currentUserID
     
+    var categories = [Category]()
+    var locationService: LocationService!
+    var currentLocation: [String:AnyObject] = [:]
+    var geoFire: GeoFire!
+    var timer: Timer?
     var request: Request?
     var webTitle: String?
     var webDescription: String?
@@ -35,31 +47,20 @@ class LinkPostVC: UIViewController, UITextViewDelegate, UITextFieldDelegate {
     var webFinalUrl: String?
     var linkObj: [String:AnyObject] = [:]
     var linkData: Bool = false
-    var timer: Timer?
     
     override func viewDidLoad() {
         super.viewDidLoad()
         
         UserDefaults.standard.setValue(false, forKey: "_UIConstraintBasedLayoutLogUnsatisfiable")
         print("LinkPostVC")
-        //Subclass navigation bar after app is finished and all other non DRY
-//        let image = UIImage(named: "metal-bg.jpg")?.resizableImage(withCapInsets: UIEdgeInsetsMake(0, 15, 0, 15), resizingMode: UIImageResizingMode.stretch)
-//        self.navigationController?.navigationBar.setBackgroundImage(image, for: .default)
-//        self.navigationController?.navigationBar.titleTextAttributes = [NSFontAttributeName: UIFont(name: "TOSCA ZERO", size: 30)!,NSForegroundColorAttributeName: LIGHT_GREY]
-        
         
         UIApplication.shared.statusBarStyle = .lightContent
         self.navigationController?.navigationBar.setBackgroundImage(UIImage(), for: .default)
         self.navigationController?.navigationBar.shadowImage = UIImage()
         self.navigationController?.navigationBar.isTranslucent = true
-
-//        NotificationCenter.default.addObserver(self, selector: #selector(LinkPostVC.keyboardWillShow(_:)), name: NSNotification.Name.UIKeyboardWillShow, object: nil)
-//        NotificationCenter.default.addObserver(self, selector: #selector(LinkPostVC.getPreview), name: NSNotification.Name.UIKeyboardWillHide, object: nil)
         
         let tap: UITapGestureRecognizer = UITapGestureRecognizer(target: self, action: #selector(LinkPostVC.dismissKeyboard))
-        //let tap2: UITapGestureRecognizer = UITapGestureRecognizer(target: self, action: #selector(LinkPostVC.getPreview))
         view.addGestureRecognizer(tap)
-        //view.addGestureRecognizer(tap2)
         
         let customView = UIView()
         customView.frame = CGRect(x: 0, y: 0, width: 36, height: 36)
@@ -75,6 +76,18 @@ class LinkPostVC: UIViewController, UITextViewDelegate, UITextFieldDelegate {
         messageField.delegate = self
         textField.delegate = self
         
+        geoFire = GeoFire(firebaseRef: geofireRef)
+        
+        locationService = LocationService()
+        locationService.startTracking()
+        
+        locationService.addObserver(self, forKeyPath: "latitude", options: .new, context: &latitude)
+        locationService.addObserver(self, forKeyPath: "longitude", options: .new, context: &longitude)
+        
+        timer = Timer.scheduledTimer(timeInterval: 5.0, target: self, selector: #selector(self.updateUserLocation), userInfo: nil, repeats: true)
+        
+        NotificationCenter.default.addObserver(self, selector: #selector(self.terminateAuthentication), name: NSNotification.Name(rawValue: "userSignedOut"), object: nil)
+
         applyPlaceholderStyle(aTextview: messageField!, placeholderText: PLACEHOLDER_TEXT)
         
         imageView.center = (imageView.superview?.center)!
@@ -89,11 +102,60 @@ class LinkPostVC: UIViewController, UITextViewDelegate, UITextFieldDelegate {
         self.navigationItem.rightBarButtonItem = rightBarButton
     }
     
-    //Calls this function when the tap is recognized.
+    override func observeValue(forKeyPath keyPath: String?, of object: Any?, change: [NSKeyValueChangeKey : Any]?, context: UnsafeMutableRawPointer?) {
+        
+        if context == &latitude {
+            latitude = Double(change![NSKeyValueChangeKey.newKey]! as! NSNumber)
+            currentLocation["latitude"] = latitude as AnyObject?
+        }
+        if context == &longitude {
+            longitude = Double(change![NSKeyValueChangeKey.newKey]! as! NSNumber)
+            currentLocation["longitude"] = longitude as AnyObject?
+        }
+    }
+    
+    override func viewWillDisappear(_ animated: Bool) {
+        
+        timer?.invalidate()
+    }
+    
+    deinit {
+        locationService.removeObserver(self, forKeyPath: "latitude", context: &latitude)
+        locationService.removeObserver(self, forKeyPath: "longitude", context: &longitude)
+    }
+
     func dismissKeyboard() {
 
         getPreview()
         view.endEditing(true)
+    }
+    
+    
+    func updateUserLocation() {
+        
+        if currentLocation["latitude"] != nil && currentLocation["longitude"] != nil {
+            
+            geoFire.setLocation(CLLocation(latitude: (currentLocation["latitude"] as? CLLocationDegrees)!, longitude: (currentLocation["longitude"] as? CLLocationDegrees)!), forKey: iD)
+            
+            if UserService.ds.REF_USER_CURRENT != nil {
+                let longRef = UserService.ds.REF_USER_CURRENT?.child("longitude")
+                let latRef = UserService.ds.REF_USER_CURRENT?.child("latitude")
+                
+                longRef?.setValue(currentLocation["longitude"])
+                latRef?.setValue(currentLocation["latitude"])
+            }
+            print(currentLocation)
+        }
+    }
+    
+    func terminateAuthentication() {
+        
+        do {
+            try FIRAuth.auth()!.signOut()
+            self.performSegue(withIdentifier: "unwindToLoginVC", sender: self)
+        } catch let err as NSError {
+            print(err)
+        }
     }
     
     func textField(_ textField: UITextField, shouldChangeCharactersIn range: NSRange, replacementString string: String) -> Bool {
@@ -140,23 +202,6 @@ class LinkPostVC: UIViewController, UITextViewDelegate, UITextFieldDelegate {
         DispatchQueue.main.async {
             aTextView.selectedRange = NSMakeRange(0, 0);
         }
-    }
-
-//    func keyboardWillShow(_ notification: Notification) {
-//        
-//        if let keyboardSize = ((notification as NSNotification).userInfo?[UIKeyboardFrameBeginUserInfoKey] as? NSValue)?.cgRectValue {
-//            if view.frame.origin.y == 0 {
-//                self.view.frame.origin.y -= keyboardSize.height
-//            }
-//            else {
-//                
-//            }
-//        }
-//        
-//    }
-//    
-    func keyboardWillHide(_ notification: Notification) {
-        
     }
 
     func verifyUrl (urlString: String?) -> Bool {
@@ -247,7 +292,7 @@ class LinkPostVC: UIViewController, UITextViewDelegate, UITextFieldDelegate {
                     }
                     if let imageUrl = result["image"] as? String, imageUrl != ""  {
                         
-                        self.request = Alamofire.request(imageUrl).validate(contentType: ["image/png", "image/jpg", "image/jpeg", "image/gif"]).response {  response in
+                        self.request = Alamofire.request(imageUrl).validate(contentType: ["image/png", "image/jpg", "image/jpeg", "image/gif", "image/svg"]).response {  response in
 
                             if response.error == nil {
                                 if let imgData = response.data as Data? {

@@ -17,6 +17,7 @@ struct Location {
         let userLoc = CLLocation(latitude: Double(userLocation["latitude"]! as! NSNumber), longitude: Double(userLocation["longitude"]! as! NSNumber))
         
         let meters = userLoc.distance(from: postLocation)
+
         let miles = meters * 0.000621371
         
         var finalDistance: Double

@@ -8,12 +8,23 @@
 
 import UIKit
 import Firebase
+import GeoFire
+
+private var latitude = 0.0
+private var longitude = 0.0
 
 class CategoryFilterVC: UIViewController, UITableViewDelegate, UITableViewDataSource {
 
     @IBOutlet weak var tableView: UITableView!
     
+    let iD = UserService.ds.currentUserID
+    let geofireRef = UserService.ds.REF_USER_LOCATIONS
+    
     var categories = [Category]()
+    var locationService: LocationService!
+    var currentLocation: [String:AnyObject] = [:]
+    var geoFire: GeoFire!
+    var timer: Timer?
     var checked = [String]()
     var comingFromCategoryVC = true
     var previousVC: String!
@@ -24,27 +35,76 @@ class CategoryFilterVC: UIViewController, UITableViewDelegate, UITableViewDataSo
         tableView.delegate = self
         tableView.dataSource = self
         
-        CategoryService.ds.REF_CATEGORIES.queryOrdered(byChild: "name").observeSingleEvent(of: FIRDataEventType.value, with: { (snapshot) in
-            
-            if let snapshots = snapshot.children.allObjects as? [FIRDataSnapshot] {
-                
-                self.categories = []
-                for snap in snapshots {
-                    
-                    if let categoryDict = snap.value as?  Dictionary<String, AnyObject> {
-                        let key = snap.key
-                        let category = Category(categoryKey: key, dictionary: categoryDict)
-                        self.categories.append(category)
-                    }
-                }
-                
+        geoFire = GeoFire(firebaseRef: geofireRef)
+        
+        locationService = LocationService()
+        locationService.startTracking()
+        locationService.addObserver(self, forKeyPath: "latitude", options: .new, context: &latitude)
+        locationService.addObserver(self, forKeyPath: "longitude", options: .new, context: &longitude)
+        
+        timer = Timer.scheduledTimer(timeInterval: 5.0, target: self, selector: #selector(self.updateUserLocation), userInfo: nil, repeats: true)
+        
+        NotificationCenter.default.addObserver(locationService, selector: #selector(self.terminateAuthentication), name: NSNotification.Name(rawValue: "userSignedOut"), object: nil)
+        
+        categories = []
+        for i in 0...CATEGORY_TITLE_ARRAY.count - 1 {
+            if i > 0 {
+                let category = Category(name: CATEGORY_TITLE_ARRAY[i], img: CATEGORY_IMAGE_ARRAY[i])
+                categories.append(category)
             }
-            if self.categories.count > 0 {
-                self.tableView.reloadData()
-            }
-        })
+        }
+        tableView.reloadData()
     }
     
+    override func observeValue(forKeyPath keyPath: String?, of object: Any?, change: [NSKeyValueChangeKey : Any]?, context: UnsafeMutableRawPointer?) {
+        
+        if context == &latitude {
+            latitude = Double(change![NSKeyValueChangeKey.newKey]! as! NSNumber)
+            currentLocation["latitude"] = latitude as AnyObject?
+        }
+        if context == &longitude {
+            longitude = Double(change![NSKeyValueChangeKey.newKey]! as! NSNumber)
+            currentLocation["longitude"] = longitude as AnyObject?
+        }
+    }
+    
+    func updateUserLocation() {
+        
+        if currentLocation["latitude"] != nil && currentLocation["longitude"] != nil {
+            
+            geoFire.setLocation(CLLocation(latitude: (currentLocation["latitude"] as? CLLocationDegrees)!, longitude: (currentLocation["longitude"] as? CLLocationDegrees)!), forKey: iD)
+            
+            if UserService.ds.REF_USER_CURRENT != nil {
+                let longRef = UserService.ds.REF_USER_CURRENT?.child("longitude")
+                let latRef = UserService.ds.REF_USER_CURRENT?.child("latitude")
+                
+                longRef?.setValue(currentLocation["longitude"])
+                latRef?.setValue(currentLocation["latitude"])
+            }
+            print(currentLocation)
+        }
+    }
+    
+    func terminateAuthentication() {
+        
+        do {
+            try FIRAuth.auth()!.signOut()
+            self.performSegue(withIdentifier: "unwindToLoginVC", sender: self)
+        } catch let err as NSError {
+            print(err)
+        }
+    }
+    
+    override func viewWillDisappear(_ animated: Bool) {
+        
+        timer?.invalidate()
+    }
+    
+    deinit {
+        locationService.removeObserver(self, forKeyPath: "latitude", context: &latitude)
+        locationService.removeObserver(self, forKeyPath: "longitude", context: &longitude)
+    }
+
     func tableView(_ tableView: UITableView, didSelectRowAt indexPath: IndexPath) {
         
         //        let category = categories[indexPath.row]
@@ -95,13 +155,7 @@ class CategoryFilterVC: UIViewController, UITableViewDelegate, UITableViewDataSo
             
             cell.request?.cancel()
             
-            var img: UIImage?
-            
-            if let url = category.image_path {
-                img = SubscriptionsVC.imageCache.object(forKey: url as AnyObject) as? UIImage
-            }
-            
-            cell.configureCell(category, img: img)
+            cell.configureCell(category)
             
             if checked.count > 0 {
                 for i in 0...checked.count - 1 {
@@ -133,6 +187,7 @@ class CategoryFilterVC: UIViewController, UITableViewDelegate, UITableViewDataSo
     }
     
     @IBAction func darkenedViewBtnPressed(_ sender: AnyObject) {
+        
         if previousVC == "MyInfoVC" {
             
             self.performSegue(withIdentifier: "unwindToMyInfoVC", sender: self)
@@ -142,5 +197,4 @@ class CategoryFilterVC: UIViewController, UITableViewDelegate, UITableViewDataSo
             self.performSegue(withIdentifier: "unwindToViralVC", sender: self)
         }
     }
-    
 }

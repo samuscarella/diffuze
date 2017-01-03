@@ -26,7 +26,9 @@ class BombVC: UIViewController {
     let firebasePost = PostService.ds.REF_POSTS.childByAutoId()
     let userRef = UserService.ds.REF_USERS
     let uploadMetadata = FIRStorageMetadata()
-
+    let iD = UserService.ds.currentUserID
+    
+    var locationService = LocationService()
     var geoFire: GeoFire?
     var query: GFQuery?
     var explosionPlayer: AVAudioPlayer!
@@ -36,6 +38,7 @@ class BombVC: UIViewController {
     var username: String!
     var key: String! = nil
     var checked = [String]()
+    var currentLocation: [String:AnyObject] = [:]
     var bombData: [String:AnyObject] = [:]
     var post = [String:AnyObject]()
     var postImg: Data?
@@ -52,17 +55,29 @@ class BombVC: UIViewController {
     var player: AVPlayer?
     var fileExtension: String?
     var checkingUserInRadius: Bool = false
-    var distanceTraveled: Int!
     var totalUsersTrackable: [[String:AnyObject]] = [[:]]
     var targetUsersCount = 100
-    var queryCount = 0
+    var distanceTraveled = 0
     
     override func viewDidLoad() {
         super.viewDidLoad()
+        
+        locationService.stopUpdatingLocation()
 
         bombVCView.layer.cornerRadius = 6
         geoFire = GeoFire(firebaseRef: geofireRef)
-        center = CLLocation(latitude: DALLAS_LATITUDE, longitude: DALLAS_LONGITUDE)
+        
+        URL_BASE.child("users").child(iD).observeSingleEvent(of: FIRDataEventType.value, with: { snapshot in
+            
+            let user = snapshot.value as! Dictionary<String,AnyObject>
+            
+            let userLat = user["latitude"] as? Double
+            let userLong = user["longitude"] as? Double
+            
+            self.center = CLLocation(latitude: userLat!, longitude: userLong!)
+            
+        })
+        
         
         for i in 0...91 {
             if i < 10 {
@@ -88,25 +103,20 @@ class BombVC: UIViewController {
                 
                 let userLocDict = userLoc.value as! Dictionary<String,AnyObject>
                 self.totalUsersTrackable.append(userLocDict)
-                print(self.totalUsersTrackable.count)
             }
             
             self.explosionAnimationImageView.startAnimating()
-            self.startGeoFireQuery(latitudeDelta: self.latDeltVal + 1000.0, longitudeDelta: self.longDeltVal + 1000.0)
+            self.startGeoFireQuery()
         })
         
     }
     
     override func viewDidAppear(_ animated: Bool) {
 
-//        self.explosionAnimationImageView.startAnimating()
-//        startGeoFireQuery(latitudeDelta: latDeltVal + 1000.0, longitudeDelta: longDeltVal + 1000.0)
     }
     
-    func startGeoFireQuery(latitudeDelta: Double, longitudeDelta: Double) {
+    func startGeoFireQuery() {
         
-//        let regionWithDistance = MKCoordinateRegionMakeWithDistance((center?.coordinate)!, latitudeDelta, longitudeDelta)
-//        let region = MKCoordinateRegionMake((center?.coordinate)!, regionWithDistance.span)
         meters += 1.0
         query = geoFire?.query(at: center, withRadius: Double(meters))
 
@@ -120,24 +130,19 @@ class BombVC: UIViewController {
         
         query?.observeReady({
             
-            print(self.meters * 1)
-            print(self.usersInRadius.count)
-            print(self.subscribedUsers)
-            print(self.totalUsersTrackable.count)
-            
-            if self.totalUsersTrackable.count - 2 < 100 {
+            if self.totalUsersTrackable.count < 100 {
                 
-                print("\(self.meters):\(MAX_DISTANCE)")
                 if self.meters == MAX_DISTANCE {
 
                     self.getAllSubscribedUsersFromRadius() { uniqueSubscribers, distanceTraveled in
                         
-                        print("All Subscribers: \(self.subscribedUsers)")
+                        print("All Subscribers: \(self.subscribedUsers.count)")
+                        print(distanceTraveled)
                         
                         self.distanceTraveled = distanceTraveled
                         self.createPost()
                     }
-                } else if self.usersInRadius.count == self.totalUsersTrackable.count - 2 {
+                } else if self.usersInRadius.count >= self.totalUsersTrackable.count - 1 {
                     
                     self.getAllSubscribedUsersFromRadius() { uniqueSubscribers, distanceTraveled in
                         
@@ -147,9 +152,9 @@ class BombVC: UIViewController {
                         self.createPost()
                     }
                 } else {
-                    self.continueGeoFireQuery()
+                    self.startGeoFireQuery()
                 }
-            } else if self.totalUsersTrackable.count - 1 >= 100 {
+            } else if self.totalUsersTrackable.count >= 100 {
                 
                 self.getAllSubscribedUsersFromRadius() { uniqueSubscribers, distanceTraveled in
 
@@ -158,7 +163,7 @@ class BombVC: UIViewController {
                     self.distanceTraveled = distanceTraveled
                     
                     if uniqueSubscribers < TARGET_SUBS && self.meters != MAX_DISTANCE {
-                        self.continueGeoFireQuery()
+                        self.startGeoFireQuery()
                     } else {
                         self.createPost()
                     }
@@ -167,19 +172,10 @@ class BombVC: UIViewController {
         })
     }
     
-    func continueGeoFireQuery() {
-        self.latDeltVal += 1000.0
-        self.longDeltVal += 1000.0
-        self.startGeoFireQuery(latitudeDelta: self.latDeltVal, longitudeDelta: self.longDeltVal)
-    }
-    
     func getAllSubscribedUsersFromRadius(completion: @escaping (_ uniqueSubscribers: Int, _ distanceTraveled: Int) -> Void) {
         
-        var distanceTraveled = 0
+        print(uncheckedUsersInRadius)
         
-        for user in uncheckedUsersInRadius {
-            print(user)
-        }
         while(self.uncheckedUsersInRadius.count > 0) {
             
             myGroup.enter()
@@ -196,16 +192,16 @@ class BombVC: UIViewController {
                 if (subscriptions != nil) {
                     for name in self.checked {
                         for sub in subscriptions! {
-                            if name == sub.key {
+                            if name == sub.key || sub.key == "All" {
                                 
                                 self.subscribedUsers.append(iD)
                                 isUserSubscribed = true
                                 
-                                let userLocation = CLLocation(latitude: 35.1495, longitude: 90.0490)
+                                let userLocation = CLLocation(latitude: userLat!, longitude: userLong!)
                                 let distance = userLocation.distance(from: self.center!)
 
-                                if Int(distance) > distanceTraveled {
-                                    distanceTraveled = Int(distance)
+                                if Int(distance) > self.distanceTraveled {
+                                    self.distanceTraveled = Int(distance)
                                 }
                                 break
                             }
@@ -222,38 +218,28 @@ class BombVC: UIViewController {
         }
         
         myGroup.notify(queue: DispatchQueue.main, execute: {
-            completion(self.subscribedUsers.count, distanceTraveled)
+            completion(self.subscribedUsers.count, self.distanceTraveled)
         })
     }
     
     func createPost() {
         
-        if checked.count > 0 {
-            
-            if CLLocationManager.authorizationStatus() == CLAuthorizationStatus.denied {
-                print("You have to allow location to make a post!")
-            } else if CLLocationManager.authorizationStatus() == CLAuthorizationStatus.authorizedWhenInUse || CLLocationManager.authorizationStatus() == CLAuthorizationStatus.notDetermined {
-                
-                if previousVC == TEXT_POST_VC {
-                    self.gatherPostData(postType: "text", data: bombData as AnyObject)
-                } else if previousVC == LINK_POST_VC {
-                    self.gatherPostData(postType: "link", data: bombData as AnyObject)
-                } else if previousVC == IMAGE_POST_VC {
-                    self.gatherPostData(postType: "image", data: bombData as AnyObject)
-                } else if previousVC == VIDEO_POST_VC {
-                    self.gatherPostData(postType: "video", data: bombData as AnyObject)
-                } else if previousVC == AUDIO_POST_VC {
-                    self.gatherPostData(postType: "audio", data: bombData as AnyObject)
-                } else if previousVC == QUOTE_POST_VC {
-                    if bombData["image"] != nil {
-                        self.gatherPostData(postType: "quoteImg", data: bombData as AnyObject)
-                    } else if bombData["image"] != nil {
-                        self.gatherPostData(postType: "quoteText", data: bombData as AnyObject)
-                    }
-                }
+        if previousVC == TEXT_POST_VC {
+            self.gatherPostData(postType: "text", data: bombData as AnyObject)
+        } else if previousVC == LINK_POST_VC {
+            self.gatherPostData(postType: "link", data: bombData as AnyObject)
+        } else if previousVC == IMAGE_POST_VC {
+            self.gatherPostData(postType: "image", data: bombData as AnyObject)
+        } else if previousVC == VIDEO_POST_VC {
+            self.gatherPostData(postType: "video", data: bombData as AnyObject)
+        } else if previousVC == AUDIO_POST_VC {
+            self.gatherPostData(postType: "audio", data: bombData as AnyObject)
+        } else if previousVC == QUOTE_POST_VC {
+            if bombData["image"] != nil {
+                self.gatherPostData(postType: "quoteImg", data: bombData as AnyObject)
+            } else if bombData["image"] != nil {
+                self.gatherPostData(postType: "quoteText", data: bombData as AnyObject)
             }
-        } else {
-            print("Please pick at least one category!")
         }
     }
     
@@ -272,6 +258,9 @@ class BombVC: UIViewController {
         }
         let intFinalDistance = Int(finalDistance)
         
+        let latitude = currentLocation["latitude"] as! Double
+        let longitude = currentLocation["longitude"] as! Double
+        
         post = [
             "user_id": userID as AnyObject,
             "username": username as AnyObject,
@@ -281,10 +270,11 @@ class BombVC: UIViewController {
             "dislikes": 0 as AnyObject,
             "rating": 0 as AnyObject,
             "shares": 0 as AnyObject,
-            "latitude": DALLAS_LATITUDE as AnyObject,
-            "longitude": DALLAS_LONGITUDE as AnyObject,
+            "latitude": latitude as AnyObject,
+            "longitude": longitude as AnyObject,
             "distance": intFinalDistance as AnyObject,
-            "usersInRadius": self.subscribedUsers.count as AnyObject,
+            "receivers": self.subscribedUsers as AnyObject,
+            "numberOfReceivers": self.subscribedUsers.count as AnyObject,
             "created_at": FIRServerValue.timestamp() as AnyObject
         ]
         
@@ -373,7 +363,7 @@ class BombVC: UIViewController {
             let videoRef = storageRef.child("videos/video_post/video_\(uniqueString)")
             
             let newMetadata = FIRStorageMetadata()
-            newMetadata.contentType = "video/quicktime";
+            newMetadata.contentType = "video/quicktime"
 
             let uploadTask = videoRef.put(video as Data, metadata: newMetadata) { metadata, error in
                 if (error != nil) {
@@ -383,7 +373,7 @@ class BombVC: UIViewController {
                     
                     let downloadURL = metadata?.downloadURL()
                     
-                    self.post["video"] = downloadURL as AnyObject?
+                    self.post["video"] = downloadURL?.absoluteString as AnyObject?
                     self.post["contentType"] = metadata!.contentType as AnyObject?
                     
                     if let videoThumbnail = data["thumbnail"] as! NSData? {
@@ -476,7 +466,6 @@ class BombVC: UIViewController {
         
         var selectedCategories: Dictionary<String, Bool> = [:]
         
-        print(checked)
         for check in checked {
             selectedCategories[check] = true
         }
@@ -485,11 +474,11 @@ class BombVC: UIViewController {
         userPostRef.child("categories").updateChildValues(selectedCategories)
         activeFirebasePost.child("categories").updateChildValues(selectedCategories)
         
-        let userPostsRef = UserService.ds.REF_USER_CURRENT.child("posts")
+        let userPostsRef = UserService.ds.REF_USER_CURRENT?.child("posts")
         let userPost = [
             key: true
         ]
-        userPostsRef.updateChildValues(userPost)
+        userPostsRef?.updateChildValues(userPost)
         
         for user in self.subscribedUsers {
             secondGroup.enter()
@@ -499,7 +488,7 @@ class BombVC: UIViewController {
         
         secondGroup.notify(queue: DispatchQueue.main, execute: {
             self.bombFinished()
-            Timer.scheduledTimer(timeInterval: 1.8, target: self, selector: #selector(self.goToRadarVC), userInfo: nil, repeats: false);
+            Timer.scheduledTimer(timeInterval: 1.5, target: self, selector: #selector(self.goToRadarVC), userInfo: nil, repeats: false);
         })
     }
 
@@ -521,6 +510,7 @@ class BombVC: UIViewController {
             print("Error Could not play Sound!")
         }
     }
+    
     
     func bombFinished() {
         self.explosionAnimationImageView.stopAnimating()

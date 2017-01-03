@@ -92,12 +92,12 @@ let BOMB_VC = "BombVC"
 
 //Images
 let CATEGORY_TITLE_ARRAY = ["All","Art","Business","Career","Do-It-Yourself","Economics","Education","Entertainment","Fashion","Finance","Fitness","Food","Gaming","Health","History","Humor","Law","Marketing","Medical","Military","Music","News","Other","Philosophy","Photography","Politics","Psychology","Relationships","Religion & Spirituality","Science","Sexuality","Social Media","Sociology","Sports","Technology","Travel"]
-let CATEGORY_IMAGE_ARRAY = ["all","arts-culture","business","career","diy","economics","education","entertainment","fashion","finance","fitness","food","gmaing","health","history","humor","law","marketing","medical","military","music","news","other","philopsophy","photography","politics","psychology","relationships","religion-spirituality","science","sexuality","social-media","sociology","sports","technology","travel"]
+let CATEGORY_IMAGE_ARRAY = ["all","art","business","career","do-it-yourself","economics","education","entertainment","fashion","finance","fitness","food","gaming","health","history","humor","law","marketing","medical","military","music","news","other","philosophy","photography","politics","psychology","relationships","religion-spirituality","science","sexuality","social-media","sociology","sports","technology","travel"]
 
 //Status Codes
 let USER_NOT_FOUND = 17011
 let PASSWORD_NOT_FOUND = 17009
-let MAX_DISTANCE: Double = 6327
+let MAX_DISTANCE: Double = 6318
 let TARGET_SUBS: Int = 100
 
 //Colors

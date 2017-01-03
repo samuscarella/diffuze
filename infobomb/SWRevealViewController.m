@@ -1851,6 +1851,7 @@ NSString * const SWSegueRightIdentifier = @"sw_right";
     NSString *identifier = self.identifier;
     SWRevealViewController *rvc = self.sourceViewController;
     UIViewController *dvc = self.destinationViewController;
+
     
     if ( [identifier isEqualToString:SWSegueFrontIdentifier] )
         operation = SWRevealControllerOperationReplaceFrontController;

@@ -16,10 +16,12 @@ class SubscriptionCell: UITableViewCell {
     @IBOutlet weak var subscriptionTxt: UILabel!
     @IBOutlet weak var subscriptionSwitch: UISwitch!
     
-    let subscriptionRef = UserService.ds.REF_USER_CURRENT.child("subscriptions")
+    let subscriptionRef = UserService.ds.REF_USER_CURRENT?.child("subscriptions")
 
     var category: Category!
     var request: Request?
+    var subscribedToAll: Bool!
+    var isSubscribed = false
     
     override func awakeFromNib() {
         super.awakeFromNib()
@@ -38,35 +40,27 @@ class SubscriptionCell: UITableViewCell {
         // Configure the view for the selected state
     }
     
-    func configureCell(_ category: Category, img: UIImage?) {
+    func configureCell(_ category: Category,_ subscribedToAll: Bool) {
         
         self.category = category
         self.subscriptionTxt.text = category.name
+        self.subscriptionImage.image = UIImage(named: category.imagePath)
+        self.subscribedToAll = subscribedToAll
         
-//        subscriptionRef = UserService.ds.REF_USER_CURRENT.child("subscriptions").child(category.name)
-        
-        if img != nil {
-            self.subscriptionImage.image = img
+        if subscribedToAll {
+            self.subscriptionSwitch.isOn = true
         } else {
-
-            request = Alamofire.request(category.image_path!).validate(contentType: ["image/*"]).response { response in
-            
-                    if response.error == nil {
-                        let img = UIImage(data: response.data!)!
-                        self.subscriptionImage.image = img
-                        SubscriptionsVC.imageCache.setObject(img, forKey: self.category.image_path! as AnyObject)
-                    }
+            subscriptionRef?.child(category.name).observeSingleEvent(of: .value, with: { (snapshot) in
+                
+                if let doesNotExist = snapshot.value as? NSNull {
+                    self.subscriptionSwitch.isOn = false
+                    self.isSubscribed = false
+                } else {
+                    self.subscriptionSwitch.isOn = true
+                    self.isSubscribed = true
                 }
+            })
         }
-        
-        subscriptionRef.child(category.name).observeSingleEvent(of: .value, with: { (snapshot) in
-            
-            if let doesNotExist = snapshot.value as? NSNull {
-                self.subscriptionSwitch.isOn = false
-            } else {
-                self.subscriptionSwitch.isOn = true
-            }
-        })
         
         subscriptionSwitch.addTarget(self, action: #selector(SubscriptionCell.subscribeSwitchPressed(_:)), for: UIControlEvents.touchUpInside)
     }
@@ -74,24 +68,26 @@ class SubscriptionCell: UITableViewCell {
     
     func subscribeSwitchPressed(_ sender: UISwitch) {
         
-        let subscriberRef = CategoryService.ds.REF_CATEGORIES.child(category.categoryKey).child("subscribers")
-        let username = UserService.ds.currentUserUsername
-        
-        subscriptionRef.child(category.name).observeSingleEvent(of: .value, with: { (snapshot) in
+        subscriptionRef?.child(category.name).observeSingleEvent(of: .value, with: { (snapshot) in
             
             if let doesNotExist = snapshot.value as? NSNull {
                 
-                let subscription = [
-                    self.category.name: true
-                ]
-                let subscriber = [
-                    username: true
-                ]
-                self.subscriptionRef.updateChildValues(subscription)
-                subscriberRef.updateChildValues(subscriber)
+                if self.category.name == "All" {
+                    
+                    self.subscriptionRef?.removeValue()
+                    self.subscriptionRef?.updateChildValues(["All":true])
+                    
+                } else {
+                    self.isSubscribed = true
+                    let subscription = [
+                        self.category.name: true
+                    ]
+                    self.subscriptionRef?.updateChildValues(subscription)
+                    self.subscriptionRef?.child("All").removeValue()
+                }
             } else {
-                self.subscriptionRef.child(self.category.name).removeValue()
-                subscriberRef.child(username).removeValue()
+                self.isSubscribed = false
+                self.subscriptionRef?.child(self.category.name).removeValue()
             }
         })
         
