@@ -1,5 +1,23 @@
 PODS:
   - Alamofire (4.2.0)
+  - Bolts (1.8.4):
+    - Bolts/AppLinks (= 1.8.4)
+    - Bolts/Tasks (= 1.8.4)
+  - Bolts/AppLinks (1.8.4):
+    - Bolts/Tasks
+  - Bolts/Tasks (1.8.4)
+  - FacebookCore (0.2.0):
+    - Bolts (~> 1.8)
+    - FBSDKCoreKit (~> 4.15)
+  - FacebookShare (0.2.0):
+    - Bolts (~> 1.8)
+    - FacebookCore (~> 0.2)
+    - FBSDKCoreKit (~> 4.15)
+    - FBSDKShareKit (~> 4.15)
+  - FBSDKCoreKit (4.18.0):
+    - Bolts (~> 1.7)
+  - FBSDKShareKit (4.18.0):
+    - FBSDKCoreKit
   - FDWaveformView (2.0.0)
   - Firebase (3.10.0):
     - Firebase/Core (= 3.10.0)
@@ -57,6 +75,7 @@ PODS:
 
 DEPENDENCIES:
   - Alamofire (~> 4.0)
+  - FacebookShare
   - FDWaveformView
   - Firebase
   - Firebase/Auth
@@ -80,6 +99,11 @@ CHECKOUT OPTIONS:
 
 SPEC CHECKSUMS:
   Alamofire: aa2e09d871c9160ac53c90e83c68064a94e3dfbe
+  Bolts: 8a7995239dbe724f9cba2248b766d48b7ebdd322
+  FacebookCore: 2cb3f0fbff218e9d3119cec84bae983b232412de
+  FacebookShare: 8e9ee8ea06505e6a1d3d719b0cc63e840fb8aaeb
+  FBSDKCoreKit: 15fef8804a4629f98c6f4e55e81a76c9d725d85e
+  FBSDKShareKit: 0b8d6cc3f103c75297eb3c62caec284a2ccf1b9e
   FDWaveformView: 13d70f4d8c536393427c8b4c9e846bf0bcfd16c7
   Firebase: 387f37c7dca894a02708da9ff35ba147040eae9e
   FirebaseAnalytics: 9c67af0ebeb8d2146c9b4ea2616439affa947b58
@@ -98,6 +122,6 @@ SPEC CHECKSUMS:
   SwiftLinkPreview: 977461879ae31f9e2d1bf2fafba0553d99eacbb9
   SwiftyGif: d6b4d63de2a2a5134d8b54ba5719837319d77ef0
 
-PODFILE CHECKSUM: 9e4db1a263b8d0332fa0a2952936f16af7cde6a6
+PODFILE CHECKSUM: 614af3aa116f16086fb8e534d48f84cd63696cb4
 
 COCOAPODS: 1.1.0.beta.1

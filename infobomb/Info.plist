@@ -74,5 +74,22 @@
 	<string>InfoBomb needs access to your photo library to post media.</string>
 	<key>FirebaseAutomaticScreenReportingEnabled</key>
 	<false/>
+	<key>LSApplicationQueriesSchemes</key>
+	<array>
+		<string>fbauth2</string>
+	</array>
+	<key>FacebookAppID</key>
+	<string>333604840371940</string>
+	<key>FacebookDisplayName</key>
+	<string>Diffuze</string>
+	<key>CFBundleURLTypes</key>
+	<array>
+		<dict>
+			<key>CFBundleURLSchemes</key>
+			<array>
+				<string>fb333604840371940</string>
+			</array>
+		</dict>
+	</array>
 </dict>
 </plist>

@@ -13,16 +13,16 @@ import GeoFire
 private var latitude = 0.0
 private var longitude = 0.0
 
-class ViralVC: UIViewController, UITableViewDelegate, UITableViewDataSource, UIPickerViewDelegate, UIPickerViewDataSource, ActivityTableViewCellDelegate {
+//Store score on post creation and then use that to filter rating by actual number and not
+
+class ViralVC: UIViewController, UITableViewDelegate, UITableViewDataSource, ActivityTableViewCellDelegate, ModalTransitionListener {
     
     @IBOutlet weak var tableView: UITableView!
-    @IBOutlet weak var pickerView: UIPickerView!
     @IBOutlet weak var personalFilterBtn: UIButton!
     @IBOutlet weak var postTypeFilterBtn: UIButton!
     @IBOutlet weak var categoryFilterBtn: UIButton!
     @IBOutlet weak var noPostsLbl: UILabel!
     @IBOutlet weak var noPostsImageView: UIImageView!
-    @IBOutlet weak var darkendViewBtn: UIButton!
     @IBOutlet weak var scoreView: UIView!
     @IBOutlet weak var scoreLbl: UILabel!
 
@@ -37,8 +37,9 @@ class ViralVC: UIViewController, UITableViewDelegate, UITableViewDataSource, UIP
     var geoFire: GeoFire!
     var timer: Timer?
     var posts = [Post]()
-    var personalFilterOption: String!
+    var notifications = [NotificationCustom]()
     var postTypeFilterOption: String!
+    var viralFilterOption: String!
     var categoryFilterOptions: [String]?
     var personalFilterActive = false
     var postTypeFilterActive = false
@@ -47,22 +48,28 @@ class ViralVC: UIViewController, UITableViewDelegate, UITableViewDataSource, UIP
     var previousPersonalFilterRow: Int!
     var previousPostTypeFilterRow: Int!
     var comingFromCategoryFilterVC = false
+    var comingFromPersonalFilterVC = false
+    var comingFromPostTypeFilterVC = false
     var userFollowersToPass: String!
     var mediaImageToPass: UIImage?
     var videoDataToPass: NSData?
     var followingImgToPass: UIImage!
     var postToPass: Post!
     var userPhotoToPass: UIImage?
+    var activePostType: String!
+    var activeViralOption: String!
+    var dot: UIView!
+    var radarWatchObj: Dictionary<String,AnyObject>?
+    var notificationService: NotificationService!
     
     override func viewDidLoad() {
         super.viewDidLoad()
         
-        pickerView.delegate = self
-        pickerView.dataSource = self
-
         self.navigationController?.navigationBar.setBackgroundImage(UIImage(), for: .default)
         self.navigationController?.navigationBar.shadowImage = UIImage()
         self.navigationController?.navigationBar.isTranslucent = true
+        
+        ModalTransitionMediator.instance.setListener(listener: self)
         
         personalFilterBtn.setImage(UIImage(named: "star-black"), for: .highlighted)
         postTypeFilterBtn.setImage(UIImage(named: "funnel-black-small"), for: .highlighted)
@@ -85,10 +92,19 @@ class ViralVC: UIViewController, UITableViewDelegate, UITableViewDataSource, UIP
         imageView.center = (imageView.superview?.center)!
         self.navigationItem.titleView = customView
         
+        dot = UIView(frame: CGRect(x: 14, y: 16, width: 12, height: 12))
+        dot.backgroundColor = UIColor.red
+        dot.layer.cornerRadius = dot.frame.size.height / 2
+        dot.isHidden = true
+        dot.isUserInteractionEnabled = false
+        dot.isExclusiveTouch = false
+        dot.isHidden = true
+        
         let button: UIButton = UIButton(type: UIButtonType.custom)
         button.setImage(UIImage(named: "notification.png"), for: UIControlState())
-//        button.addTarget(self, action: #selector(ActivityVC.notificationBtnPressed), for: UIControlEvents.touchUpInside)
+        button.addTarget(self, action: #selector(self.notificationBtnPressed), for: UIControlEvents.touchUpInside)
         button.frame = CGRect(x: 0, y: 0, width: 27, height: 27)
+        button.addSubview(dot)
         let rightBarButton = UIBarButtonItem(customView: button)
         self.navigationItem.rightBarButtonItem = rightBarButton
         
@@ -113,21 +129,59 @@ class ViralVC: UIViewController, UITableViewDelegate, UITableViewDataSource, UIP
         timer = Timer.scheduledTimer(timeInterval: 5.0, target: self, selector: #selector(self.updateUserLocation), userInfo: nil, repeats: true)
         
         NotificationCenter.default.addObserver(self, selector: #selector(self.terminateAuthentication), name: NSNotification.Name(rawValue: "userSignedOut"), object: nil)
+        
+        notificationService = NotificationService()
+        notificationService.getNotifications()
+        notificationService.watchRadar()
+        
+        NotificationCenter.default.addObserver(self, selector: #selector(self.updateNotifications), name: NSNotification.Name(rawValue: "newFollowersNotification"), object: nil)
 
-        if !comingFromCategoryFilterVC {
+        if !comingFromCategoryFilterVC || !comingFromPersonalFilterVC || !comingFromPostTypeFilterVC {
             categoryFilterOptions?.removeAll()
-            personalFilterOption = "Popularity"
+            viralFilterOption = "Popularity"
             postTypeFilterOption = "All"
-            previousPersonalFilterRow = 0
-            previousPostTypeFilterRow = 0
+            activePostType = postTypeFilterOption
+            activeViralOption = viralFilterOption
             refreshPostFeed()
         }
         
-        //Burger side menu
+        //Burger side menus
         if revealViewController() != nil {
             menuButton.addTarget(revealViewController(), action: #selector(SWRevealViewController.revealToggle(_:)), for: UIControlEvents.touchUpInside)
         }
-
+    }
+    
+    func popoverDismissed() {
+        
+        notificationService.getNotifications()
+    }
+    
+    func updateNotifications(notification: NSNotification) {
+        
+        self.notifications = []
+        let incomingNotifications = notification.object as! [NotificationCustom]
+        self.notifications = incomingNotifications
+        var newNotifications = false
+        for n in notifications {
+            if n.read == false {
+                newNotifications = true
+                dot.isHidden = false
+                break
+            }
+        }
+        if !newNotifications {
+            dot.isHidden = true
+        }
+        print("Updated Notifications From Followers: \(self.notifications)")
+    }
+    
+    func notificationBtnPressed() {
+        
+        let notificationVC = self.storyboard?.instantiateViewController(withIdentifier: "NotificationVC") as! NotificationVC
+        notificationVC.modalPresentationStyle = UIModalPresentationStyle.overCurrentContext
+        
+        notificationVC.notifications = self.notifications
+        present(notificationVC, animated: true, completion: nil)
     }
     
     override func observeValue(forKeyPath keyPath: String?, of object: Any?, change: [NSKeyValueChangeKey : Any]?, context: UnsafeMutableRawPointer?) {
@@ -179,59 +233,10 @@ class ViralVC: UIViewController, UITableViewDelegate, UITableViewDataSource, UIP
         locationService.removeObserver(self, forKeyPath: "latitude", context: &latitude)
         locationService.removeObserver(self, forKeyPath: "longitude", context: &longitude)
     }
-
-    func notificationBtnPressed() {
-        
-    }
     
     func postAction(action: String) {
         
         showScoreView(action: action)
-    }
-    
-    func numberOfComponents(in pickerView: UIPickerView) -> Int {
-        return 1
-    }
-    
-    func pickerView(_ pickerView: UIPickerView, numberOfRowsInComponent component: Int) -> Int {
-        
-        if personalFilterActive {
-            return personalDataSource.count
-        } else if postTypeFilterActive {
-            return postTypeDataSource.count
-        }
-        return personalDataSource.count
-    }
-    
-    func pickerView(_ pickerView: UIPickerView, titleForRow row: Int, forComponent component: Int) -> String? {
-        
-        if personalFilterActive {
-            return personalDataSource[row]
-        } else if postTypeFilterActive {
-            return postTypeDataSource[row]
-        }
-        return personalDataSource[row]
-    }
-    
-    func pickerView(_ pickerView: UIPickerView, didSelectRow row: Int, inComponent component: Int) {
-        
-        if darkendViewBtn.isHidden {
-            
-            if personalFilterActive {
-                self.pickerView.selectRow(previousPersonalFilterRow, inComponent: 0, animated: false)
-            } else if postTypeFilterActive {
-                self.pickerView.selectRow(previousPostTypeFilterRow, inComponent: 0, animated: false)
-            }
-            return
-        }
-        
-        if personalFilterActive {
-            self.personalFilterOption = personalDataSource[row]
-            previousPersonalFilterRow = row
-        } else if postTypeFilterActive {
-            self.postTypeFilterOption = postTypeDataSource[row]
-            previousPostTypeFilterRow = row
-        }
     }
     
     func numberOfSections(in tableView: UITableView) -> Int {
@@ -250,13 +255,13 @@ class ViralVC: UIViewController, UITableViewDelegate, UITableViewDataSource, UIP
             noPostsImageView.isHidden = true
         }
         
-        if personalFilterOption == "Popularity" {
+        if viralFilterOption == "Popularity" {
             
             if postTypeFilterOption != "All" {
                 
                 getNoPostTypeMessage()
             }
-        } else if personalFilterOption == "Rating" && posts.count == 0 {
+        } else if viralFilterOption == "Rating" && posts.count == 0 {
             
             if postTypeFilterOption != "All" {
                 
@@ -330,7 +335,7 @@ class ViralVC: UIViewController, UITableViewDelegate, UITableViewDataSource, UIP
                     img = ActivityVC.imageCache.object(forKey: postImgUrl as AnyObject) as? UIImage
                 }
                 
-                cell.configureCell(post, currentLocation: currentLocation, image: img, postType: "Viral", filterType: self.personalFilterOption)
+                cell.configureCell(post, currentLocation: currentLocation, image: img, postType: "Viral", filterType: viralFilterOption)
                 
                 cell.activityDelegate = self
 
@@ -347,59 +352,9 @@ class ViralVC: UIViewController, UITableViewDelegate, UITableViewDataSource, UIP
         
     }
     
-    @IBAction func personalFilterBtnPressed(_ sender: AnyObject) {
-        
-        personalFilterActive = true
-        postTypeFilterActive = false
-        categoryFilterActive = false
-        pickerView.isHidden = false
-        darkendViewBtn.isHidden = false
-        darkendViewBtn.isUserInteractionEnabled = true
-        darkendViewBtn.alpha = 0.0
-        
-        UIView.animate(withDuration: 0.25, animations: {
-            
-            self.darkendViewBtn.alpha = 0.75
-            }, completion: { finished in
-                
-        })
-        pickerView.reloadAllComponents()
-        self.pickerView.selectRow(previousPersonalFilterRow, inComponent: 0, animated: false)
-    }
-    
-    @IBAction func postTypeFilterBtnPressed(_ sender: AnyObject) {
-        
-        personalFilterActive = false
-        postTypeFilterActive = true
-        categoryFilterActive = false
-        pickerView.isHidden = false
-        darkendViewBtn.isHidden = false
-        darkendViewBtn.isUserInteractionEnabled = true
-        darkendViewBtn.alpha = 0.0
-        
-        UIView.animate(withDuration: 0.25, animations: {
-            
-            self.darkendViewBtn.alpha = 0.75
-            }, completion: { finished in
-                
-        })
-        pickerView.reloadAllComponents()
-        self.pickerView.selectRow(previousPostTypeFilterRow, inComponent: 0, animated: false)
-    }
-        
-    @IBAction func darkendViewBtnPressed(_ sender: AnyObject) {
-        
-        pickerView.isHidden = true
-        darkendViewBtn.isHidden = true
-        darkendViewBtn.isUserInteractionEnabled = false
-        darkendViewBtn.alpha = 0.0
-        
-        refreshPostFeed()
-    }
-    
     func filterPostFeedType() {
-        
-        if previousPostTypeFilterRow == 0 {
+
+        if postTypeFilterOption == "All" {
             return
         } else {
             var i = 0
@@ -444,13 +399,12 @@ class ViralVC: UIViewController, UITableViewDelegate, UITableViewDataSource, UIP
         }
         tableView.reloadData()
     }
-
     
     func refreshPostFeed() {
         
         self.posts = []
         
-        if personalFilterOption == "Popularity" {
+        if viralFilterOption == "Popularity" {
             
             URL_BASE.child("posts").queryOrdered(byChild: "viewCount").observeSingleEvent(of: FIRDataEventType.value, with: { snapshot in
                 
@@ -482,7 +436,7 @@ class ViralVC: UIViewController, UITableViewDelegate, UITableViewDataSource, UIP
                 self.tableView.reloadData()
             })
             
-        } else if personalFilterOption == "Rating" {
+        } else if viralFilterOption == "Rating" {
             
             URL_BASE.child("posts").queryOrdered(byChild: "rating").observeSingleEvent(of: FIRDataEventType.value, with: { snapshot in
                 
@@ -546,9 +500,17 @@ class ViralVC: UIViewController, UITableViewDelegate, UITableViewDataSource, UIP
     }
 
     @IBAction func unwindToViralVC(_ segue: UIStoryboardSegue) {
+        
         if let sourceViewController = segue.source as? CategoryFilterVC {
+            
             self.categoryFilterOptions = sourceViewController.checked
             self.comingFromCategoryFilterVC = sourceViewController.comingFromCategoryVC
+            refreshPostFeed()
+            
+        } else if let sourceViewController = segue.source as? OptionFilterVC {
+            
+            postTypeFilterOption = sourceViewController.activePostType
+            viralFilterOption = sourceViewController.activeViralOption
             refreshPostFeed()
         }
     }
@@ -557,7 +519,8 @@ class ViralVC: UIViewController, UITableViewDelegate, UITableViewDataSource, UIP
         
         if segue.identifier == "CategoryFilterVC" {
             
-            let vC = segue.destination as! CategoryFilterVC
+            let nav = segue.destination as! UINavigationController
+            let vC = nav.topViewController as! CategoryFilterVC
             if categoryFilterOptions != nil && (categoryFilterOptions?.count)! > 0 {
                 vC.checked = categoryFilterOptions!
             }
@@ -572,7 +535,22 @@ class ViralVC: UIViewController, UITableViewDelegate, UITableViewDataSource, UIP
             vC.followingStatus = followingImgToPass
             vC.userPhotoPostDetail = userPhotoToPass
             vC.previousVC = "ViralVC"
+        } else if segue.identifier == "PersonalFilterVC" {
+            
+            let nav = segue.destination as! UINavigationController
+            let vC = nav.topViewController as! OptionFilterVC
+            vC.filterType = "Viral"
+            vC.previousVC = "ViralVC"
+            vC.activePostType = activePostType
+            vC.activeViralOption = activeViralOption
+        } else if segue.identifier == "PostTypeFilterVC" {
+            
+            let nav = segue.destination as! UINavigationController
+            let vC = nav.topViewController as! OptionFilterVC
+            vC.filterType = "PostType"
+            vC.previousVC = "ViralVC"
+            vC.activePostType = activePostType
+            vC.activeViralOption = activeViralOption
         }
     }
-
 }

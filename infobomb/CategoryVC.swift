@@ -46,10 +46,11 @@ class CategoryVC: UIViewController, UITableViewDataSource, UITableViewDelegate, 
     var post = [String:AnyObject]()
     var postImg: Data?
     var fileExtension: String?
-    
-//    var locationManager: CLLocationManager!
-//    var currentLocation: CLLocation!
-    
+    var dot: UIView!
+    var radarWatchObj: Dictionary<String,AnyObject>?
+    var notificationService: NotificationService!
+    var notifications = [NotificationCustom]()
+
     override func viewDidLoad() {
         super.viewDidLoad()
         UserDefaults.standard.setValue(false, forKey: "_UIConstraintBasedLayoutLogUnsatisfiable")
@@ -60,6 +61,14 @@ class CategoryVC: UIViewController, UITableViewDataSource, UITableViewDelegate, 
         self.navigationController?.navigationBar.shadowImage = UIImage()
         self.navigationController?.navigationBar.isTranslucent = true
         
+        dot = UIView(frame: CGRect(x: 14, y: 16, width: 12, height: 12))
+        dot.backgroundColor = UIColor.red
+        dot.layer.cornerRadius = dot.frame.size.height / 2
+        dot.isHidden = true
+        dot.isUserInteractionEnabled = false
+        dot.isExclusiveTouch = false
+        dot.isHidden = true
+
         let customView = UIView()
         customView.frame = CGRect(x: 0, y: 0, width: 36, height: 36)
         customView.backgroundColor = UIColor.white
@@ -76,8 +85,9 @@ class CategoryVC: UIViewController, UITableViewDataSource, UITableViewDelegate, 
         
         let button: UIButton = UIButton(type: UIButtonType.custom)
         button.setImage(UIImage(named: "notification.png"), for: UIControlState())
-//        button.addTarget(self, action: #selector(ActivityVC.notificationBtnPressed), for: UIControlEvents.touchUpInside)
+        button.addTarget(self, action: #selector(self.notificationBtnPressed), for: UIControlEvents.touchUpInside)
         button.frame = CGRect(x: 0, y: 0, width: 27, height: 27)
+        button.addSubview(dot)
         let rightBarButton = UIBarButtonItem(customView: button)
         self.navigationItem.rightBarButtonItem = rightBarButton
         
@@ -98,9 +108,8 @@ class CategoryVC: UIViewController, UITableViewDataSource, UITableViewDelegate, 
         
         if FIRAuth.auth()?.currentUser != nil {
             username = FIRAuth.auth()?.currentUser?.displayName
-        } else {
-           print("No user is signed in and this shouldnt be saying this.")
         }
+        
         userID = UserService.ds.currentUserID
         key = firebasePost.key
 
@@ -108,6 +117,12 @@ class CategoryVC: UIViewController, UITableViewDataSource, UITableViewDelegate, 
         tableView.dataSource = self
                 
         geoFire = GeoFire(firebaseRef: geofireRef)
+        
+        notificationService = NotificationService()
+        notificationService.getNotifications()
+        notificationService.watchRadar()
+        
+        NotificationCenter.default.addObserver(self, selector: #selector(self.updateNotifications), name: NSNotification.Name(rawValue: "newFollowersNotification"), object: nil)
         
         locationService = LocationService()
         locationService.startTracking()
@@ -126,6 +141,39 @@ class CategoryVC: UIViewController, UITableViewDataSource, UITableViewDelegate, 
             }
         }
         tableView.reloadData()        
+    }
+    
+    func popoverDismissed() {
+        
+        notificationService.getNotifications()
+    }
+    
+    func updateNotifications(notification: NSNotification) {
+        
+        self.notifications = []
+        let incomingNotifications = notification.object as! [NotificationCustom]
+        self.notifications = incomingNotifications
+        var newNotifications = false
+        for n in notifications {
+            if n.read == false {
+                newNotifications = true
+                dot.isHidden = false
+                break
+            }
+        }
+        if !newNotifications {
+            dot.isHidden = true
+        }
+        print("Updated Notifications From Followers: \(self.notifications)")
+    }
+    
+    func notificationBtnPressed() {
+        
+        let notificationVC = self.storyboard?.instantiateViewController(withIdentifier: "NotificationVC") as! NotificationVC
+        notificationVC.modalPresentationStyle = UIModalPresentationStyle.overCurrentContext
+        
+        notificationVC.notifications = self.notifications
+        present(notificationVC, animated: true, completion: nil)
     }
     
     override func observeValue(forKeyPath keyPath: String?, of object: Any?, change: [NSKeyValueChangeKey : Any]?, context: UnsafeMutableRawPointer?) {
@@ -247,10 +295,8 @@ class CategoryVC: UIViewController, UITableViewDataSource, UITableViewDelegate, 
     @IBAction func backBtnPressed(_ sender: AnyObject) {
         
         if previousVC == TEXT_POST_VC {
-            //locationService.stopUpdatingLocation()
             self.performSegue(withIdentifier: "unwindToTextPost", sender: self)
         } else if previousVC == LINK_POST_VC {
-            //locationService.stopUpdatingLocation()
             self.performSegue(withIdentifier: "unwindToLinkPost", sender: self)
         } else if previousVC == IMAGE_POST_VC {
             self.performSegue(withIdentifier: "unwindToImagePost", sender: self)
@@ -264,10 +310,6 @@ class CategoryVC: UIViewController, UITableViewDataSource, UITableViewDelegate, 
     
     }
     
-    func notificationBtnPressed() {
-        
-    }
-
     func playExplosion() {
         
         let path = Bundle.main.path(forResource: "blast", ofType: "mp3")!

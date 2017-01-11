@@ -13,15 +13,13 @@ import GeoFire
 private var latitude: Double = 0.0
 private var longitude: Double = 0.0
 
-class MyInfoVC: UIViewController, UITableViewDelegate, UITableViewDataSource, UIPickerViewDelegate, UIPickerViewDataSource, TableViewCellDelegate, ActivityTableViewCellDelegate {
+class MyInfoVC: UIViewController, UITableViewDelegate, UITableViewDataSource, TableViewCellDelegate, ActivityTableViewCellDelegate {
     
-    @IBOutlet weak var darkendViewBtn: UIButton!
     @IBOutlet weak var menuBtn: UIBarButtonItem!
     @IBOutlet weak var personalFilterBtn: UIButton!
     @IBOutlet weak var postTypeFilterBtn: UIButton!
     @IBOutlet weak var categoryFilterBtn: UIButton!
     @IBOutlet weak var tableView: UITableView!
-    @IBOutlet weak var pickerView: UIPickerView!
     @IBOutlet weak var scoreView: UIView!
     @IBOutlet weak var scoreLbl: UILabel!
     @IBOutlet weak var noPostsLbl: UILabel!
@@ -49,19 +47,24 @@ class MyInfoVC: UIViewController, UITableViewDelegate, UITableViewDataSource, UI
     var previousPersonalFilterRow: Int!
     var previousPostTypeFilterRow: Int!
     var comingFromCategoryFilterVC = false
+    var comingFromPersonalFilterVC = false
+    var comingFromPostTypeFilterVC = false
     var userFollowersToPass: String!
     var mediaImageToPass: UIImage?
     var videoDataToPass: NSData?
     var followingImgToPass: UIImage!
     var postToPass: Post!
     var userPhotoToPass: UIImage?
+    var activePostType: String!
+    var activePersonalOption: String!
+    var dot: UIView!
+    var radarWatchObj: Dictionary<String,AnyObject>?
+    var notificationService: NotificationService!
+    var notifications = [NotificationCustom]()
     
     override func viewDidLoad() {
         super.viewDidLoad()
         
-        pickerView.delegate = self
-        pickerView.dataSource = self
-
         self.navigationController?.navigationBar.setBackgroundImage(UIImage(), for: .default)
         self.navigationController?.navigationBar.shadowImage = UIImage()
         self.navigationController?.navigationBar.isTranslucent = true
@@ -87,9 +90,18 @@ class MyInfoVC: UIViewController, UITableViewDelegate, UITableViewDataSource, UI
         imageView.center = (imageView.superview?.center)!
         self.navigationItem.titleView = customView
         
+        dot = UIView(frame: CGRect(x: 14, y: 16, width: 12, height: 12))
+        dot.backgroundColor = UIColor.red
+        dot.layer.cornerRadius = dot.frame.size.height / 2
+        dot.isHidden = true
+        dot.isUserInteractionEnabled = false
+        dot.isExclusiveTouch = false
+        dot.isHidden = true
+
         let button: UIButton = UIButton(type: UIButtonType.custom)
         button.setImage(UIImage(named: "notification.png"), for: UIControlState())
-//        button.addTarget(self, action: #selector(MyInfoVC.notificationBtnPressed), for: UIControlEvents.touchUpInside)
+        button.addTarget(self, action: #selector(MyInfoVC.notificationBtnPressed), for: UIControlEvents.touchUpInside)
+        button.addSubview(dot)
         button.frame = CGRect(x: 0, y: 0, width: 27, height: 27)
         let rightBarButton = UIBarButtonItem(customView: button)
         self.navigationItem.rightBarButtonItem = rightBarButton
@@ -107,6 +119,12 @@ class MyInfoVC: UIViewController, UITableViewDelegate, UITableViewDataSource, UI
         
         geoFire = GeoFire(firebaseRef: geofireRef)
         
+        notificationService = NotificationService()
+        notificationService.getNotifications()
+        notificationService.watchRadar()
+        
+        NotificationCenter.default.addObserver(self, selector: #selector(self.updateNotifications), name: NSNotification.Name(rawValue: "newFollowersNotification"), object: nil)
+        
         locationService = LocationService()
         locationService.startTracking()
         locationService.addObserver(self, forKeyPath: "latitude", options: .new, context: &latitude)
@@ -116,20 +134,52 @@ class MyInfoVC: UIViewController, UITableViewDelegate, UITableViewDataSource, UI
         
         NotificationCenter.default.addObserver(self, selector: #selector(self.terminateAuthentication), name: NSNotification.Name(rawValue: "userSignedOut"), object: nil)
 
-        if !comingFromCategoryFilterVC {
+        if !comingFromCategoryFilterVC || !comingFromPersonalFilterVC {
             categoryFilterOptions?.removeAll()
             personalFilterOption = "My Posts"
             postTypeFilterOption = "All"
-            previousPersonalFilterRow = 0
-            previousPostTypeFilterRow = 0
+            activePostType = postTypeFilterOption
+            activePersonalOption = personalFilterOption
             refreshPostFeed()
         }
-        
-        print("VDL: \(categoryFilterOptions)")
         
         if revealViewController() != nil {
             menuButton.addTarget(revealViewController(), action: #selector(SWRevealViewController.revealToggle(_:)), for: UIControlEvents.touchUpInside)
         }
+    }
+    
+    
+    func popoverDismissed() {
+        
+        notificationService.getNotifications()
+    }
+    
+    func updateNotifications(notification: NSNotification) {
+        
+        self.notifications = []
+        let incomingNotifications = notification.object as! [NotificationCustom]
+        self.notifications = incomingNotifications
+        var newNotifications = false
+        for n in notifications {
+            if n.read == false {
+                newNotifications = true
+                dot.isHidden = false
+                break
+            }
+        }
+        if !newNotifications {
+            dot.isHidden = true
+        }
+        print("Updated Notifications From Followers: \(self.notifications)")
+    }
+    
+    func notificationBtnPressed() {
+        
+        let notificationVC = self.storyboard?.instantiateViewController(withIdentifier: "NotificationVC") as! NotificationVC
+        notificationVC.modalPresentationStyle = UIModalPresentationStyle.overCurrentContext
+        
+        notificationVC.notifications = self.notifications
+        present(notificationVC, animated: true, completion: nil)
     }
     
     override func observeValue(forKeyPath keyPath: String?, of object: Any?, change: [NSKeyValueChangeKey : Any]?, context: UnsafeMutableRawPointer?) {
@@ -176,11 +226,6 @@ class MyInfoVC: UIViewController, UITableViewDelegate, UITableViewDataSource, UI
         timer?.invalidate()
     }
     
-    deinit {
-        locationService.removeObserver(self, forKeyPath: "latitude", context: &latitude)
-        locationService.removeObserver(self, forKeyPath: "longitude", context: &longitude)
-    }
-    
     func postAction(action: String) {
         
         showScoreView(action: action)
@@ -222,55 +267,6 @@ class MyInfoVC: UIViewController, UITableViewDelegate, UITableViewDataSource, UI
                 }
                 self.scoreView.isHidden = true
         })
-    }
-    
-    func notificationBtnPressed() {
-        
-    }
-        
-    func numberOfComponents(in pickerView: UIPickerView) -> Int {
-        return 1
-    }
-    
-    func pickerView(_ pickerView: UIPickerView, numberOfRowsInComponent component: Int) -> Int {
-        
-        if personalFilterActive {
-            return personalDataSource.count
-        } else if postTypeFilterActive {
-            return postTypeDataSource.count
-        }
-        return personalDataSource.count
-    }
-    
-    func pickerView(_ pickerView: UIPickerView, titleForRow row: Int, forComponent component: Int) -> String? {
-        
-        if personalFilterActive {
-            return personalDataSource[row]
-        } else if postTypeFilterActive {
-            return postTypeDataSource[row]
-        }
-        return personalDataSource[row]
-    }
-    
-    func pickerView(_ pickerView: UIPickerView, didSelectRow row: Int, inComponent component: Int) {
-        
-        if darkendViewBtn.isHidden {
-            
-            if personalFilterActive {
-                self.pickerView.selectRow(previousPersonalFilterRow, inComponent: 0, animated: false)
-            } else if postTypeFilterActive {
-                self.pickerView.selectRow(previousPostTypeFilterRow, inComponent: 0, animated: false)
-            }
-            return
-        }
-        
-        if personalFilterActive {
-            self.personalFilterOption = personalDataSource[row]
-            previousPersonalFilterRow = row
-        } else if postTypeFilterActive {
-            self.postTypeFilterOption = postTypeDataSource[row]
-            previousPostTypeFilterRow = row
-        }
     }
     
     func numberOfSections(in tableView: UITableView) -> Int {
@@ -404,57 +400,15 @@ class MyInfoVC: UIViewController, UITableViewDelegate, UITableViewDataSource, UI
     
     @IBAction func personalFilterBtnPressed(_ sender: AnyObject) {
         
-        personalFilterActive = true
-        postTypeFilterActive = false
-        categoryFilterActive = false
-        pickerView.isHidden = false
-        darkendViewBtn.isHidden = false
-        darkendViewBtn.isUserInteractionEnabled = true
-        darkendViewBtn.alpha = 0.0
-            
-        UIView.animate(withDuration: 0.25, animations: {
-        
-            self.darkendViewBtn.alpha = 0.75
-        }, completion: { finished in
-                
-        })
-        pickerView.reloadAllComponents()
-        self.pickerView.selectRow(previousPersonalFilterRow, inComponent: 0, animated: false)
     }
     
     @IBAction func postTypeFilterBtnPressed(_ sender: AnyObject) {
         
-        personalFilterActive = false
-        postTypeFilterActive = true
-        categoryFilterActive = false
-        pickerView.isHidden = false
-        darkendViewBtn.isHidden = false
-        darkendViewBtn.isUserInteractionEnabled = true
-        darkendViewBtn.alpha = 0.0
-        
-        UIView.animate(withDuration: 0.25, animations: {
-            
-            self.darkendViewBtn.alpha = 0.75
-        }, completion: { finished in
-                
-        })
-        pickerView.reloadAllComponents()
-        self.pickerView.selectRow(previousPostTypeFilterRow, inComponent: 0, animated: false)
-    }
-    
-    @IBAction func darkenedViewBtnPressed(_ sender: AnyObject) {
-        
-        pickerView.isHidden = true
-        darkendViewBtn.isHidden = true
-        darkendViewBtn.isUserInteractionEnabled = false
-        darkendViewBtn.alpha = 0.0
-        
-        refreshPostFeed()
     }
     
     func filterPostFeedType() {
         
-        if previousPostTypeFilterRow == 0 {
+        if postTypeFilterOption == "All" {
             return
         } else {
             var i = 0
@@ -464,7 +418,6 @@ class MyInfoVC: UIViewController, UITableViewDelegate, UITableViewDataSource, UI
                     shouldRemoveFromPosts = false
                 }
                 if shouldRemoveFromPosts {
-                    print("removing")
                     self.posts.remove(at: i)
                 } else {
                     i += 1
@@ -482,7 +435,7 @@ class MyInfoVC: UIViewController, UITableViewDelegate, UITableViewDataSource, UI
         var i = 0
         while(posts.count > 0 && i < posts.count) {
             var shouldRemoveFromPosts = true
-            print(posts.count)
+
             for cat in posts[i].categories {
                 for fo in categoryFilterOptions! {
                     if fo == cat {
@@ -491,7 +444,6 @@ class MyInfoVC: UIViewController, UITableViewDelegate, UITableViewDataSource, UI
                 }
             }
             if shouldRemoveFromPosts {
-                print("Removing")
                 self.posts.remove(at: i)
             } else {
                 i += 1
@@ -626,9 +578,17 @@ class MyInfoVC: UIViewController, UITableViewDelegate, UITableViewDataSource, UI
     }
     
     @IBAction func unwindToMyInfoVC(_ segue: UIStoryboardSegue) {
+        
         if let sourceViewController = segue.source as? CategoryFilterVC {
+            
             self.categoryFilterOptions = sourceViewController.checked
             self.comingFromCategoryFilterVC = sourceViewController.comingFromCategoryVC
+            refreshPostFeed()
+            
+        } else if let sourceViewController = segue.source as? OptionFilterVC {
+            
+            postTypeFilterOption = sourceViewController.activePostType
+            personalFilterOption = sourceViewController.activePersonalOption
             refreshPostFeed()
         }
     }
@@ -637,7 +597,8 @@ class MyInfoVC: UIViewController, UITableViewDelegate, UITableViewDataSource, UI
         
         if segue.identifier == "CategoryFilterVC" {
 
-            let vC = segue.destination as! CategoryFilterVC
+            let nav = segue.destination as! UINavigationController
+            let vC = nav.topViewController as! CategoryFilterVC
             if categoryFilterOptions != nil && (categoryFilterOptions?.count)! > 0 {
                 vC.checked = categoryFilterOptions!
             }
@@ -652,6 +613,27 @@ class MyInfoVC: UIViewController, UITableViewDelegate, UITableViewDataSource, UI
             vC.followingStatus = followingImgToPass
             vC.userPhotoPostDetail = userPhotoToPass
             vC.previousVC = "MyInfoVC"
+        } else if segue.identifier == "PersonalFilterVC" {
+            
+            let nav = segue.destination as! UINavigationController
+            let vC = nav.topViewController as! OptionFilterVC
+            vC.filterType = "Personal"
+            vC.previousVC = "MyInfoVC"
+            vC.activePostType = activePostType
+            vC.activePersonalOption = activePersonalOption
+        } else if segue.identifier == "PostTypeFilterVC" {
+            
+            let nav = segue.destination as! UINavigationController
+            let vC = nav.topViewController as! OptionFilterVC
+            vC.filterType = "PostType"
+            vC.previousVC = "MyInfoVC"
+            vC.activePostType = activePostType
+            vC.activePersonalOption = activePersonalOption
         }
+    }
+    
+    deinit {
+        locationService.removeObserver(self, forKeyPath: "latitude", context: &latitude)
+        locationService.removeObserver(self, forKeyPath: "longitude", context: &longitude)
     }
 }

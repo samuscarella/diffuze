@@ -18,7 +18,7 @@ import Alamofire
 private var latitude: Double = 0.0
 private var longitude: Double = 0.0
 
-class ActivityVC: UIViewController, CLLocationManagerDelegate, UITableViewDelegate, UITableViewDataSource, UIPickerViewDelegate, UIPickerViewDataSource, TableViewCellDelegate {
+class ActivityVC: UIViewController, CLLocationManagerDelegate, UITableViewDelegate, UITableViewDataSource, TableViewCellDelegate, SocialSharingDelegate {
     
     @IBOutlet weak var notificationBtn: UIBarButtonItem!
     @IBOutlet weak var pulseImg: UIImageView!
@@ -28,9 +28,6 @@ class ActivityVC: UIViewController, CLLocationManagerDelegate, UITableViewDelega
     @IBOutlet weak var scoreLbl: UILabel!
     @IBOutlet weak var categoryFilterBtn: UIButton!
     @IBOutlet weak var postTypeFilterBtn: UIButton!
-    @IBOutlet weak var pickerView: UIPickerView!
-    @IBOutlet weak var darkendViewBtn: UIButton!
-    @IBOutlet weak var userPhotoImageView: ShakeImage!
     
     static var imageCache = NSCache<AnyObject, AnyObject>()
     
@@ -51,6 +48,7 @@ class ActivityVC: UIViewController, CLLocationManagerDelegate, UITableViewDelega
     var notFollowingImage: UIImage!
     var lineView: UIView!
     var comingFromCategoryFilterVC = false
+    var comingFromPostTypeFilterVC = false
     var postTypeFilterActive = false
     var categoryFilterActive = false
     var postTypeFilterOption: String!
@@ -67,13 +65,16 @@ class ActivityVC: UIViewController, CLLocationManagerDelegate, UITableViewDelega
     var timer: Timer?
     var comingFromBombVC = false
     var userPhoto: UIImage?
+    var filterType = "PostType"
+    var activePostType: String!
+    var dot: UIView!
+    var radarWatchObj: Dictionary<String,AnyObject>?
+    var notificationService: NotificationService!
+    var notifications = [NotificationCustom]()
 
     override func viewDidLoad() {
         super.viewDidLoad()
-        
-        pickerView.delegate = self
-        pickerView.dataSource = self
-        
+                
         geoFire = GeoFire(firebaseRef: geofireRef)
         
         UserDefaults.standard.setValue(false, forKey: "_UIConstraintBasedLayoutLogUnsatisfiable")
@@ -104,11 +105,20 @@ class ActivityVC: UIViewController, CLLocationManagerDelegate, UITableViewDelega
         
         imageView.center = (imageView.superview?.center)!
         self.navigationItem.titleView = customView
-                
+        
+        dot = UIView(frame: CGRect(x: 14, y: 16, width: 12, height: 12))
+        dot.backgroundColor = UIColor.red
+        dot.layer.cornerRadius = dot.frame.size.height / 2
+        dot.isHidden = true
+        dot.isUserInteractionEnabled = false
+        dot.isExclusiveTouch = false
+        dot.isHidden = true
+
         let button: UIButton = UIButton(type: UIButtonType.custom)
         button.setImage(UIImage(named: "notification.png"), for: UIControlState())
         button.addTarget(self, action: #selector(ActivityVC.notificationBtnPressed), for: UIControlEvents.touchUpInside)
         button.frame = CGRect(x: 0, y: 0, width: 27, height: 27)
+        button.addSubview(dot)
         let rightBarButton = UIBarButtonItem(customView: button)
         self.navigationItem.rightBarButtonItem = rightBarButton
         
@@ -125,6 +135,12 @@ class ActivityVC: UIViewController, CLLocationManagerDelegate, UITableViewDelega
         locationService.addObserver(self, forKeyPath: "longitude", options: .new, context: &longitude)
         
         timer = Timer.scheduledTimer(timeInterval: 5.0, target: self, selector: #selector(self.updateUserLocation), userInfo: nil, repeats: true)
+        
+        notificationService = NotificationService()
+        notificationService.getNotifications()
+        notificationService.watchRadar()
+        
+        NotificationCenter.default.addObserver(self, selector: #selector(self.updateNotifications), name: NSNotification.Name(rawValue: "newFollowersNotification"), object: nil)
     
         NotificationCenter.default.addObserver(self, selector: #selector(self.terminateAuthentication), name: NSNotification.Name(rawValue: "userSignedOut"), object: nil)
         
@@ -145,7 +161,12 @@ class ActivityVC: UIViewController, CLLocationManagerDelegate, UITableViewDelega
         if !comingFromCategoryFilterVC {
             categoryFilterOptions?.removeAll()
             postTypeFilterOption = "All"
-            previousPostTypeFilterRow = 0
+            refreshPostFeed()
+        }
+        
+        if !comingFromPostTypeFilterVC {
+            postTypeFilterOption = "All"
+            activePostType = postTypeFilterOption
             refreshPostFeed()
         }
         
@@ -219,6 +240,48 @@ class ActivityVC: UIViewController, CLLocationManagerDelegate, UITableViewDelega
         }
     }
     
+    func popoverDismissed() {
+        
+        notificationService.getNotifications()
+    }
+    
+    func updateNotifications(notification: NSNotification) {
+        
+        self.notifications = []
+        let incomingNotifications = notification.object as! [NotificationCustom]
+        self.notifications = incomingNotifications
+        var newNotifications = false
+        for n in notifications {
+            if n.read == false {
+                newNotifications = true
+                dot.isHidden = false
+                break
+            }
+        }
+        if !newNotifications {
+            dot.isHidden = true
+        }
+        print("Updated Notifications From Followers: \(self.notifications)")
+    }
+    
+    func notificationBtnPressed() {
+        
+        let notificationVC = self.storyboard?.instantiateViewController(withIdentifier: "NotificationVC") as! NotificationVC
+        notificationVC.modalPresentationStyle = UIModalPresentationStyle.overCurrentContext
+        
+        notificationVC.notifications = self.notifications
+        present(notificationVC, animated: true, completion: nil)
+    }
+    
+    func openSharePostVC(post: Post) {
+                
+        let sharingVC = self.storyboard?.instantiateViewController(withIdentifier: "SocialSharingVC") as! SocialSharingVC
+        sharingVC.modalPresentationStyle = UIModalPresentationStyle.overCurrentContext
+        sharingVC.post = post
+        
+        present(sharingVC, animated: true, completion: nil)
+    }
+    
     override func observeValue(forKeyPath keyPath: String?, of object: Any?, change: [NSKeyValueChangeKey : Any]?, context: UnsafeMutableRawPointer?) {
         
         if context == &latitude {
@@ -247,11 +310,6 @@ class ActivityVC: UIViewController, CLLocationManagerDelegate, UITableViewDelega
     
     override func viewWillDisappear(_ animated: Bool) {
         timer?.invalidate()
-    }
-    
-    deinit {
-        locationService.removeObserver(self, forKeyPath: "latitude", context: &latitude)
-        locationService.removeObserver(self, forKeyPath: "longitude", context: &longitude)
     }
     
     func updateUserLocation() {
@@ -283,59 +341,9 @@ class ActivityVC: UIViewController, CLLocationManagerDelegate, UITableViewDelega
     
     @IBAction func postTypeFilterBtnPressed(_ sender: AnyObject) {
         
-        postTypeFilterActive = true
-        categoryFilterActive = false
-        pickerView.isHidden = false
-        darkendViewBtn.isHidden = false
-        darkendViewBtn.isUserInteractionEnabled = true
-        darkendViewBtn.alpha = 0.0
-        
-        UIView.animate(withDuration: 0.25, animations: {
-            
-            self.darkendViewBtn.alpha = 0.75
-            }, completion: { finished in
-                
-        })
-        pickerView.reloadAllComponents()
-        self.pickerView.selectRow(previousPostTypeFilterRow, inComponent: 0, animated: false)
+        self.performSegue(withIdentifier: "OptionFilterVC", sender: self)
     }
         
-    func numberOfComponents(in pickerView: UIPickerView) -> Int {
-        return 1
-    }
-    
-    func pickerView(_ pickerView: UIPickerView, numberOfRowsInComponent component: Int) -> Int {
-        
-         if postTypeFilterActive {
-            return postTypeDataSource.count
-        }
-        return postTypeDataSource.count
-    }
-    
-    func pickerView(_ pickerView: UIPickerView, titleForRow row: Int, forComponent component: Int) -> String? {
-        
-        if postTypeFilterActive {
-            return postTypeDataSource[row]
-        }
-        return postTypeDataSource[row]
-    }
-    
-    func pickerView(_ pickerView: UIPickerView, didSelectRow row: Int, inComponent component: Int) {
-        
-        if darkendViewBtn.isHidden {
-            
-            if postTypeFilterActive {
-                self.pickerView.selectRow(previousPostTypeFilterRow, inComponent: 0, animated: false)
-            }
-            return
-        }
-        
-       if postTypeFilterActive {
-            self.postTypeFilterOption = postTypeDataSource[row]
-            previousPostTypeFilterRow = row
-        }
-    }
-
     func postManipulated(post: Post, action: String) {
         
         let index = (posts as NSArray).index(of: post)
@@ -392,14 +400,13 @@ class ActivityVC: UIViewController, CLLocationManagerDelegate, UITableViewDelega
                 } else if let postImgUrl = post.thumbnail {
                     img = ActivityVC.imageCache.object(forKey: postImgUrl as AnyObject) as? UIImage
                 }
-                                
+                
                 cell.delegate = self
+                cell.sharingDelegate = self
                 
                 cell.configureCell(post, currentLocation: currentLocation, image: img, postType: "radar", filterType: nil)
                 
                 return cell
-            } else {
-                return PostCell()
             }
         }
         return PostCell()
@@ -447,16 +454,11 @@ class ActivityVC: UIViewController, CLLocationManagerDelegate, UITableViewDelega
         return label.frame.height
     }
     
-    func notificationBtnPressed() {
-        
-    }
-    
     func filterPostFeedType() {
         
-        if previousPostTypeFilterRow == 0 {
+        if postTypeFilterOption == "All" {
             return
         } else {
-            
             var i = 0
             
             while(posts.count > 0 && i < posts.count) {
@@ -473,7 +475,6 @@ class ActivityVC: UIViewController, CLLocationManagerDelegate, UITableViewDelega
                 }
             }
         }
-        tableView.reloadData()
     }
     
     func filterPostFeedCategories() {
@@ -570,7 +571,7 @@ class ActivityVC: UIViewController, CLLocationManagerDelegate, UITableViewDelega
                                 self.posts.append(post)
                             }
                             if post.type == "image" || post.type == "quote" {
-                                //will still format quote posts same as image
+                                // will still format quote posts same as image
                                 self.getPostImageFromServer(urlString: post.image!, postType: "image")
                             } else if post.type == "video" {
                                 self.getPostImageFromServer(urlString: post.thumbnail!, postType: "video")
@@ -587,28 +588,25 @@ class ActivityVC: UIViewController, CLLocationManagerDelegate, UITableViewDelega
                         self.posts.reverse()
                         self.tableView.isHidden = false
                     }
+                    let watchObj = [
+                        "type": "radar",
+                        "read": true,
+                        "timestamp": FIRServerValue.timestamp()
+                        ] as [String: Any]
+
+                    URL_BASE.child("notifications").child(self.iD).child("watch").updateChildValues(watchObj)
                     self.tableView.reloadData()
                 })
-                
             }
         })
-    }
-    
-    @IBAction func darkenedViewBtnPressed(_ sender: AnyObject) {
-        
-        pickerView.isHidden = true
-        darkendViewBtn.isHidden = true
-        darkendViewBtn.isUserInteractionEnabled = false
-        darkendViewBtn.alpha = 0.0
-        
-        getRadarPosts()
     }
     
     override func prepare(for segue: UIStoryboardSegue, sender: Any?) {
         
         if segue.identifier == "CategoryFilterVC" {
             
-            let vC = segue.destination as! CategoryFilterVC
+            let nav = segue.destination as! UINavigationController
+            let vC = nav.topViewController as! CategoryFilterVC
             if categoryFilterOptions != nil && (categoryFilterOptions?.count)! > 0 {
                 vC.checked = categoryFilterOptions!
             }
@@ -627,6 +625,13 @@ class ActivityVC: UIViewController, CLLocationManagerDelegate, UITableViewDelega
         
             let vC = segue.destination as! LoginVC
             vC.noLocationAccess = true
+        } else if segue.identifier == "OptionFilterVC" {
+            
+            let nav = segue.destination as! UINavigationController
+            let vC = nav.topViewController as! OptionFilterVC
+            vC.filterType = "PostType"
+            vC.previousVC = "RadarVC"
+            vC.activePostType = self.activePostType
         }
     }
     
@@ -640,7 +645,15 @@ class ActivityVC: UIViewController, CLLocationManagerDelegate, UITableViewDelega
             self.categoryFilterOptions = sourceViewController.checked
             self.comingFromCategoryFilterVC = sourceViewController.comingFromCategoryVC
             getRadarPosts()
+        } else if let sourceViewController = segue.source as? OptionFilterVC {
+            self.postTypeFilterOption = sourceViewController.activePostType
+            getRadarPosts()
         }
+    }
+    
+    deinit {
+        locationService.removeObserver(self, forKeyPath: "latitude", context: &latitude)
+        locationService.removeObserver(self, forKeyPath: "longitude", context: &longitude)
     }
 
 }

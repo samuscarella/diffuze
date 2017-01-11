@@ -14,6 +14,13 @@
 		931CC0061D9AE377005DA803 /* PostDetailVC.swift in Sources */ = {isa = PBXBuildFile; fileRef = 931CC0051D9AE377005DA803 /* PostDetailVC.swift */; };
 		9324326E1D98B73000D5C3DA /* ShakeImage.swift in Sources */ = {isa = PBXBuildFile; fileRef = 9324326D1D98B73000D5C3DA /* ShakeImage.swift */; };
 		932FA0AB1E1B11D600A668C2 /* ImageStruct.swift in Sources */ = {isa = PBXBuildFile; fileRef = 932FA0AA1E1B11D600A668C2 /* ImageStruct.swift */; };
+		932FA0AF1E1D3E0F00A668C2 /* FilterCell.swift in Sources */ = {isa = PBXBuildFile; fileRef = 932FA0AE1E1D3E0F00A668C2 /* FilterCell.swift */; };
+		932FA0B11E1D7B5200A668C2 /* OptionFilterVC.swift in Sources */ = {isa = PBXBuildFile; fileRef = 932FA0B01E1D7B5200A668C2 /* OptionFilterVC.swift */; };
+		9335BF441E2163710047EEE7 /* NotificationCustom.swift in Sources */ = {isa = PBXBuildFile; fileRef = 9335BF431E2163710047EEE7 /* NotificationCustom.swift */; };
+		9335BF461E2175D50047EEE7 /* NotificationVC.swift in Sources */ = {isa = PBXBuildFile; fileRef = 9335BF451E2175D50047EEE7 /* NotificationVC.swift */; };
+		9335BF481E2184DE0047EEE7 /* NotificationCell.swift in Sources */ = {isa = PBXBuildFile; fileRef = 9335BF471E2184DE0047EEE7 /* NotificationCell.swift */; };
+		9335BF4A1E21B2FB0047EEE7 /* ModalTransitionListener.swift in Sources */ = {isa = PBXBuildFile; fileRef = 9335BF491E21B2FB0047EEE7 /* ModalTransitionListener.swift */; };
+		9335BF4C1E21D4510047EEE7 /* NotificationService.swift in Sources */ = {isa = PBXBuildFile; fileRef = 9335BF4B1E21D4510047EEE7 /* NotificationService.swift */; };
 		933A0AD61DA154C0008E58E6 /* LinkPostVC.swift in Sources */ = {isa = PBXBuildFile; fileRef = 933A0AD51DA154C0008E58E6 /* LinkPostVC.swift */; };
 		933C2C201D803C4100DB89AE /* TopNav.swift in Sources */ = {isa = PBXBuildFile; fileRef = 933C2C1F1D803C4100DB89AE /* TopNav.swift */; };
 		933C2C221D8087F400DB89AE /* SubscriptionCell.swift in Sources */ = {isa = PBXBuildFile; fileRef = 933C2C211D8087F400DB89AE /* SubscriptionCell.swift */; };
@@ -45,6 +52,7 @@
 		937E3AE51D85BBD400BB7C01 /* MaterialTextView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 937E3AE41D85BBD400BB7C01 /* MaterialTextView.swift */; };
 		937E3AEB1D85F64B00BB7C01 /* CategoryVC.swift in Sources */ = {isa = PBXBuildFile; fileRef = 937E3AEA1D85F64B00BB7C01 /* CategoryVC.swift */; };
 		937E3AEF1D8615A600BB7C01 /* CategoryCell.swift in Sources */ = {isa = PBXBuildFile; fileRef = 937E3AEE1D8615A600BB7C01 /* CategoryCell.swift */; };
+		93823BAB1E240A54008B6A0C /* SocialSharingVC.swift in Sources */ = {isa = PBXBuildFile; fileRef = 93823BAA1E240A54008B6A0C /* SocialSharingVC.swift */; };
 		9385B14F1DE8BAF7004087E9 /* radar-spinner.gif in Resources */ = {isa = PBXBuildFile; fileRef = 9385B14E1DE8BAF7004087E9 /* radar-spinner.gif */; };
 		9385D00B1DA9979800AAAAD2 /* ImagePostVC.swift in Sources */ = {isa = PBXBuildFile; fileRef = 9385D00A1DA9979800AAAAD2 /* ImagePostVC.swift */; };
 		938A20D91DF834BD00BF0A6C /* SignUpOneVC.swift in Sources */ = {isa = PBXBuildFile; fileRef = 938A20D81DF834BD00BF0A6C /* SignUpOneVC.swift */; };
@@ -111,6 +119,13 @@
 		931CC0051D9AE377005DA803 /* PostDetailVC.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = PostDetailVC.swift; sourceTree = "<group>"; };
 		9324326D1D98B73000D5C3DA /* ShakeImage.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = ShakeImage.swift; sourceTree = "<group>"; };
 		932FA0AA1E1B11D600A668C2 /* ImageStruct.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = ImageStruct.swift; sourceTree = "<group>"; };
+		932FA0AE1E1D3E0F00A668C2 /* FilterCell.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = FilterCell.swift; sourceTree = "<group>"; };
+		932FA0B01E1D7B5200A668C2 /* OptionFilterVC.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = OptionFilterVC.swift; sourceTree = "<group>"; };
+		9335BF431E2163710047EEE7 /* NotificationCustom.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = NotificationCustom.swift; sourceTree = "<group>"; };
+		9335BF451E2175D50047EEE7 /* NotificationVC.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = NotificationVC.swift; sourceTree = "<group>"; };
+		9335BF471E2184DE0047EEE7 /* NotificationCell.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = NotificationCell.swift; sourceTree = "<group>"; };
+		9335BF491E21B2FB0047EEE7 /* ModalTransitionListener.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = ModalTransitionListener.swift; sourceTree = "<group>"; };
+		9335BF4B1E21D4510047EEE7 /* NotificationService.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = NotificationService.swift; sourceTree = "<group>"; };
 		933A0AD51DA154C0008E58E6 /* LinkPostVC.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = LinkPostVC.swift; sourceTree = "<group>"; };
 		933C2C1F1D803C4100DB89AE /* TopNav.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = TopNav.swift; sourceTree = "<group>"; };
 		933C2C211D8087F400DB89AE /* SubscriptionCell.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = SubscriptionCell.swift; sourceTree = "<group>"; };
@@ -144,6 +159,7 @@
 		937E3AE41D85BBD400BB7C01 /* MaterialTextView.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = MaterialTextView.swift; sourceTree = "<group>"; };
 		937E3AEA1D85F64B00BB7C01 /* CategoryVC.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = CategoryVC.swift; sourceTree = "<group>"; };
 		937E3AEE1D8615A600BB7C01 /* CategoryCell.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = CategoryCell.swift; sourceTree = "<group>"; };
+		93823BAA1E240A54008B6A0C /* SocialSharingVC.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = SocialSharingVC.swift; sourceTree = "<group>"; };
 		9385B14E1DE8BAF7004087E9 /* radar-spinner.gif */ = {isa = PBXFileReference; lastKnownFileType = image.gif; path = "radar-spinner.gif"; sourceTree = "<group>"; };
 		9385D00A1DA9979800AAAAD2 /* ImagePostVC.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = ImagePostVC.swift; sourceTree = "<group>"; };
 		938A20D81DF834BD00BF0A6C /* SignUpOneVC.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = SignUpOneVC.swift; sourceTree = "<group>"; };
@@ -323,6 +339,9 @@
 				938A20DC1DF83FAA00BF0A6C /* SignUpThreeVC.swift */,
 				938DC2181E0233F600957766 /* CategoryFilterVC.swift */,
 				93A21BB31E0F3A8C0092C340 /* SignUpFourVC.swift */,
+				932FA0B01E1D7B5200A668C2 /* OptionFilterVC.swift */,
+				9335BF451E2175D50047EEE7 /* NotificationVC.swift */,
+				93823BAA1E240A54008B6A0C /* SocialSharingVC.swift */,
 			);
 			name = Controller;
 			sourceTree = "<group>";
@@ -347,6 +366,8 @@
 				93EE29211DA9C9550082FDA5 /* VideoContainerView.swift */,
 				937131F71DACDB8D006CC35E /* NewPostNavBarView.swift */,
 				93D179E01DF5F143005C1EE7 /* FollowerCell.swift */,
+				932FA0AE1E1D3E0F00A668C2 /* FilterCell.swift */,
+				9335BF471E2184DE0047EEE7 /* NotificationCell.swift */,
 			);
 			name = View;
 			sourceTree = "<group>";
@@ -357,6 +378,7 @@
 				93C893011D80F0D4008B792D /* Category.swift */,
 				93AA25EB1D846509002344D3 /* User.swift */,
 				93C164581D8E447A004B0432 /* Post.swift */,
+				9335BF431E2163710047EEE7 /* NotificationCustom.swift */,
 			);
 			name = Model;
 			sourceTree = "<group>";
@@ -411,6 +433,8 @@
 				9315C06D1D8376130051BFCD /* FirebaseStorage.swift */,
 				931479CF1D88D34600F5E366 /* PostService.swift */,
 				939D3AE41D8B966400F0F064 /* LocationService.swift */,
+				9335BF491E21B2FB0047EEE7 /* ModalTransitionListener.swift */,
+				9335BF4B1E21D4510047EEE7 /* NotificationService.swift */,
 			);
 			name = Services;
 			sourceTree = "<group>";
@@ -615,9 +639,11 @@
 			isa = PBXSourcesBuildPhase;
 			buildActionMask = 2147483647;
 			files = (
+				9335BF4A1E21B2FB0047EEE7 /* ModalTransitionListener.swift in Sources */,
 				938A20DB1DF83AFF00BF0A6C /* SignUpTwoVC.swift in Sources */,
 				9340CA911D7DD41C00AE1231 /* TransparentUsernameField.swift in Sources */,
 				9393A1CC1D83AC3B0078503C /* MaterialView.swift in Sources */,
+				932FA0B11E1D7B5200A668C2 /* OptionFilterVC.swift in Sources */,
 				9324326E1D98B73000D5C3DA /* ShakeImage.swift in Sources */,
 				93D179D91DF4DBD7005C1EE7 /* RadarVC.swift in Sources */,
 				9340CA771D7DB10800AE1231 /* ViewController.swift in Sources */,
@@ -638,6 +664,7 @@
 				933C2C221D8087F400DB89AE /* SubscriptionCell.swift in Sources */,
 				9340CA751D7DB10800AE1231 /* AppDelegate.swift in Sources */,
 				93EFD5791D7FAD2000455DF0 /* PremiumVC.swift in Sources */,
+				9335BF481E2184DE0047EEE7 /* NotificationCell.swift in Sources */,
 				938CF36E1DE4CC53006A1833 /* BombVC.swift in Sources */,
 				93C1645B1D8EBD24004B0432 /* PostCell.swift in Sources */,
 				93D179DD1DF4F58C005C1EE7 /* FollowersVC.swift in Sources */,
@@ -646,6 +673,7 @@
 				9340CA951D7DE0D500AE1231 /* MaterialButton.swift in Sources */,
 				9390DC621DD8F0D700BCF212 /* LaunchVC.swift in Sources */,
 				931CC0061D9AE377005DA803 /* PostDetailVC.swift in Sources */,
+				9335BF4C1E21D4510047EEE7 /* NotificationService.swift in Sources */,
 				93C1645D1D8F299A004B0432 /* PostTextView.swift in Sources */,
 				93AA25F81D85ACF4002344D3 /* TextPostVC.swift in Sources */,
 				93EFD5771D7F9EDE00455DF0 /* SubscriptionsVC.swift in Sources */,
@@ -656,6 +684,7 @@
 				93C164591D8E447A004B0432 /* Post.swift in Sources */,
 				937131F81DACDB8D006CC35E /* NewPostNavBarView.swift in Sources */,
 				93C1645F1D8F3A4B004B0432 /* MaterialUIView.swift in Sources */,
+				93823BAB1E240A54008B6A0C /* SocialSharingVC.swift in Sources */,
 				93C893041D81811E008B792D /* CategoryService.swift in Sources */,
 				938A20DD1DF83FAA00BF0A6C /* SignUpThreeVC.swift in Sources */,
 				937E3AEB1D85F64B00BB7C01 /* CategoryVC.swift in Sources */,
@@ -664,15 +693,18 @@
 				93770C401DAA718C00A2A134 /* AudioPostVC.swift in Sources */,
 				9340CA971D7DE10400AE1231 /* Constants.swift in Sources */,
 				93D179E11DF5F143005C1EE7 /* FollowerCell.swift in Sources */,
+				932FA0AF1E1D3E0F00A668C2 /* FilterCell.swift in Sources */,
 				9315C06E1D8376130051BFCD /* FirebaseStorage.swift in Sources */,
 				938D02781DFC6EB80019D5B9 /* TimeService.swift in Sources */,
 				931479D01D88D34600F5E366 /* PostService.swift in Sources */,
 				937E3AEF1D8615A600BB7C01 /* CategoryCell.swift in Sources */,
+				9335BF461E2175D50047EEE7 /* NotificationVC.swift in Sources */,
 				939D3AE51D8B966400F0F064 /* LocationService.swift in Sources */,
 				933A0AD61DA154C0008E58E6 /* LinkPostVC.swift in Sources */,
 				93F177D81DA33FA4002D0570 /* MaterialImgView.swift in Sources */,
 				93AA25F21D84CB86002344D3 /* MyInfoVC.swift in Sources */,
 				933C2C201D803C4100DB89AE /* TopNav.swift in Sources */,
+				9335BF441E2163710047EEE7 /* NotificationCustom.swift in Sources */,
 				93AA25EC1D846509002344D3 /* User.swift in Sources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;

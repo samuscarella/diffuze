@@ -29,7 +29,6 @@ class LocationService: NSObject, CLLocationManagerDelegate {
         locationManager.startUpdatingLocation()
     }
     
-    
     func locationManager(_ manager: CLLocationManager, didUpdateLocations locations: [CLLocation]) {
     
         currentLocation = locations.last! as CLLocation
@@ -37,7 +36,6 @@ class LocationService: NSObject, CLLocationManagerDelegate {
         latitude = Double(currentLocation.coordinate.latitude)
         longitude = Double(currentLocation.coordinate.longitude)
         
-        NotificationCenter.default.post(name: Notification.Name(rawValue: "userUpdatedLocation"), object: nil)
     }
 
     

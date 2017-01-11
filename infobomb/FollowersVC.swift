@@ -40,6 +40,10 @@ class FollowersVC: UIViewController, UITableViewDataSource, UITableViewDelegate,
     var inSearchMode = false
     var myGroup = DispatchGroup()
     var secondGroup = DispatchGroup()
+    var dot: UIView!
+    var radarWatchObj: Dictionary<String,AnyObject>?
+    var notificationService: NotificationService!
+    var notifications = [NotificationCustom]()
     
     static var imageCache = NSCache<AnyObject, AnyObject>()
     
@@ -67,10 +71,19 @@ class FollowersVC: UIViewController, UITableViewDataSource, UITableViewDelegate,
         imageView.center = (imageView.superview?.center)!
         self.navigationItem.titleView = customView
         
+        dot = UIView(frame: CGRect(x: 14, y: 16, width: 12, height: 12))
+        dot.backgroundColor = UIColor.red
+        dot.layer.cornerRadius = dot.frame.size.height / 2
+        dot.isHidden = true
+        dot.isUserInteractionEnabled = false
+        dot.isExclusiveTouch = false
+        dot.isHidden = true
+
         let button: UIButton = UIButton(type: UIButtonType.custom)
         button.setImage(UIImage(named: "notification.png"), for: UIControlState())
-//        button.addTarget(self, action: #selector(ActivityVC.notificationBtnPressed), for: UIControlEvents.touchUpInside)
+        button.addTarget(self, action: #selector(self.notificationBtnPressed), for: UIControlEvents.touchUpInside)
         button.frame = CGRect(x: 0, y: 0, width: 27, height: 27)
+        button.addSubview(dot)
         let rightBarButton = UIBarButtonItem(customView: button)
         self.navigationItem.rightBarButtonItem = rightBarButton
         
@@ -96,6 +109,12 @@ class FollowersVC: UIViewController, UITableViewDataSource, UITableViewDelegate,
         
         geoFire = GeoFire(firebaseRef: geofireRef)
         
+        notificationService = NotificationService()
+        notificationService.getNotifications()
+        notificationService.watchRadar()
+        
+        NotificationCenter.default.addObserver(self, selector: #selector(self.updateNotifications), name: NSNotification.Name(rawValue: "newFollowersNotification"), object: nil)
+        
         locationService = LocationService()
         locationService.startTracking()
         locationService.addObserver(self, forKeyPath: "latitude", options: .new, context: &latitude)
@@ -116,6 +135,39 @@ class FollowersVC: UIViewController, UITableViewDataSource, UITableViewDelegate,
         if revealViewController() != nil {
             menuButton.addTarget(revealViewController(), action: #selector(SWRevealViewController.revealToggle(_:)), for: UIControlEvents.touchUpInside)
         }
+    }
+    
+    func popoverDismissed() {
+        
+        notificationService.getNotifications()
+    }
+    
+    func updateNotifications(notification: NSNotification) {
+        
+        self.notifications = []
+        let incomingNotifications = notification.object as! [NotificationCustom]
+        self.notifications = incomingNotifications
+        var newNotifications = false
+        for n in notifications {
+            if n.read == false {
+                newNotifications = true
+                dot.isHidden = false
+                break
+            }
+        }
+        if !newNotifications {
+            dot.isHidden = true
+        }
+        print("Updated Notifications From Followers: \(self.notifications)")
+    }
+    
+    func notificationBtnPressed() {
+        
+        let notificationVC = self.storyboard?.instantiateViewController(withIdentifier: "NotificationVC") as! NotificationVC
+        notificationVC.modalPresentationStyle = UIModalPresentationStyle.overCurrentContext
+        
+        notificationVC.notifications = self.notifications
+        present(notificationVC, animated: true, completion: nil)
     }
     
     override func observeValue(forKeyPath keyPath: String?, of object: Any?, change: [NSKeyValueChangeKey : Any]?, context: UnsafeMutableRawPointer?) {
@@ -354,8 +406,7 @@ class FollowersVC: UIViewController, UITableViewDataSource, UITableViewDelegate,
                 URL_BASE.child("users").child(id).observeSingleEvent(of: FIRDataEventType.value, with: { (snapshot) in
                     
                     if let userDict = snapshot.value as? Dictionary<String,AnyObject> {
-                        
-                        let user = User.init(userId: userDict["user_ref"] as! String, dictionary: userDict)
+                        let user = User.init(userId: userDict["user_id"] as! String, dictionary: userDict)
                         self.users.append(user)
                     }
                     self.secondGroup.leave()

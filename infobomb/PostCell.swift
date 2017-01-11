@@ -23,6 +23,10 @@ protocol ActivityTableViewCellDelegate {
     
     func postAction(action: String)
 }
+protocol SocialSharingDelegate {
+    
+    func openSharePostVC(post: Post)
+}
 
 class PostCell: UITableViewCell {
     
@@ -64,6 +68,7 @@ class PostCell: UITableViewCell {
     @IBOutlet weak var postCellView: MaterialUIView!
     
     let currentUserID = UserDefaults.standard.object(forKey: KEY_UID) as! String
+    let currentUserUsername = UserDefaults.standard.object(forKey: KEY_USERNAME) as! String
     let geofireRef = URL_BASE.child("user-locations")
 
     //Variables
@@ -93,6 +98,7 @@ class PostCell: UITableViewCell {
     var likeOnDragRelease = false
     var delegate: TableViewCellDelegate?
     var activityDelegate: ActivityTableViewCellDelegate?
+    var sharingDelegate: SocialSharingDelegate?
     var postType: String!
     var filterType: String?
     var postObjRef: [String:Bool]!
@@ -125,7 +131,6 @@ class PostCell: UITableViewCell {
         self.username.text = post.username
         self.postType = postType
         self.postObjRef = [post.postKey:true]
-        
         
         URL_BASE.child("users").child(self.post.user_id).observeSingleEvent(of: FIRDataEventType.value, with: { (snapshot) in
             
@@ -323,7 +328,6 @@ class PostCell: UITableViewCell {
             setDynamicQuoteCell(quoteText: post.text, quoteAuthor: post.author, quoteImage: image, quoteType: post.quoteType!)
             
         }
-
     }
     
     func playButtonTapped(sender: AnyObject) {
@@ -337,6 +341,7 @@ class PostCell: UITableViewCell {
         self.linkTitle.isHidden = true
         self.linkURL.isHidden = true
         self.audioView.isHidden = true
+        self.linkView.isHidden = true
         
         //This should be eventually done on post creation.
         trimmedMessage = message.trimmingCharacters(in: CharacterSet.whitespacesAndNewlines)
@@ -366,6 +371,7 @@ class PostCell: UITableViewCell {
         self.postImg.isHidden = false
         self.linkTitle.isHidden = false
         self.linkURL.isHidden = false
+        self.linkView.isHidden = false
         openQuoteHeight?.constant = 0
         closeQuoteHeight?.constant = 0
         
@@ -386,6 +392,7 @@ class PostCell: UITableViewCell {
         //Constraints
         self.linkViewHeight.constant = totalHeight!
         self.audioViewHeight.constant = 0
+        self.audioView.isHidden = true
         
         if let msg = message as String? {
 
@@ -411,17 +418,16 @@ class PostCell: UITableViewCell {
         } else if let videoThumb = post.thumbnail as String? {
             
             getPostImageFromServer(urlString: videoThumb, postType: post.type)
-            
         }
         
         configureMediaViewUI()
         
         //Displays
         self.postImg.isHidden = false
+        self.linkView.isHidden = false
         
         //Constraints
-        self.audioTitleLbl.isHidden = true
-        self.audioTimeLbl.isHidden = true
+        self.audioView.isHidden = true
         self.linkViewHeight.constant = POST_IMAGE_HEIGHT
         self.audioViewHeight.constant = 0
         self.linkTitleHeight.constant = 0
@@ -437,7 +443,6 @@ class PostCell: UITableViewCell {
         } else {
             self.messageHeight.constant = 0
         }
-        
         
     }
     
@@ -464,6 +469,7 @@ class PostCell: UITableViewCell {
         
             //Displays
             self.postImg.isHidden = true
+            self.linkView.isHidden = true
             self.linkTitle.isHidden = true
             self.linkURL.isHidden = true
             self.audioView.isHidden = false
@@ -571,7 +577,6 @@ class PostCell: UITableViewCell {
                     self.postImg.image = img
                     ActivityVC.imageCache.setObject(img!, forKey: urlString as AnyObject)
                 }
-
             } else {
                 print("\(response.error)")
             }
@@ -602,27 +607,46 @@ class PostCell: UITableViewCell {
         return label.frame.height
     }
     
+    @IBAction func sharePostBtnPressed(_ sender: AnyObject) {
+     
+        self.sharingDelegate!.openSharePostVC(post: post)
+    }
+    
     @IBAction func followersBtnPressed(_ sender: AnyObject) {
         
         let followingUsers = URL_BASE.child("users").child(currentUserID).child("following")
         let followingUser = URL_BASE.child("users").child(post.user_id).child("followers")
+        let notification = URL_BASE.child("notifications").child(self.post.user_id)
         
         let followingObj = [self.post.user_id: true]
         let followerObj = [currentUserID: true]
-
+        
+        let notificationObj = [
+            "username": currentUserUsername,
+            "read": false,
+            "status": true,
+            "type": "follower",
+            "timestamp": FIRServerValue.timestamp()
+        ] as [String : Any]
+        
         if followerBtn.imageView?.image == notFollowingImage {
+            
+            notification.child(currentUserID).updateChildValues(notificationObj)
             
             followingUsers.updateChildValues(followingObj)
             followingUser.updateChildValues(followerObj)
+            
             followerBtn.setImage(followingImage, for: .normal)
         } else if followerBtn.imageView?.image == followingImage {
             
+            notification.child(currentUserID).child("status").setValue(false)
+            
             followingUsers.child(self.post.user_id).removeValue()
             followingUser.child(currentUserID).removeValue()
+            
             followerBtn.setImage(notFollowingImage, for: .normal)
         }
     }
-    
     
     
     func showUnfollowUserPostView() {

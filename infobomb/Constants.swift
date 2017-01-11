@@ -101,6 +101,7 @@ let MAX_DISTANCE: Double = 6318
 let TARGET_SUBS: Int = 100
 
 //Colors
+let FILTER_BLUE: UIColor = UIColor(red: 32.0 / 255.0, green: 129.0 / 255.0, blue: 195.0 / 255.0, alpha: 1.0)
 let BABY_BLUE: UIColor = UIColor(red: 82.0 / 255.0, green: 178.0 / 255.0, blue: 207.0 / 255.0, alpha: 1)
 let RED: UIColor = UIColor(red: 255.0, green: 0, blue: 0, alpha: 1)
 let SHADOW_COLOR: CGFloat = 157.0 / 255.0
