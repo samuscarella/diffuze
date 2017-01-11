@@ -19,6 +19,8 @@ class CategoryFilterVC: UIViewController, UITableViewDelegate, UITableViewDataSo
     
     let iD = UserService.ds.currentUserID
     let geofireRef = UserService.ds.REF_USER_LOCATIONS
+    let personalFilterOptions = ["My Posts","Liked","Disliked"]
+    let postTypeFilterOptions = ["All","Text","Link","Image","Video","Audio","Quote"]
     
     var categories = [Category]()
     var locationService: LocationService!
@@ -28,14 +30,58 @@ class CategoryFilterVC: UIViewController, UITableViewDelegate, UITableViewDataSo
     var checked = [String]()
     var comingFromCategoryVC = true
     var previousVC: String!
+    var dot: UIView!
+    var radarWatchObj: Dictionary<String,AnyObject>?
+    var notificationService: NotificationService!
+    var notifications = [NotificationCustom]()
     
     override func viewDidLoad() {
         super.viewDidLoad()
+        
+        self.navigationController?.navigationBar.setBackgroundImage(UIImage(), for: .default)
+        self.navigationController?.navigationBar.shadowImage = UIImage()
+        self.navigationController?.navigationBar.isTranslucent = true
+        
+        let customView = UIView()
+        customView.frame = CGRect(x: 0, y: 0, width: 36, height: 36)
+        customView.backgroundColor = UIColor.white
+        let logo = UIImage(named: "categories-icon")
+        let imageView = UIImageView(image: logo)
+        imageView.frame = CGRect(x: 0, y: 0, width: 24, height: 24)
+        imageView.contentMode = UIViewContentMode.scaleAspectFit
+        customView.addSubview(imageView)
+        customView.layer.cornerRadius = customView.frame.size.width / 2
+        customView.clipsToBounds = true
+        
+        imageView.center = (imageView.superview?.center)!
+        self.navigationItem.titleView = customView
+        
+        dot = UIView(frame: CGRect(x: 14, y: 16, width: 12, height: 12))
+        dot.backgroundColor = UIColor.red
+        dot.layer.cornerRadius = dot.frame.size.height / 2
+        dot.isHidden = true
+        dot.isUserInteractionEnabled = false
+        dot.isExclusiveTouch = false
+        dot.isHidden = true
+        
+        let button: UIButton = UIButton(type: UIButtonType.custom)
+        button.setImage(UIImage(named: "notification.png"), for: UIControlState())
+                button.addTarget(self, action: #selector(self.notificationBtnPressed), for: UIControlEvents.touchUpInside)
+        button.frame = CGRect(x: 0, y: 0, width: 27, height: 27)
+        button.addSubview(dot)
+        let rightBarButton = UIBarButtonItem(customView: button)
+        self.navigationItem.rightBarButtonItem = rightBarButton
 
         tableView.delegate = self
         tableView.dataSource = self
         
         geoFire = GeoFire(firebaseRef: geofireRef)
+        
+        notificationService = NotificationService()
+        notificationService.getNotifications()
+        notificationService.watchRadar()
+        
+        NotificationCenter.default.addObserver(self, selector: #selector(self.updateNotifications), name: NSNotification.Name(rawValue: "newFollowersNotification"), object: nil)
         
         locationService = LocationService()
         locationService.startTracking()
@@ -56,6 +102,39 @@ class CategoryFilterVC: UIViewController, UITableViewDelegate, UITableViewDataSo
         tableView.reloadData()
     }
     
+    func popoverDismissed() {
+        
+        notificationService.getNotifications()
+    }
+    
+    func updateNotifications(notification: NSNotification) {
+        
+        self.notifications = []
+        let incomingNotifications = notification.object as! [NotificationCustom]
+        self.notifications = incomingNotifications
+        var newNotifications = false
+        for n in notifications {
+            if n.read == false {
+                newNotifications = true
+                dot.isHidden = false
+                break
+            }
+        }
+        if !newNotifications {
+            dot.isHidden = true
+        }
+        print("Updated Notifications From Followers: \(self.notifications)")
+    }
+    
+    func notificationBtnPressed() {
+        
+        let notificationVC = self.storyboard?.instantiateViewController(withIdentifier: "NotificationVC") as! NotificationVC
+        notificationVC.modalPresentationStyle = UIModalPresentationStyle.overCurrentContext
+        
+        notificationVC.notifications = self.notifications
+        present(notificationVC, animated: true, completion: nil)
+    }
+
     override func observeValue(forKeyPath keyPath: String?, of object: Any?, change: [NSKeyValueChangeKey : Any]?, context: UnsafeMutableRawPointer?) {
         
         if context == &latitude {
@@ -107,7 +186,7 @@ class CategoryFilterVC: UIViewController, UITableViewDelegate, UITableViewDataSo
 
     func tableView(_ tableView: UITableView, didSelectRowAt indexPath: IndexPath) {
         
-        //        let category = categories[indexPath.row]
+        
         if let cell = tableView.cellForRow(at: indexPath) as? CategoryCell {
             
             let category = categories[(indexPath as NSIndexPath).row]
@@ -131,7 +210,6 @@ class CategoryFilterVC: UIViewController, UITableViewDelegate, UITableViewDataSo
                     cell.categoryCheckmark.image = UIImage(named: "checked")
                 }
             }
-            print(checked)
         }
     }
     
@@ -149,28 +227,38 @@ class CategoryFilterVC: UIViewController, UITableViewDelegate, UITableViewDataSo
     
     func tableView(_ tableView: UITableView, cellForRowAt indexPath: IndexPath) -> UITableViewCell {
         
-        let category = categories[(indexPath as NSIndexPath).row]
-            
-        if let cell = tableView.dequeueReusableCell(withIdentifier: "CategoryCell") as? CategoryCell {
-            
-            cell.request?.cancel()
-            
-            cell.configureCell(category)
-            
-            if checked.count > 0 {
-                for i in 0...checked.count - 1 {
-                    if checked[i] == category.name {
-                        cell.categoryCheckmark.image = UIImage(named: "checked")
-                        break
+            if let cell = tableView.dequeueReusableCell(withIdentifier: "CategoryCell") as? CategoryCell {
+                
+                let category = categories[(indexPath as NSIndexPath).row]
+                                
+                cell.configureCell(category)
+                
+                if checked.count > 0 {
+                    for i in 0...checked.count - 1 {
+                        if checked[i] == category.name {
+                            cell.categoryCheckmark.image = UIImage(named: "checked")
+                            break
+                        }
                     }
                 }
+                return cell
+            } else {
+                return CategoryCell()
             }
-            return cell
-        } else {
-            return CategoryCell()
-        }
     }
     
+    @IBAction func backBtnPressed(_ sender: AnyObject) {
+        
+        if previousVC == "MyInfoVC" {
+            
+            self.performSegue(withIdentifier: "unwindToMyInfoVC", sender: self)
+        } else if previousVC == "RadarVC" {
+            self.performSegue(withIdentifier: "unwindToActivityVC", sender: self)
+        } else if previousVC == "ViralVC" {
+            self.performSegue(withIdentifier: "unwindToViralVC", sender: self)
+        }
+    }
+
     override func prepare(for segue: UIStoryboardSegue, sender: Any!) {
         
         if previousVC == "MyInfoVC" {
@@ -183,18 +271,15 @@ class CategoryFilterVC: UIViewController, UITableViewDelegate, UITableViewDataSo
             let vC = segue.destination as! ActivityVC;
             vC.categoryFilterOptions = self.checked
             vC.comingFromCategoryFilterVC = true
+        } else if previousVC == "ViralVC" {
+            
+            let vC = segue.destination as! ViralVC;
+            vC.categoryFilterOptions = self.checked
+            vC.comingFromCategoryFilterVC = true
         }
     }
     
     @IBAction func darkenedViewBtnPressed(_ sender: AnyObject) {
         
-        if previousVC == "MyInfoVC" {
-            
-            self.performSegue(withIdentifier: "unwindToMyInfoVC", sender: self)
-        } else if previousVC == "RadarVC" {
-            self.performSegue(withIdentifier: "unwindToActivityVC", sender: self)
-        } else if previousVC == "ViralVC" {
-            self.performSegue(withIdentifier: "unwindToViralVC", sender: self)
-        }
     }
 }

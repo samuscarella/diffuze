@@ -15,4 +15,5 @@ target ‘infobomb’ do
  pod ‘FDWaveformView’
  pod 'SwiftyGif'
  pod 'SCLAlertView'
+ pod 'FacebookShare'
 end

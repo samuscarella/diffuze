@@ -47,6 +47,7 @@ class PostDetailVC: UIViewController, AVAudioPlayerDelegate {
     @IBOutlet weak var playVideoBtn: UIButton!
     
     let currentUserID = UserDefaults.standard.object(forKey: KEY_UID) as! String
+    let currentUserUsername = UserDefaults.standard.object(forKey: KEY_USERNAME) as! String
     let font = UIFont(name: "Ubuntu", size: 12.0)
     let geofireRef = UserService.ds.REF_USER_LOCATIONS
     let iD = UserService.ds.currentUserID
@@ -72,6 +73,10 @@ class PostDetailVC: UIViewController, AVAudioPlayerDelegate {
     var followingImage: UIImage?
     var notFollowingImage: UIImage?
     var followingStatus: UIImage!
+    var dot: UIView!
+    var radarWatchObj: Dictionary<String,AnyObject>?
+    var notificationService: NotificationService!
+    var notifications = [NotificationCustom]()
     
     override func viewDidLoad() {
         super.viewDidLoad()
@@ -299,7 +304,6 @@ class PostDetailVC: UIViewController, AVAudioPlayerDelegate {
             }
         }
         
-        print(categoryImages)
         if categoryImages.count == 1 {
             self.categoryImageViewOne.isHidden = true
             self.categoryImageViewTwo.image = UIImage(named: categoryImages[0])
@@ -344,13 +348,60 @@ class PostDetailVC: UIViewController, AVAudioPlayerDelegate {
         
         NotificationCenter.default.addObserver(self, selector: #selector(PostDetailVC.updateViews), name: NSNotification.Name(rawValue: "messageHeightUpdated"), object: nil)
         
+        dot = UIView(frame: CGRect(x: 14, y: 16, width: 12, height: 12))
+        dot.backgroundColor = UIColor.red
+        dot.layer.cornerRadius = dot.frame.size.height / 2
+        dot.isHidden = true
+        dot.isUserInteractionEnabled = false
+        dot.isExclusiveTouch = false
+        dot.isHidden = true
+        
         let button: UIButton = UIButton(type: UIButtonType.custom)
         button.setImage(UIImage(named: "notification.png"), for: UIControlState())
-        button.addTarget(self, action: #selector(PostDetailVC.notificationBtnPressed), for: UIControlEvents.touchUpInside)
+        button.addTarget(self, action: #selector(self.notificationBtnPressed), for: UIControlEvents.touchUpInside)
         button.frame = CGRect(x: 0, y: 0, width: 27, height: 27)
+        button.addSubview(dot)
         let rightBarButton = UIBarButtonItem(customView: button)
         self.navigationItem.rightBarButtonItem = rightBarButton
         
+        notificationService = NotificationService()
+        notificationService.getNotifications()
+        notificationService.watchRadar()
+        
+        NotificationCenter.default.addObserver(self, selector: #selector(self.updateNotifications), name: NSNotification.Name(rawValue: "newFollowersNotification"), object: nil)
+    }
+    
+    func popoverDismissed() {
+        
+        notificationService.getNotifications()
+    }
+    
+    func updateNotifications(notification: NSNotification) {
+        
+        self.notifications = []
+        let incomingNotifications = notification.object as! [NotificationCustom]
+        self.notifications = incomingNotifications
+        var newNotifications = false
+        for n in notifications {
+            if n.read == false {
+                newNotifications = true
+                dot.isHidden = false
+                break
+            }
+        }
+        if !newNotifications {
+            dot.isHidden = true
+        }
+        print("Updated Notifications From Followers: \(self.notifications)")
+    }
+    
+    func notificationBtnPressed() {
+        
+        let notificationVC = self.storyboard?.instantiateViewController(withIdentifier: "NotificationVC") as! NotificationVC
+        notificationVC.modalPresentationStyle = UIModalPresentationStyle.overCurrentContext
+        
+        notificationVC.notifications = self.notifications
+        present(notificationVC, animated: true, completion: nil)
     }
     
     override func observeValue(forKeyPath keyPath: String?, of object: Any?, change: [NSKeyValueChangeKey : Any]?, context: UnsafeMutableRawPointer?) {
@@ -403,10 +454,6 @@ class PostDetailVC: UIViewController, AVAudioPlayerDelegate {
         locationService.removeObserver(self, forKeyPath: "longitude", context: &longitude)
     }
 
-    func notificationBtnPressed() {
-        
-    }
-    
     func updateSliderWithAudio() {
         updater = CADisplayLink(target: self, selector: #selector(PostDetailVC.trackAudio))
         updater.frameInterval = 1
@@ -472,24 +519,36 @@ class PostDetailVC: UIViewController, AVAudioPlayerDelegate {
     
     @IBAction func followPosterBtnPressed(_ sender: AnyObject) {
         
-        print(1)
-
         let followingUsers = URL_BASE.child("users").child(currentUserID).child("following")
         let followingUser = URL_BASE.child("users").child(post.user_id).child("followers")
+        let notification = URL_BASE.child("notifications").child(post.user_id)
         
         let followingObj = [self.post.user_id: true]
         let followerObj = [currentUserID: true]
-        
+
+        let notificationObj = [
+            "username": currentUserUsername,
+            "read": false,
+            "status": true,
+            "type": "follower",
+            "timestamp": FIRServerValue.timestamp()
+            ] as [String : Any]
+
         if followBtn.imageView?.image == notFollowingImage {
-            print(3)
+            
+            notification.child(currentUserID).updateChildValues(notificationObj)
+
             followingUsers.updateChildValues(followingObj)
             followingUser.updateChildValues(followerObj)
             followBtn.setImage(followingImage, for: .normal)
             
         } else if followBtn.imageView?.image == followingImage {
-            print(4)
+
+            notification.child(currentUserID).child("status").setValue(false)
+            
             followingUsers.child(self.post.user_id).removeValue()
             followingUser.child(currentUserID).removeValue()
+            
             followBtn.setImage(notFollowingImage, for: .normal)
         }
     }

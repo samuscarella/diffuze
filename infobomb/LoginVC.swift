@@ -107,6 +107,7 @@ class LoginVC: UIViewController, UITextFieldDelegate {
                 } else {
                     
                     UserDefaults.standard.setValue(user!.uid, forKey: KEY_UID)
+                    UserDefaults.standard.setValue(user!.displayName, forKey: KEY_USERNAME)
                     print("User is signed in: \(user!.displayName)")
                     self.playIntroSound()
                     self.performSegue(withIdentifier: SEGUE_LOGGED_IN, sender: nil)
