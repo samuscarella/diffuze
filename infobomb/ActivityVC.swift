@@ -141,7 +141,7 @@ class ActivityVC: UIViewController, CLLocationManagerDelegate, UITableViewDelega
         notificationService.watchRadar()
         
         NotificationCenter.default.addObserver(self, selector: #selector(self.updateNotifications), name: NSNotification.Name(rawValue: "newFollowersNotification"), object: nil)
-    
+        
         NotificationCenter.default.addObserver(self, selector: #selector(self.terminateAuthentication), name: NSNotification.Name(rawValue: "userSignedOut"), object: nil)
         
         tableView.delegate = self
@@ -274,11 +274,10 @@ class ActivityVC: UIViewController, CLLocationManagerDelegate, UITableViewDelega
     }
     
     func openSharePostVC(post: Post) {
-                
+        
         let sharingVC = self.storyboard?.instantiateViewController(withIdentifier: "SocialSharingVC") as! SocialSharingVC
         sharingVC.modalPresentationStyle = UIModalPresentationStyle.overCurrentContext
         sharingVC.post = post
-        
         present(sharingVC, animated: true, completion: nil)
     }
     
@@ -403,7 +402,7 @@ class ActivityVC: UIViewController, CLLocationManagerDelegate, UITableViewDelega
                 
                 cell.delegate = self
                 cell.sharingDelegate = self
-                
+
                 cell.configureCell(post, currentLocation: currentLocation, image: img, postType: "radar", filterType: nil)
                 
                 return cell
@@ -529,7 +528,7 @@ class ActivityVC: UIViewController, CLLocationManagerDelegate, UITableViewDelega
         })
     }
     
-    func getPostImageFromServer(urlString: String, postType: String) {
+    func getPostImageFromServerAndCache(urlString: String, postType: String) {
         
         let url = URL(string: urlString)!
         Alamofire.request(url, method: .get).response { response in
@@ -572,10 +571,13 @@ class ActivityVC: UIViewController, CLLocationManagerDelegate, UITableViewDelega
                             }
                             if post.type == "image" || post.type == "quote" {
                                 // will still format quote posts same as image
-                                self.getPostImageFromServer(urlString: post.image!, postType: "image")
+                                if post.image != nil {
+                                    self.getPostImageFromServerAndCache(urlString: post.image!, postType: "image")
+                                }
                             } else if post.type == "video" {
-                                self.getPostImageFromServer(urlString: post.thumbnail!, postType: "video")
+                                self.getPostImageFromServerAndCache(urlString: post.thumbnail!, postType: "video")
                             }
+                            self.getPosterUserPhotoAndCache(post: post)
                         }
                         self.myGroup.leave()
                     })
@@ -585,7 +587,7 @@ class ActivityVC: UIViewController, CLLocationManagerDelegate, UITableViewDelega
                     
                     if self.posts.count > 0 {
                         self.refreshPostFeed()
-                        self.posts.reverse()
+                        self.posts = self.posts.sorted(by: { $0.timestamp > $1.timestamp })
                         self.tableView.isHidden = false
                     }
                     let watchObj = [
@@ -649,6 +651,36 @@ class ActivityVC: UIViewController, CLLocationManagerDelegate, UITableViewDelega
             self.postTypeFilterOption = sourceViewController.activePostType
             getRadarPosts()
         }
+    }
+    
+    func getPosterUserPhotoAndCache(post: Post) {
+        
+        URL_BASE.child("users").child(post.user_id).child("photo").observeSingleEvent(of: FIRDataEventType.value, with: { snapshot in
+            
+            let userPhotoString = snapshot.value as? String ?? ""
+            
+            if userPhotoString != "" {
+                
+                let posterPhoto = ActivityVC.imageCache.object(forKey: post.user_id as AnyObject) as? UIImage
+                
+                if posterPhoto == nil {
+                    
+                    let url = URL(string: userPhotoString)!
+                    Alamofire.request(url, method: .get).response { response in
+                        if response.error == nil {
+                            
+                            let img = UIImage(data: response.data!)
+                            ActivityVC.imageCache.setObject(img!, forKey: post.user_id as AnyObject)
+                            
+                        } else {
+                            print("\(response.error)")
+                        }
+                    }
+                }
+            } else {
+                print("User does not have a photo set.")
+            }
+        })
     }
     
     deinit {

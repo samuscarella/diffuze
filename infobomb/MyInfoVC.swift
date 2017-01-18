@@ -9,11 +9,12 @@
 import UIKit
 import Firebase
 import GeoFire
+import Alamofire
 
 private var latitude: Double = 0.0
 private var longitude: Double = 0.0
 
-class MyInfoVC: UIViewController, UITableViewDelegate, UITableViewDataSource, TableViewCellDelegate, ActivityTableViewCellDelegate {
+class MyInfoVC: UIViewController, UITableViewDelegate, UITableViewDataSource, TableViewCellDelegate, ActivityTableViewCellDelegate, SocialSharingDelegate {
     
     @IBOutlet weak var menuBtn: UIBarButtonItem!
     @IBOutlet weak var personalFilterBtn: UIButton!
@@ -231,6 +232,24 @@ class MyInfoVC: UIViewController, UITableViewDelegate, UITableViewDataSource, Ta
         showScoreView(action: action)
     }
     
+    func updatePostInArray(post: Post) {
+        
+        for p in posts {
+            if p.user_id == post.user_id {
+                p.dislikes = post.dislikes
+                p.likes = post.likes
+            }
+        }
+    }
+    
+    func openSharePostVC(post: Post) {
+        
+        let sharingVC = self.storyboard?.instantiateViewController(withIdentifier: "SocialSharingVC") as! SocialSharingVC
+        sharingVC.modalPresentationStyle = UIModalPresentationStyle.overCurrentContext
+        sharingVC.post = post
+        present(sharingVC, animated: true, completion: nil)
+    }
+    
     func postManipulated(post: Post, action: String) {
 
         let  index = (posts as NSArray).index(of: post)
@@ -380,6 +399,7 @@ class MyInfoVC: UIViewController, UITableViewDelegate, UITableViewDataSource, Ta
                 
                 cell.delegate = self
                 cell.activityDelegate = self
+                cell.sharingDelegate = self
                 
                 return cell
             } else {
@@ -478,6 +498,15 @@ class MyInfoVC: UIViewController, UITableViewDelegate, UITableViewDataSource, Ta
                         let key = post.key
                         let post = Post(postKey: key, dictionary: postDict)
                         self.posts.append(post)
+                        if post.type == "image" || post.type == "quote" {
+                            // will still format quote posts same as image
+                            if post.image != nil {
+                                self.getPostImageFromServerAndCache(urlString: post.image!, postType: "image")
+                            }
+                        } else if post.type == "video" {
+                            self.getPostImageFromServerAndCache(urlString: post.thumbnail!, postType: "video")
+                        }
+                        self.getPosterUserPhotoAndCache(post: post)
                     }
                 }
                 if self.posts.count > 0 {
@@ -485,7 +514,7 @@ class MyInfoVC: UIViewController, UITableViewDelegate, UITableViewDataSource, Ta
                     self.filterPostFeedType()
                     self.filterPostFeedCategories()
                     self.tableView.isHidden = false
-                    self.posts.reverse()
+                    self.posts = self.posts.sorted(by: { $0.timestamp > $1.timestamp })
                 }
                 self.tableView.reloadData()
             })
@@ -513,6 +542,15 @@ class MyInfoVC: UIViewController, UITableViewDelegate, UITableViewDataSource, Ta
                             
                             let post = Post(postKey: post.key, dictionary: postDict)
                             self.posts.append(post)
+                            if post.type == "image" || post.type == "quote" {
+                                // will still format quote posts same as image
+                                if post.image != nil {
+                                    self.getPostImageFromServerAndCache(urlString: post.image!, postType: "image")
+                                }
+                            } else if post.type == "video" {
+                                self.getPostImageFromServerAndCache(urlString: post.thumbnail!, postType: "video")
+                            }
+                            self.getPosterUserPhotoAndCache(post: post)
                         }
                         self.myGroup.leave()
                     })
@@ -521,7 +559,7 @@ class MyInfoVC: UIViewController, UITableViewDelegate, UITableViewDataSource, Ta
                     if self.posts.count > 0 {
                         self.filterPostFeedType()
                         self.filterPostFeedCategories()
-                        self.posts.reverse()
+                        self.posts = self.posts.sorted(by: { $0.timestamp > $1.timestamp })
                         self.tableView.isHidden = false
                     } else {
                         self.noPostsLbl.text = "You have not liked any posts"
@@ -555,6 +593,15 @@ class MyInfoVC: UIViewController, UITableViewDelegate, UITableViewDataSource, Ta
                             
                             let post = Post(postKey: post.key, dictionary: postDict)
                             self.posts.append(post)
+                            if post.type == "image" || post.type == "quote" {
+                                // will still format quote posts same as image
+                                if post.image != nil {
+                                    self.getPostImageFromServerAndCache(urlString: post.image!, postType: "image")
+                                }
+                            } else if post.type == "video" {
+                                self.getPostImageFromServerAndCache(urlString: post.thumbnail!, postType: "video")
+                            }
+                            self.getPosterUserPhotoAndCache(post: post)
                         }
                         self.myGroup.leave()
                     })
@@ -564,7 +611,7 @@ class MyInfoVC: UIViewController, UITableViewDelegate, UITableViewDataSource, Ta
                     if self.posts.count > 0 {
                         self.filterPostFeedType()
                         self.filterPostFeedCategories()
-                        self.posts.reverse()
+                        self.posts = self.posts.sorted(by: { $0.timestamp > $1.timestamp })
                         self.tableView.isHidden = false
                     } else {
                         self.noPostsLbl.text = "You have not disliked any posts."
@@ -577,6 +624,57 @@ class MyInfoVC: UIViewController, UITableViewDelegate, UITableViewDataSource, Ta
         }
     }
     
+    func getPostImageFromServerAndCache(urlString: String, postType: String) {
+        
+        let url = URL(string: urlString)!
+        Alamofire.request(url, method: .get).response { response in
+            if response.error == nil {
+                
+                let img = UIImage(data: response.data!)
+                
+                if postType == "image" || postType == "quote" {
+                    ActivityVC.imageCache.setObject(img!, forKey: urlString as AnyObject)
+                } else if postType == "video" {
+                    let imageStruct = ImageStruct()
+                    let rotatedImage = imageStruct.imageRotatedByDegrees(oldImage: img!, deg: 90)
+                    ActivityVC.imageCache.setObject(rotatedImage, forKey: urlString as AnyObject)
+                }
+            } else {
+                print("\(response.error)")
+            }
+        }
+    }
+    
+    func getPosterUserPhotoAndCache(post: Post) {
+        
+        URL_BASE.child("users").child(post.user_id).child("photo").observeSingleEvent(of: FIRDataEventType.value, with: { snapshot in
+            
+            let userPhotoString = snapshot.value as? String ?? ""
+            
+            if userPhotoString != "" {
+                
+                let posterPhoto = ActivityVC.imageCache.object(forKey: post.user_id as AnyObject) as? UIImage
+                
+                if posterPhoto == nil {
+                    
+                    let url = URL(string: userPhotoString)!
+                    Alamofire.request(url, method: .get).response { response in
+                        if response.error == nil {
+                            
+                            let img = UIImage(data: response.data!)
+                            ActivityVC.imageCache.setObject(img!, forKey: post.user_id as AnyObject)
+                            
+                        } else {
+                            print("\(response.error)")
+                        }
+                    }
+                }
+            } else {
+                print("User does not have a photo set.")
+            }
+        })
+    }
+
     @IBAction func unwindToMyInfoVC(_ segue: UIStoryboardSegue) {
         
         if let sourceViewController = segue.source as? CategoryFilterVC {

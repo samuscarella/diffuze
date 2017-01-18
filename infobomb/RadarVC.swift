@@ -9,11 +9,14 @@
 import UIKit
 import Firebase
 import GeoFire
+import Alamofire
 
 private var latitude = 0.0
 private var longitude = 0.0
+//ADD DELEGATE THAT UPDATES POST IN ARRAY THA WAS LIKED OR DISLIKED SO THAT WHEN IT SHOWS AGAIN IT IS CORRECT
+//add setter for likes,dislikes in post model and set new likes and dislikes on object used after delegate in postcell passes which post what changed and then will update post in array accordingly
 
-class RadarVC: UIViewController, UITableViewDelegate, UITableViewDataSource, ActivityTableViewCellDelegate {
+class RadarVC: UIViewController, UITableViewDelegate, UITableViewDataSource, ActivityTableViewCellDelegate, SocialSharingDelegate {
 
     @IBOutlet weak var tableView: UITableView!
     @IBOutlet weak var scoreView: UIView!
@@ -185,6 +188,14 @@ class RadarVC: UIViewController, UITableViewDelegate, UITableViewDataSource, Act
         print("Updated Notifications From Followers: \(self.notifications)")
     }
     
+    func openSharePostVC(post: Post) {
+        
+        let sharingVC = self.storyboard?.instantiateViewController(withIdentifier: "SocialSharingVC") as! SocialSharingVC
+        sharingVC.modalPresentationStyle = UIModalPresentationStyle.overCurrentContext
+        sharingVC.post = post
+        present(sharingVC, animated: true, completion: nil)
+    }
+    
     func notificationBtnPressed() {
         
         let notificationVC = self.storyboard?.instantiateViewController(withIdentifier: "NotificationVC") as! NotificationVC
@@ -248,6 +259,16 @@ class RadarVC: UIViewController, UITableViewDelegate, UITableViewDataSource, Act
 
         showScoreView(action: action)
     }
+    
+    func updatePostInArray(post: Post) {
+        
+        for p in posts {
+            if p.user_id == post.user_id {
+                p.dislikes = post.dislikes
+                p.likes = post.likes
+            }
+        }
+    }
         
     func numberOfSections(in tableView: UITableView) -> Int {
         return 1
@@ -295,6 +316,7 @@ class RadarVC: UIViewController, UITableViewDelegate, UITableViewDataSource, Act
                 
                 cell.configureCell(post, currentLocation: currentLocation, image: img, postType: "activity", filterType: nil)
                 
+                cell.sharingDelegate = self
                 cell.activityDelegate = self
                 
                 return cell
@@ -307,7 +329,27 @@ class RadarVC: UIViewController, UITableViewDelegate, UITableViewDataSource, Act
     
     func tableView(_ tableView: UITableView, heightForRowAt indexPath: IndexPath) -> CGFloat {
         return UITableViewAutomaticDimension
+    }
+    
+    func getPostImageFromServerAndCache(urlString: String, postType: String) {
         
+        let url = URL(string: urlString)!
+        Alamofire.request(url, method: .get).response { response in
+            if response.error == nil {
+                
+                let img = UIImage(data: response.data!)
+                
+                if postType == "image" || postType == "quote" {
+                    ActivityVC.imageCache.setObject(img!, forKey: urlString as AnyObject)
+                } else if postType == "video" {
+                    let imageStruct = ImageStruct()
+                    let rotatedImage = imageStruct.imageRotatedByDegrees(oldImage: img!, deg: 90)
+                    ActivityVC.imageCache.setObject(rotatedImage, forKey: urlString as AnyObject)
+                }
+            } else {
+                print("\(response.error)")
+            }
+        }
     }
     
     func getAllFollowingUsers() {
@@ -322,7 +364,7 @@ class RadarVC: UIViewController, UITableViewDelegate, UITableViewDataSource, Act
                 for user in followingUsers {
                     
                     self.myGroup.enter()
-                    let userRecentPost = URL_BASE.child("posts").queryOrdered(byChild: "user_id").queryEqual(toValue: user.key).queryLimited(toLast: 1)
+                    let userRecentPost = URL_BASE.child("posts").queryOrdered(byChild: "user_id").queryEqual(toValue: user.key).queryLimited(toLast: 3)
                     userRecentPost.observeSingleEvent(of: FIRDataEventType.value, with: { snapshot in
                         
                         let postObjects = snapshot.children.allObjects as? [FIRDataSnapshot] ?? []
@@ -330,6 +372,15 @@ class RadarVC: UIViewController, UITableViewDelegate, UITableViewDataSource, Act
                             let postDict = post.value as? Dictionary<String,AnyObject>
                             let post = Post(postKey: post.key, dictionary: postDict!)
                             self.posts.append(post)
+                            if post.type == "image" || post.type == "quote" {
+                                // will still format quote posts same as image
+                                if post.image != nil {
+                                    self.getPostImageFromServerAndCache(urlString: post.image!, postType: "image")
+                                }
+                            } else if post.type == "video" {
+                                self.getPostImageFromServerAndCache(urlString: post.thumbnail!, postType: "video")
+                            }
+                            self.getPosterUserPhotoAndCache(post: post)
                         }
                         self.myGroup.leave()
                     })
@@ -338,7 +389,7 @@ class RadarVC: UIViewController, UITableViewDelegate, UITableViewDataSource, Act
                 self.myGroup.notify(queue: DispatchQueue.main, execute: {
                     
                     if self.posts.count > 0 {
-                       // self.posts.reverse()
+                        self.posts = self.posts.sorted(by: { $0.timestamp > $1.timestamp })
                         self.tableView.reloadData()
                         self.tableView.isHidden = false
                     } else {
@@ -354,6 +405,36 @@ class RadarVC: UIViewController, UITableViewDelegate, UITableViewDataSource, Act
                 self.tableView.reloadData()
             }
             
+        })
+    }
+    
+    func getPosterUserPhotoAndCache(post: Post) {
+        
+        URL_BASE.child("users").child(post.user_id).child("photo").observeSingleEvent(of: FIRDataEventType.value, with: { snapshot in
+            
+            let userPhotoString = snapshot.value as? String ?? ""
+            
+            if userPhotoString != "" {
+                
+                let posterPhoto = ActivityVC.imageCache.object(forKey: post.user_id as AnyObject) as? UIImage
+                
+                if posterPhoto == nil {
+                    
+                    let url = URL(string: userPhotoString)!
+                    Alamofire.request(url, method: .get).response { response in
+                        if response.error == nil {
+                            
+                            let img = UIImage(data: response.data!)
+                            ActivityVC.imageCache.setObject(img!, forKey: post.user_id as AnyObject)
+                            
+                        } else {
+                            print("\(response.error)")
+                        }
+                    }
+                }
+            } else {
+                print("User does not have a photo set.")
+            }
         })
     }
     

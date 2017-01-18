@@ -18,7 +18,7 @@ import GeoFire
 private var latitude = 0.0
 private var longitude = 0.0
 
-class CategoryVC: UIViewController, UITableViewDataSource, UITableViewDelegate, CLLocationManagerDelegate, CLUploaderDelegate {
+class CategoryVC: UIViewController, UITableViewDataSource, UITableViewDelegate, CLLocationManagerDelegate {
 
     @IBOutlet weak var backBtn: UIBarButtonItem!
     @IBOutlet weak var tableView: UITableView!

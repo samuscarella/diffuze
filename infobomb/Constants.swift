@@ -58,6 +58,8 @@ let SAN_FRANCISCO_LATITUDE = 37.7749
 let SAN_FRANCISCO_LONGITUDE = 122.4194
 
 let PLACEHOLDER_TEXT = "Enter Text..."
+let FACEBOOK = "Facebook"
+let TWITTER = "Twitter"
 
 //Post Constraints
 let POST_IMAGE_HEIGHT: CGFloat = 180
@@ -73,7 +75,6 @@ let KEY_UID = "uid"
 let KEY_USERNAME = "username"
 
 //Auth Providers
-let FACEBOOK = "facebook"
 let FIREBASE = "firebase"
 let CLOUDINARY_URL = "cloudinary://466524748444115:RSAd9YoIfC3A8AZED33PJQhfbac@infobomb"
 

@@ -3,6 +3,8 @@ source 'https://github.com/CocoaPods/Specs.git'
 use_frameworks!
 
 target ‘infobomb’ do
+ pod 'Fabric'
+ pod 'TwitterKit'
  pod ‘Firebase’
  pod 'Firebase/Core’
  pod 'Firebase/Database’

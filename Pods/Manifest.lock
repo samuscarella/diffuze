@@ -6,6 +6,7 @@ PODS:
   - Bolts/AppLinks (1.8.4):
     - Bolts/Tasks
   - Bolts/Tasks (1.8.4)
+  - Fabric (1.6.11)
   - FacebookCore (0.2.0):
     - Bolts (~> 1.8)
     - FBSDKCoreKit (~> 4.15)
@@ -72,9 +73,14 @@ PODS:
   - SCLAlertView (0.7.0)
   - SwiftLinkPreview (1.0.1)
   - SwiftyGif (3.0.0)
+  - TwitterCore (2.6.1):
+    - Fabric
+  - TwitterKit (2.6.1):
+    - TwitterCore (= 2.6.1)
 
 DEPENDENCIES:
   - Alamofire (~> 4.0)
+  - Fabric
   - FacebookShare
   - FDWaveformView
   - Firebase
@@ -87,6 +93,7 @@ DEPENDENCIES:
   - SCLAlertView
   - SwiftLinkPreview (~> 1.0.1)
   - SwiftyGif
+  - TwitterKit
 
 EXTERNAL SOURCES:
   GeoFire:
@@ -100,6 +107,7 @@ CHECKOUT OPTIONS:
 SPEC CHECKSUMS:
   Alamofire: aa2e09d871c9160ac53c90e83c68064a94e3dfbe
   Bolts: 8a7995239dbe724f9cba2248b766d48b7ebdd322
+  Fabric: 5911403591946b8228ab1c51d98f1d7137e863c6
   FacebookCore: 2cb3f0fbff218e9d3119cec84bae983b232412de
   FacebookShare: 8e9ee8ea06505e6a1d3d719b0cc63e840fb8aaeb
   FBSDKCoreKit: 15fef8804a4629f98c6f4e55e81a76c9d725d85e
@@ -121,7 +129,9 @@ SPEC CHECKSUMS:
   SCLAlertView: 8a14ffc40590c619e183eed2298b854385f30be1
   SwiftLinkPreview: 977461879ae31f9e2d1bf2fafba0553d99eacbb9
   SwiftyGif: d6b4d63de2a2a5134d8b54ba5719837319d77ef0
+  TwitterCore: a8aea8bdaf2abd6572c8f264707a4ea4dc2d0eab
+  TwitterKit: d38c08d31dfd4ba604f95deca6cf8e174b5cbd96
 
-PODFILE CHECKSUM: 614af3aa116f16086fb8e534d48f84cd63696cb4
+PODFILE CHECKSUM: 1834723ada27efb32d3bc13487f135226a8a81ab
 
 COCOAPODS: 1.1.0.beta.1

@@ -22,6 +22,7 @@ protocol TableViewCellDelegate {
 protocol ActivityTableViewCellDelegate {
     
     func postAction(action: String)
+    func updatePostInArray(post: Post)
 }
 protocol SocialSharingDelegate {
     
@@ -131,6 +132,17 @@ class PostCell: UITableViewCell {
         self.username.text = post.username
         self.postType = postType
         self.postObjRef = [post.postKey:true]
+
+        var userPhotoAvailable = false
+        
+        if let posterPhoto = ActivityVC.imageCache.object(forKey: post.user_id as AnyObject) as? UIImage {
+            
+            self.layoutIfNeeded()
+            self.profileImg.layer.cornerRadius = self.profileImg.frame.size.height / 2
+            self.profileImg.clipsToBounds = true
+            self.profileImg.image = posterPhoto
+            userPhotoAvailable = true
+        }
         
         URL_BASE.child("users").child(self.post.user_id).observeSingleEvent(of: FIRDataEventType.value, with: { (snapshot) in
             
@@ -140,23 +152,24 @@ class PostCell: UITableViewCell {
                 
                 let user = User.init(userId: key, dictionary: userDict)
                 
-                if let photoCheck = ActivityVC.imageCache.object(forKey: user.userPhoto as AnyObject) as? UIImage {
+                if let userPhoto = user.userPhoto {
                     
-                    self.profileImg.image = photoCheck
-                } else if let userPhoto = user.userPhoto {
-                    
-                    let url = URL(string: userPhoto)!
-                    self.request = Alamofire.request(url, method: .get).response { response in
+                    if !userPhotoAvailable {
                         
-                        if response.error == nil {
+                        let url = URL(string: userPhoto)!
+                        self.request = Alamofire.request(url, method: .get).response { response in
                             
-                            let img = UIImage(data: response.data!)
-                            self.profileImg.image = img
-                            self.profileImg.layer.cornerRadius = self.profileImg.frame.size.height / 2
-                            self.profileImg.clipsToBounds = true
-                            ActivityVC.imageCache.setObject(img!, forKey: userPhoto as AnyObject)
-                        } else {
-                            print("\(response.error)")
+                            if response.error == nil {
+                                
+                                let img = UIImage(data: response.data!)
+                                self.layoutIfNeeded()
+                                self.profileImg.layer.cornerRadius = self.profileImg.frame.size.height / 2
+                                self.profileImg.clipsToBounds = true
+                                self.profileImg.image = img
+                                ActivityVC.imageCache.setObject(img!, forKey: post.user_id as AnyObject)
+                            } else {
+                                print("\(response.error)")
+                            }
                         }
                     }
                 } else {
@@ -239,7 +252,6 @@ class PostCell: UITableViewCell {
                 self.neutralImageView.image = UIImage(named: "neutral")
             }
         }
-        
         let score = post.likes - post.dislikes
         if score == 0 {
             self.postScoreLbl.textColor = NEUTRAL_YELLOW
@@ -354,7 +366,7 @@ class PostCell: UITableViewCell {
         let height = heightForView(self.message, text: trimmedMessage!)
         self.messageHeight.constant = height
         self.message.text = trimmedMessage
-        self.message.font = UIFont(name: self.message.font.fontName, size: 12)
+        self.message.font = UIFont(name: "Ubuntu", size: 12)
     }
     
     func setDynamicLinkCell(linkTitle: String?, message: String?, image: UIImage?) {
@@ -362,8 +374,9 @@ class PostCell: UITableViewCell {
         if image != nil {
             self.postImg.image = image
         } else if let postImage = post.image as String? {
-                
             getPostImageFromServer(urlString: postImage, postType: "image")
+        } else {
+            self.postImg.image = UIImage(named: "no-image")
         }
         
         configureMediaViewUI()
@@ -517,12 +530,12 @@ class PostCell: UITableViewCell {
         } else if quoteType == "text" {
             
             trimmedMessage = quoteText!.trimmingCharacters(in: CharacterSet.whitespacesAndNewlines)
-            self.message.textAlignment = .center
             self.message.textColor = UIColor.black
             self.message.text = trimmedMessage
-            self.message.font = UIFont(name: "Ubuntu", size: 14)
-            let height = heightForView(message, text: trimmedMessage!)
+            self.message.font = UIFont(name: "Ubuntu-Bold", size: 14)
+            let height = heightToFit(label: self.message)
             self.messageHeight.constant = height
+            self.message.textAlignment = .center
         }
     }
     
@@ -566,6 +579,8 @@ class PostCell: UITableViewCell {
                 
                 let img = UIImage(data: response.data!)
                 
+                self.postImg.clipsToBounds = true
+
                 if postType == "image" {
                     self.postImg.image = img
                     ActivityVC.imageCache.setObject(img!, forKey: urlString as AnyObject)
@@ -581,8 +596,6 @@ class PostCell: UITableViewCell {
                 print("\(response.error)")
             }
         }
-        self.postImg.clipsToBounds = true
-
     }
     
     
@@ -605,6 +618,17 @@ class PostCell: UITableViewCell {
         label.sizeToFit()
         
         return label.frame.height
+    }
+    
+    func heightToFit(label: UILabel) -> CGFloat {
+        
+        let maxHeight : CGFloat = 10000
+        let labelSize = CGSize(width: self.frame.size.width, height: maxHeight)
+        let rect = label.attributedText?.boundingRect(with: labelSize, options: .usesLineFragmentOrigin, context: nil)
+        
+        label.lineBreakMode = NSLineBreakMode.byWordWrapping
+        
+        return rect!.size.height
     }
     
     @IBAction func sharePostBtnPressed(_ sender: AnyObject) {
@@ -785,14 +809,15 @@ class PostCell: UITableViewCell {
                 
                 let interactions = likeCount + dislikeCount
                 let rating = Double(likeCount) / Double(interactions)
+                let score = abs(likeCount - dislikeCount)
                 
                 post["likes"] = likeCount as AnyObject?
                 post["user-likes"] = likesDict as AnyObject?
                 post["dislikes"] = dislikeCount as AnyObject?
                 post["user-dislikes"] = dislikesDict as AnyObject?
                 post["rating"] = rating as AnyObject?
+                post["score"] = score as AnyObject?
                 
-                // Set value and report transaction success
                 currentData.value = post
                 
                 return FIRTransactionResult.success(withValue: currentData)
@@ -802,7 +827,6 @@ class PostCell: UITableViewCell {
             if let error = error {
                 print(error.localizedDescription)
             } else {
-                
 
                 let postDict = snapshot?.value as! Dictionary<String,AnyObject>
                 let key = postDict["post_ref"] as! String
@@ -810,6 +834,7 @@ class PostCell: UITableViewCell {
                 let score = post.likes - post.dislikes
                 
                 self.postInteractionCheck(post: postDict)
+                self.activityDelegate?.updatePostInArray(post: post)
 
                 if score == 0 {
                     self.postScoreLbl.textColor = NEUTRAL_YELLOW
@@ -854,12 +879,14 @@ class PostCell: UITableViewCell {
                 
                 let interactions = likeCount + dislikeCount
                 let rating = Double(likeCount) / Double(interactions)
+                let score = abs(likeCount - dislikeCount)
                 
                 post["likes"] = likeCount as AnyObject?
-                post["user-likes"] = likesDict as AnyObject?
                 post["dislikes"] = dislikeCount as AnyObject?
+                post["user-likes"] = likesDict as AnyObject?
                 post["user-dislikes"] = dislikesDict as AnyObject?
                 post["rating"] = rating as AnyObject?
+                post["score"] = score as AnyObject?
                 
                 currentData.value = post
                 
@@ -876,6 +903,9 @@ class PostCell: UITableViewCell {
                 let key = postDict["post_ref"] as! String
                 let post = Post(postKey: key, dictionary: postDict)
                 let score = post.likes - post.dislikes
+                
+                self.activityDelegate?.updatePostInArray(post: post)
+
                 if score == 0 {
                     self.postScoreLbl.textColor = NEUTRAL_YELLOW
                 } else if score > 0 {
@@ -890,11 +920,23 @@ class PostCell: UITableViewCell {
     
     func postInteractionCheck(post: Dictionary<String,AnyObject>) {
         
-        let url = "https://nameless-chamber-44579.herokuapp.com/postInteraction"
-        Alamofire.request(url, method: .post, parameters: post, encoding: JSONEncoding.default).responseJSON { response in
+        let likes = post["likes"] as! Int
+        let dislikes = post["dislikes"] as! Int
+        let interactions = likes + dislikes
+        let totalReceivers = post["receivers"] as! [Int:String]
+        let newReceivers = post["newReceivers"] as! Int
+        let recentInteractions = post["recentInteractions"] as! Int
+        let currentInteractions = interactions - recentInteractions
+        let rate = currentInteractions / newReceivers
+        let url = "http://localhost:9000/postInteraction"
+
+        if totalReceivers.count < 100 {
             
-            print(response.result.value)
-        }
+            Alamofire.request(url, method: .post, parameters: post, encoding: JSONEncoding.default).responseJSON { response in
+                
+                print(response.result.value)
+            }
+        } else if totalReceivers.count > 100 && rate
     }
     
     override func gestureRecognizerShouldBegin(_ gestureRecognizer: UIGestureRecognizer) -> Bool {
