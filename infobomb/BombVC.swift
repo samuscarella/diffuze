@@ -55,9 +55,9 @@ class BombVC: UIViewController {
     var player: AVPlayer?
     var fileExtension: String?
     var checkingUserInRadius: Bool = false
-    var totalUsersTrackable: [[String:AnyObject]] = [[:]]
-    var targetUsersCount = 100
+    var totalUsersTrackable: Int!
     var distanceTraveled = 0
+    var targetUsersRemaining = 100
     
     override func viewDidLoad() {
         super.viewDidLoad()
@@ -75,9 +75,7 @@ class BombVC: UIViewController {
             let userLong = user["longitude"] as? Double
             
             self.center = CLLocation(latitude: userLat!, longitude: userLong!)
-            
         })
-        
         
         for i in 0...91 {
             if i < 10 {
@@ -99,12 +97,7 @@ class BombVC: UIViewController {
 
             let userLocations = snapshot.children.allObjects as? [FIRDataSnapshot] ?? []
          
-            for userLoc in userLocations {
-                
-                let userLocDict = userLoc.value as! Dictionary<String,AnyObject>
-                self.totalUsersTrackable.append(userLocDict)
-            }
-            
+            self.totalUsersTrackable = userLocations.count
             self.explosionAnimationImageView.startAnimating()
             self.startGeoFireQuery()
         })
@@ -130,22 +123,24 @@ class BombVC: UIViewController {
         
         query?.observeReady({
             
-            if self.totalUsersTrackable.count < 100 {
+            if self.totalUsersTrackable < 100 {
                 
                 if self.meters == MAX_DISTANCE {
-
+            
                     self.getAllSubscribedUsersFromRadius() { uniqueSubscribers, distanceTraveled in
                         
-                        print("All Subscribers: \(self.subscribedUsers.count)")
+                        print("Subscribers Count: \(self.subscribedUsers.count)")
+                        print("All Subscribers: \(self.subscribedUsers)")
                         print(distanceTraveled)
                         
                         self.distanceTraveled = distanceTraveled
                         self.createPost()
                     }
-                } else if self.usersInRadius.count >= self.totalUsersTrackable.count - 1 {
+                } else if self.uncheckedUsersInRadius.count >= 100 {
                     
                     self.getAllSubscribedUsersFromRadius() { uniqueSubscribers, distanceTraveled in
                         
+                        print("Subscribers Count: \(self.subscribedUsers.count)")
                         print("All Subscribers: \(self.subscribedUsers)")
                         
                         self.distanceTraveled = distanceTraveled
@@ -154,10 +149,12 @@ class BombVC: UIViewController {
                 } else {
                     self.startGeoFireQuery()
                 }
-            } else if self.totalUsersTrackable.count >= 100 {
+            } else if self.totalUsersTrackable >= 100 {
+            
+                //NEEDS WORK!!!!
                 
                 self.getAllSubscribedUsersFromRadius() { uniqueSubscribers, distanceTraveled in
-
+            
                     print("All Subscribers: \(self.subscribedUsers)")
                     
                     self.distanceTraveled = distanceTraveled
@@ -173,8 +170,6 @@ class BombVC: UIViewController {
     }
     
     func getAllSubscribedUsersFromRadius(completion: @escaping (_ uniqueSubscribers: Int, _ distanceTraveled: Int) -> Void) {
-        
-        print(uncheckedUsersInRadius)
         
         while(self.uncheckedUsersInRadius.count > 0) {
             
@@ -237,7 +232,7 @@ class BombVC: UIViewController {
         } else if previousVC == QUOTE_POST_VC {
             if bombData["image"] != nil {
                 self.gatherPostData(postType: "quoteImg", data: bombData as AnyObject)
-            } else if bombData["image"] != nil {
+            } else if bombData["image"] == nil {
                 self.gatherPostData(postType: "quoteText", data: bombData as AnyObject)
             }
         }
@@ -246,17 +241,6 @@ class BombVC: UIViewController {
     func gatherPostData(postType: String, data: AnyObject) {
         
         let storageRef = storage.reference(forURL: "gs://infobomb-9b66c.appspot.com")
-        
-        let miles = Double(self.distanceTraveled) * 0.000621371
-        
-        var finalDistance: Double
-        
-        if miles < 1 {
-            finalDistance = 1
-        } else {
-            finalDistance = round(miles)
-        }
-        let intFinalDistance = Int(finalDistance)
         
         let latitude = currentLocation["latitude"] as! Double
         let longitude = currentLocation["longitude"] as! Double
@@ -268,14 +252,17 @@ class BombVC: UIViewController {
             "active": true as AnyObject,
             "likes": 0 as AnyObject,
             "dislikes": 0 as AnyObject,
+            "score": 0 as AnyObject,
             "rating": 0 as AnyObject,
             "shares": 0 as AnyObject,
             "latitude": latitude as AnyObject,
             "longitude": longitude as AnyObject,
-            "distance": intFinalDistance as AnyObject,
+            "recentInteractions": 0 as AnyObject,
+            "distance": self.distanceTraveled as AnyObject,
+            "newReceivers": self.subscribedUsers.count as AnyObject,
             "receivers": self.subscribedUsers as AnyObject,
-            "numberOfReceivers": self.subscribedUsers.count as AnyObject,
-            "created_at": FIRServerValue.timestamp() as AnyObject
+            "created_at": FIRServerValue.timestamp() as AnyObject,
+            "last_detonation": FIRServerValue.timestamp() as AnyObject
         ]
         
         self.activityLbl.text = "Sending Post..."

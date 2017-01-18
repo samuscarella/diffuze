@@ -436,7 +436,7 @@ class LinkPostVC: UIViewController, UITextViewDelegate, UITextFieldDelegate, CLL
             if self.linkData {
                 let nav = segue.destination as! UINavigationController;
                 let categoryView = nav.topViewController as! CategoryVC
-                if let message = messageField.text! as String?, messageField.text != "" || messageField.text != "Enter Text..." {
+                if let message = messageField.text! as String?, messageField.text != "" && messageField.text != "Enter Text..." {
                     linkObj["message"] = message as AnyObject?
                 }
                 categoryView.previousVC = LINK_POST_VC
@@ -444,7 +444,6 @@ class LinkPostVC: UIViewController, UITextViewDelegate, UITextFieldDelegate, CLL
                 slp.cancel()
             }
          }
- 
     }
     
     @IBAction func unwindToLinkPost(_ segue: UIStoryboardSegue) {

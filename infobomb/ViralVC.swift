@@ -9,13 +9,14 @@
 import UIKit
 import Firebase
 import GeoFire
+import Alamofire
 
 private var latitude = 0.0
 private var longitude = 0.0
 
 //Store score on post creation and then use that to filter rating by actual number and not
 
-class ViralVC: UIViewController, UITableViewDelegate, UITableViewDataSource, ActivityTableViewCellDelegate, ModalTransitionListener {
+class ViralVC: UIViewController, UITableViewDelegate, UITableViewDataSource, ActivityTableViewCellDelegate, ModalTransitionListener, SocialSharingDelegate {
     
     @IBOutlet weak var tableView: UITableView!
     @IBOutlet weak var personalFilterBtn: UIButton!
@@ -239,6 +240,24 @@ class ViralVC: UIViewController, UITableViewDelegate, UITableViewDataSource, Act
         showScoreView(action: action)
     }
     
+    func openSharePostVC(post: Post) {
+        
+        let sharingVC = self.storyboard?.instantiateViewController(withIdentifier: "SocialSharingVC") as! SocialSharingVC
+        sharingVC.modalPresentationStyle = UIModalPresentationStyle.overCurrentContext
+        sharingVC.post = post
+        present(sharingVC, animated: true, completion: nil)
+    }
+    
+    func updatePostInArray(post: Post) {
+        
+        for p in posts {
+            if p.user_id == post.user_id {
+                p.dislikes = post.dislikes
+                p.likes = post.likes
+            }
+        }
+    }
+    
     func numberOfSections(in tableView: UITableView) -> Int {
         return 1
     }
@@ -324,8 +343,9 @@ class ViralVC: UIViewController, UITableViewDelegate, UITableViewDataSource, Act
                 
                 cell.request?.cancel()
                 
-                //                let userLat = currentLocation["latitude"] as? Double
-                //                let userLong = currentLocation["longitude"] as? Double
+                //COULD POSSIBLY USE THIS TO SUBTRACT ONE REQUEST IN POST CELL
+                //let userLat = currentLocation["latitude"] as? Double
+                //let userLong = currentLocation["longitude"] as? Double
                 
                 var img: UIImage?
                 
@@ -338,6 +358,7 @@ class ViralVC: UIViewController, UITableViewDelegate, UITableViewDataSource, Act
                 cell.configureCell(post, currentLocation: currentLocation, image: img, postType: "Viral", filterType: viralFilterOption)
                 
                 cell.activityDelegate = self
+                cell.sharingDelegate = self
 
                 return cell
             } else {
@@ -424,6 +445,15 @@ class ViralVC: UIViewController, UITableViewDelegate, UITableViewDataSource, Act
 
                         let post = Post(postKey: post.key, dictionary: postDict)
                         self.posts.append(post)
+                        if post.type == "image" || post.type == "quote" {
+                            // will still format quote posts same as image
+                            if post.image != nil {
+                                self.getPostImageFromServerAndCache(urlString: post.image!, postType: "image")
+                            }
+                        } else if post.type == "video" {
+                            self.getPostImageFromServerAndCache(urlString: post.thumbnail!, postType: "video")
+                        }
+                        self.getPosterUserPhotoAndCache(post: post)
                     }
                 }
                 if self.posts.count > 0 {
@@ -431,8 +461,8 @@ class ViralVC: UIViewController, UITableViewDelegate, UITableViewDataSource, Act
                     self.filterPostFeedType()
                     self.filterPostFeedCategories()
                     self.tableView.isHidden = false
+                    self.posts = self.posts.sorted(by: { $0.timestamp > $1.timestamp })
                 }
-                self.posts.reverse()
                 self.tableView.reloadData()
             })
             
@@ -456,6 +486,15 @@ class ViralVC: UIViewController, UITableViewDelegate, UITableViewDataSource, Act
                         
                         let post = Post(postKey: post.key, dictionary: postDict)
                         self.posts.append(post)
+                        if post.type == "image" || post.type == "quote" {
+                            // will still format quote posts same as image
+                            if post.image != nil {
+                                self.getPostImageFromServerAndCache(urlString: post.image!, postType: "image")
+                            }
+                        } else if post.type == "video" {
+                            self.getPostImageFromServerAndCache(urlString: post.thumbnail!, postType: "video")
+                        }
+                        self.getPosterUserPhotoAndCache(post: post)
                     }
                 }
                 
@@ -463,18 +502,67 @@ class ViralVC: UIViewController, UITableViewDelegate, UITableViewDataSource, Act
                     self.filterPostFeedType()
                     self.filterPostFeedCategories()
                     self.tableView.isHidden = false
+                    self.posts = self.posts.sorted(by: { $0.timestamp > $1.timestamp })
                 } else {
                     self.noPostsLbl.text = "You have not liked any posts"
                     self.noPostsImageView.image = UIImage(named: "plus-white")
                     self.tableView.isHidden = true
                 }
-                self.posts.reverse()
-                /*self.posts.sort {
-                    (($0 as! Dictionary<String, AnyObject>)["interactions"] as? Int) < (($1 as! Dictionary<String, AnyObject>)["interactions"] as? Int)
-                }*/
                 self.tableView.reloadData()
             })
         }
+    }
+    
+    
+    func getPostImageFromServerAndCache(urlString: String, postType: String) {
+        
+        let url = URL(string: urlString)!
+        Alamofire.request(url, method: .get).response { response in
+            if response.error == nil {
+                
+                let img = UIImage(data: response.data!)
+                
+                if postType == "image" || postType == "quote" {
+                    ActivityVC.imageCache.setObject(img!, forKey: urlString as AnyObject)
+                } else if postType == "video" {
+                    let imageStruct = ImageStruct()
+                    let rotatedImage = imageStruct.imageRotatedByDegrees(oldImage: img!, deg: 90)
+                    ActivityVC.imageCache.setObject(rotatedImage, forKey: urlString as AnyObject)
+                }
+            } else {
+                print("\(response.error)")
+            }
+        }
+    }
+    
+    func getPosterUserPhotoAndCache(post: Post) {
+        
+        URL_BASE.child("users").child(post.user_id).child("photo").observeSingleEvent(of: FIRDataEventType.value, with: { snapshot in
+            
+            let userPhotoString = snapshot.value as? String ?? ""
+            
+            if userPhotoString != "" {
+                
+                let posterPhoto = ActivityVC.imageCache.object(forKey: post.user_id as AnyObject) as? UIImage
+                
+                if posterPhoto == nil {
+                    
+                    let url = URL(string: userPhotoString)!
+                    Alamofire.request(url, method: .get).response { response in
+                        if response.error == nil {
+                            
+                            let img = UIImage(data: response.data!)
+                            ActivityVC.imageCache.setObject(img!, forKey: post.user_id as AnyObject)
+                            
+                        } else {
+                            print("\(response.error)")
+                        }
+                    }
+                }
+            } else {
+                print("User does not have a photo set.")
+            }
+        })
     }
     
     func showScoreView(action: String) {

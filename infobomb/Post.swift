@@ -28,6 +28,7 @@ class Post {
     fileprivate var _distance: Int!
     fileprivate var _title: String?
     fileprivate var _image: String?
+    fileprivate var _description: String?
     fileprivate var _video: String?
     fileprivate var _audio: String?
     fileprivate var _author: String?
@@ -42,6 +43,9 @@ class Post {
     fileprivate var _usersInRadius: Int!
     fileprivate var _viewCount: Int!
     fileprivate var _rating: Double!
+    fileprivate var _score: Int!
+    fileprivate var _newReceivers: Int!
+    fileprivate var _recentInteractions: Int!
     
     var message: String? {
         return _message
@@ -91,6 +95,14 @@ class Post {
         return _usersInRadius
     }
     
+    var newReceivers: Int {
+        return _newReceivers
+    }
+    
+    var recentInteractions: Int {
+        return _recentInteractions
+    }
+    
     var distance: Int {
         return _distance
     }
@@ -115,6 +127,10 @@ class Post {
         return _user_id
     }
     
+    var descrip: String? {
+        return _description
+    }
+    
     var username: String {
         return _username
     }
@@ -132,11 +148,17 @@ class Post {
     }
     
     var likes: Int {
-        return _likes
+        set { _likes = newValue }
+        get { return _likes }
     }
     
     var dislikes: Int {
-        return _dislikes
+        set { _dislikes = newValue }
+        get { return _dislikes }
+    }
+    
+    var score: Int {
+        return _score
     }
     
     var active: Bool {
@@ -200,11 +222,23 @@ class Post {
         if let dislikes = dictionary["dislikes"] as? Int {
             self._dislikes = dislikes
         }
+        if let score = dictionary["score"] as? Int {
+            self._score = score
+        }
+        if let newReceivers = dictionary["newReceivers"] as? Int {
+            self._newReceivers = newReceivers
+        }
+        if let recentInteractions = dictionary["recentInteractions"] as? Int {
+            self._recentInteractions = recentInteractions
+        }
         if let distance = dictionary["distance"] as? Int {
             self._distance = distance
         }
         if let title = dictionary["title"] as? String {
             self._title = title
+        }
+        if let description = dictionary["description"] as? String {
+            self._description = description
         }
         if let shortUrl = dictionary["shortUrl"] as? String {
             self._shortUrl = shortUrl

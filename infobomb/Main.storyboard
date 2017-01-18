@@ -244,7 +244,7 @@
                         <rect key="frame" x="0.0" y="0.0" width="600" height="800"/>
                         <autoresizingMask key="autoresizingMask" widthSizable="YES" heightSizable="YES"/>
                         <subviews>
-                            <label opaque="NO" userInteractionEnabled="NO" contentMode="left" horizontalHuggingPriority="251" verticalHuggingPriority="251" misplaced="YES" text="0 Shares" textAlignment="center" lineBreakMode="tailTruncation" baselineAdjustment="alignBaselines" adjustsFontSizeToFit="NO" translatesAutoresizingMaskIntoConstraints="NO" id="GWL-kx-9B6">
+                            <label hidden="YES" opaque="NO" userInteractionEnabled="NO" contentMode="left" horizontalHuggingPriority="251" verticalHuggingPriority="251" misplaced="YES" text="0 Shares" textAlignment="center" lineBreakMode="tailTruncation" baselineAdjustment="alignBaselines" adjustsFontSizeToFit="NO" translatesAutoresizingMaskIntoConstraints="NO" id="GWL-kx-9B6">
                                 <frame key="frameInset" minX="120" minY="769" width="361" height="21"/>
                                 <fontDescription key="fontDescription" name="Ubuntu" family="Ubuntu" pointSize="17"/>
                                 <color key="textColor" white="1" alpha="1" colorSpace="calibratedWhite"/>
@@ -256,6 +256,9 @@
                                     <constraint firstAttribute="height" constant="30" id="ril-W5-CcD"/>
                                 </constraints>
                                 <state key="normal" image="share-white"/>
+                                <connections>
+                                    <action selector="shareBtnPressed:" destination="oNX-6M-6U4" eventType="touchUpInside" id="vOF-FM-epF"/>
+                                </connections>
                             </button>
                             <button opaque="NO" contentMode="scaleToFill" contentHorizontalAlignment="center" contentVerticalAlignment="center" lineBreakMode="middleTruncation" translatesAutoresizingMaskIntoConstraints="NO" id="94M-8D-ap6">
                                 <constraints>
@@ -1221,6 +1224,9 @@
                                                                 <constraint firstAttribute="width" constant="30" id="hW7-Lc-cPI"/>
                                                             </constraints>
                                                             <state key="normal" image="share-grey"/>
+                                                            <connections>
+                                                                <action selector="sharePostBtnPressed:" destination="DPs-J0-hys" eventType="touchUpInside" id="P4m-Wm-klh"/>
+                                                            </connections>
                                                         </button>
                                                         <label opaque="NO" userInteractionEnabled="NO" contentMode="left" horizontalHuggingPriority="251" verticalHuggingPriority="251" ambiguous="YES" misplaced="YES" text="1000" textAlignment="center" lineBreakMode="tailTruncation" baselineAdjustment="alignBaselines" adjustsFontSizeToFit="NO" translatesAutoresizingMaskIntoConstraints="NO" id="6wi-gc-5T4">
                                                             <frame key="frameInset" minX="46" minY="444" width="476" height="26"/>
@@ -1747,6 +1753,9 @@
                                                                 <constraint firstAttribute="height" constant="30" id="H6w-sa-012"/>
                                                             </constraints>
                                                             <state key="normal" image="share-grey"/>
+                                                            <connections>
+                                                                <action selector="sharePostBtnPressed:" destination="MhA-yi-H2T" eventType="touchUpInside" id="SRD-Ed-ETS"/>
+                                                            </connections>
                                                         </button>
                                                         <label opaque="NO" userInteractionEnabled="NO" contentMode="left" horizontalHuggingPriority="251" verticalHuggingPriority="251" ambiguous="YES" misplaced="YES" text="1000" textAlignment="center" lineBreakMode="tailTruncation" baselineAdjustment="alignBaselines" adjustsFontSizeToFit="NO" translatesAutoresizingMaskIntoConstraints="NO" id="FEZ-pw-vnK">
                                                             <frame key="frameInset" minX="46" minY="444" width="476" height="26"/>
@@ -4315,6 +4324,9 @@
                                                                 <constraint firstAttribute="height" constant="30" id="j5l-Th-qLV"/>
                                                             </constraints>
                                                             <state key="normal" image="share-grey"/>
+                                                            <connections>
+                                                                <action selector="sharePostBtnPressed:" destination="8KI-Mw-JSB" eventType="touchUpInside" id="ejr-8C-lnE"/>
+                                                            </connections>
                                                         </button>
                                                         <label opaque="NO" userInteractionEnabled="NO" contentMode="left" horizontalHuggingPriority="251" verticalHuggingPriority="251" ambiguous="YES" misplaced="YES" text="1000" textAlignment="center" lineBreakMode="tailTruncation" baselineAdjustment="alignBaselines" adjustsFontSizeToFit="NO" translatesAutoresizingMaskIntoConstraints="NO" id="uzR-7V-xDF">
                                                             <frame key="frameInset" minX="46" minY="444" width="476" height="26"/>
@@ -5540,13 +5552,13 @@
         <image name="viral-marketing" width="64" height="64"/>
     </resources>
     <inferredMetricsTieBreakers>
+        <segue reference="uZ9-aK-qKc"/>
         <segue reference="v8V-86-dBM"/>
         <segue reference="A82-wV-RuR"/>
         <segue reference="yoZ-hg-hT7"/>
+        <segue reference="I7Y-Gf-uvu"/>
         <segue reference="VQU-bb-oXC"/>
         <segue reference="EbB-Q9-tCs"/>
-        <segue reference="I7Y-Gf-uvu"/>
         <segue reference="ahD-Je-i7e"/>
-        <segue reference="uZ9-aK-qKc"/>
     </inferredMetricsTieBreakers>
 </document>

@@ -142,17 +142,50 @@ class PostDetailVC: UIViewController, AVAudioPlayerDelegate {
                 print(error.localizedDescription)
             }
         }
-
         
+        var miles = post.distance * 0.000621371
+        
+        var finalDistance: Double
+        
+        if miles < 1 {
+            finalDistance = 1
+        } else {
+            finalDistance = round(miles)
+        }
+        let intFinalDistance = Int(finalDistance)
+
         usernameLbl.text = post.username
         followersLbl.text = followers
         likesLbl.text = String(post.likes) + " Likes"
         dislikesLbl.text = String(post.dislikes) + " Dislikes"
         interactionsLbl.text = String(post.likes + post.dislikes) + " Interactions"
-        distanceLbl.text = "\(post.distance) Miles Traveled"
+        distanceLbl.text = "\(intFinalDistance) Miles Traveled"
         
         if followingStatus == followingImage || previousVC == "ActivityVC" {
             self.followBtn.setImage(followingImage, for: .normal)
+        } else if previousVC == "ViralVC" {
+            
+            URL_BASE.child("users").child(currentUserID).child("following").observeSingleEvent(of: FIRDataEventType.value, with: {
+                snapshot in
+                
+                let followingUsers = snapshot.children.allObjects as? [FIRDataSnapshot] ?? []
+                
+                if followingUsers.count > 0 {
+                    
+                    var isFollowing = false
+                    for user in followingUsers {
+                        if user.key == self.post.user_id {
+                            self.followBtn.setImage(self.followingImage, for: .normal)
+                            isFollowing = true
+                        }
+                    }
+                    if !isFollowing {
+                        self.followBtn.setImage(self.notFollowingImage, for: .normal)
+                    }
+                } else {
+                    self.followBtn.setImage(self.notFollowingImage, for: .normal)
+                }
+            })
         } else {
             self.followBtn.setImage(notFollowingImage, for: .normal)
         }
@@ -488,6 +521,15 @@ class PostDetailVC: UIViewController, AVAudioPlayerDelegate {
             print("Url is invalid.")
         }
     }
+    
+    @IBAction func shareBtnPressed(_ sender: AnyObject) {
+        
+        let sharingVC = self.storyboard?.instantiateViewController(withIdentifier: "SocialSharingVC") as! SocialSharingVC
+        sharingVC.modalPresentationStyle = UIModalPresentationStyle.overCurrentContext
+        sharingVC.post = post
+        present(sharingVC, animated: true, completion: nil)
+    }
+    
     
     @IBAction func restartBtnPressed(_ sender: AnyObject) {
         
