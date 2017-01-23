@@ -1044,10 +1044,10 @@
                                 <color key="backgroundColor" white="0.0" alpha="0.0" colorSpace="calibratedWhite"/>
                                 <prototypes>
                                     <tableViewCell clipsSubviews="YES" contentMode="scaleToFill" selectionStyle="none" indentationWidth="10" reuseIdentifier="PostCell" rowHeight="496" id="DPs-J0-hys" customClass="PostCell" customModule="infobomb" customModuleProvider="target">
-                                        <rect key="frame" x="0.0" y="28" width="600" height="496"/>
+                                        <rect key="frame" x="0.0" y="28" width="1000" height="496"/>
                                         <autoresizingMask key="autoresizingMask"/>
                                         <tableViewCellContentView key="contentView" opaque="NO" clipsSubviews="YES" multipleTouchEnabled="YES" contentMode="center" ambiguous="YES" tableViewCell="DPs-J0-hys" id="Tz3-b6-5Wa">
-                                            <frame key="frameInset" width="600" height="496"/>
+                                            <frame key="frameInset" width="1000" height="496"/>
                                             <autoresizingMask key="autoresizingMask"/>
                                             <subviews>
                                                 <view contentMode="scaleToFill" ambiguous="YES" misplaced="YES" translatesAutoresizingMaskIntoConstraints="NO" id="kF1-qO-k1O" customClass="MaterialUIView" customModule="infobomb" customModuleProvider="target">
@@ -1466,18 +1466,18 @@
                                     <tableViewCell clipsSubviews="YES" contentMode="scaleToFill" selectionStyle="default" indentationWidth="10" reuseIdentifier="CategoryCell" rowHeight="50" id="DeY-EV-Lbi" customClass="CategoryCell" customModule="infobomb" customModuleProvider="target">
                                         <rect key="frame" x="0.0" y="28" width="600" height="50"/>
                                         <autoresizingMask key="autoresizingMask"/>
-                                        <tableViewCellContentView key="contentView" opaque="NO" clipsSubviews="YES" multipleTouchEnabled="YES" contentMode="center" tableViewCell="DeY-EV-Lbi" id="N86-Qe-34D">
-                                            <frame key="frameInset" width="600" height="49"/>
+                                        <tableViewCellContentView key="contentView" opaque="NO" clipsSubviews="YES" multipleTouchEnabled="YES" contentMode="center" ambiguous="YES" tableViewCell="DeY-EV-Lbi" id="N86-Qe-34D">
+                                            <frame key="frameInset" width="600" height="49.5"/>
                                             <autoresizingMask key="autoresizingMask"/>
                                             <subviews>
-                                                <imageView userInteractionEnabled="NO" contentMode="scaleToFill" horizontalHuggingPriority="251" verticalHuggingPriority="251" misplaced="YES" image="finance" translatesAutoresizingMaskIntoConstraints="NO" id="UWX-yT-zUk">
+                                                <imageView userInteractionEnabled="NO" contentMode="scaleToFill" horizontalHuggingPriority="251" verticalHuggingPriority="251" ambiguous="YES" misplaced="YES" image="finance" translatesAutoresizingMaskIntoConstraints="NO" id="UWX-yT-zUk">
                                                     <frame key="frameInset" minX="5" minY="1" width="46" height="46"/>
                                                     <constraints>
                                                         <constraint firstAttribute="width" constant="40" id="8aJ-5m-90g"/>
                                                         <constraint firstAttribute="height" constant="40" id="lD2-9y-h8Z"/>
                                                     </constraints>
                                                 </imageView>
-                                                <imageView userInteractionEnabled="NO" contentMode="scaleToFill" horizontalHuggingPriority="251" verticalHuggingPriority="251" misplaced="YES" image="checked" translatesAutoresizingMaskIntoConstraints="NO" id="KkH-cF-XYd">
+                                                <imageView userInteractionEnabled="NO" contentMode="scaleToFill" horizontalHuggingPriority="251" verticalHuggingPriority="251" ambiguous="YES" misplaced="YES" image="checked" translatesAutoresizingMaskIntoConstraints="NO" id="KkH-cF-XYd">
                                                     <frame key="frameInset" minX="552" minY="5" width="40" height="40"/>
                                                     <constraints>
                                                         <constraint firstAttribute="width" constant="36" id="QQI-QY-6ln"/>
@@ -2557,7 +2557,7 @@
                                         <rect key="frame" x="0.0" y="28" width="600" height="55"/>
                                         <autoresizingMask key="autoresizingMask"/>
                                         <tableViewCellContentView key="contentView" opaque="NO" clipsSubviews="YES" multipleTouchEnabled="YES" contentMode="center" tableViewCell="6st-aV-TR3" id="tbP-v5-57Y">
-                                            <frame key="frameInset" width="600" height="54"/>
+                                            <frame key="frameInset" width="600" height="54.5"/>
                                             <autoresizingMask key="autoresizingMask"/>
                                             <subviews>
                                                 <imageView userInteractionEnabled="NO" contentMode="scaleToFill" horizontalHuggingPriority="251" verticalHuggingPriority="251" fixedFrame="YES" image="finance" translatesAutoresizingMaskIntoConstraints="NO" id="pDN-AP-nK9">
@@ -2650,7 +2650,7 @@
                                     <tableView hidden="YES" clipsSubviews="YES" contentMode="scaleToFill" alwaysBounceVertical="YES" dataMode="prototypes" style="plain" separatorStyle="none" rowHeight="66" sectionHeaderHeight="28" sectionFooterHeight="28" translatesAutoresizingMaskIntoConstraints="NO" id="gIW-bX-clC">
                                         <color key="backgroundColor" white="1" alpha="1" colorSpace="calibratedWhite"/>
                                         <prototypes>
-                                            <tableViewCell clipsSubviews="YES" contentMode="scaleToFill" selectionStyle="default" indentationWidth="10" reuseIdentifier="NotificationCell" rowHeight="60" id="3OY-fY-xkF" customClass="NotificationCell" customModule="infobomb" customModuleProvider="target">
+                                            <tableViewCell clipsSubviews="YES" contentMode="scaleToFill" misplaced="YES" selectionStyle="default" indentationWidth="10" reuseIdentifier="NotificationCell" rowHeight="60" id="3OY-fY-xkF" customClass="NotificationCell" customModule="infobomb" customModuleProvider="target">
                                                 <rect key="frame" x="0.0" y="28" width="536" height="60"/>
                                                 <autoresizingMask key="autoresizingMask"/>
                                                 <tableViewCellContentView key="contentView" opaque="NO" clipsSubviews="YES" multipleTouchEnabled="YES" contentMode="center" tableViewCell="3OY-fY-xkF" id="EzV-IC-DzA">
@@ -2832,7 +2832,7 @@
                     <toolbarItems/>
                     <freeformSimulatedSizeMetrics key="simulatedDestinationMetrics"/>
                     <size key="freeformSize" width="600" height="667"/>
-                    <navigationBar key="navigationBar" contentMode="scaleToFill" id="chb-tg-Tkm">
+                    <navigationBar key="navigationBar" contentMode="scaleToFill" misplaced="YES" id="chb-tg-Tkm">
                         <rect key="frame" x="0.0" y="0.0" width="320" height="44"/>
                         <autoresizingMask key="autoresizingMask"/>
                     </navigationBar>
@@ -2949,8 +2949,8 @@
                                     <tableViewCell clipsSubviews="YES" contentMode="scaleToFill" selectionStyle="default" indentationWidth="10" reuseIdentifier="CategoryCell" rowHeight="55" id="kev-vD-pSv" userLabel="CategoryCell" customClass="CategoryCell" customModule="infobomb" customModuleProvider="target">
                                         <rect key="frame" x="0.0" y="28" width="600" height="55"/>
                                         <autoresizingMask key="autoresizingMask"/>
-                                        <tableViewCellContentView key="contentView" opaque="NO" clipsSubviews="YES" multipleTouchEnabled="YES" contentMode="center" ambiguous="YES" tableViewCell="kev-vD-pSv" id="89t-nE-Qcg">
-                                            <frame key="frameInset" width="600" height="54"/>
+                                        <tableViewCellContentView key="contentView" opaque="NO" clipsSubviews="YES" multipleTouchEnabled="YES" contentMode="center" tableViewCell="kev-vD-pSv" id="89t-nE-Qcg">
+                                            <frame key="frameInset" width="600" height="54.5"/>
                                             <autoresizingMask key="autoresizingMask"/>
                                             <subviews>
                                                 <imageView userInteractionEnabled="NO" contentMode="scaleToFill" horizontalHuggingPriority="251" verticalHuggingPriority="251" fixedFrame="YES" image="finance" translatesAutoresizingMaskIntoConstraints="NO" id="gg3-Zg-l1a">
@@ -2964,7 +2964,7 @@
                                                     <color key="textColor" red="0.0" green="0.0" blue="0.0" alpha="1" colorSpace="custom" customColorSpace="sRGB"/>
                                                     <nil key="highlightedColor"/>
                                                 </label>
-                                                <imageView userInteractionEnabled="NO" contentMode="scaleToFill" horizontalHuggingPriority="251" verticalHuggingPriority="251" ambiguous="YES" misplaced="YES" image="checked" translatesAutoresizingMaskIntoConstraints="NO" id="0EI-fu-M2z">
+                                                <imageView userInteractionEnabled="NO" contentMode="scaleToFill" horizontalHuggingPriority="251" verticalHuggingPriority="251" misplaced="YES" image="checked" translatesAutoresizingMaskIntoConstraints="NO" id="0EI-fu-M2z">
                                                     <frame key="frameInset" minX="551" minY="10" width="36" height="36"/>
                                                     <constraints>
                                                         <constraint firstAttribute="height" constant="36" id="136-xK-FMH"/>
@@ -3725,7 +3725,7 @@
                                         <rect key="frame" x="0.0" y="28" width="600" height="60"/>
                                         <autoresizingMask key="autoresizingMask"/>
                                         <tableViewCellContentView key="contentView" opaque="NO" clipsSubviews="YES" multipleTouchEnabled="YES" contentMode="center" tableViewCell="JF7-8O-e3U" id="bCy-rC-uo3">
-                                            <frame key="frameInset" width="600" height="59"/>
+                                            <frame key="frameInset" width="600" height="59.5"/>
                                             <autoresizingMask key="autoresizingMask"/>
                                             <subviews>
                                                 <imageView userInteractionEnabled="NO" contentMode="scaleToFill" horizontalHuggingPriority="251" verticalHuggingPriority="251" image="link-1" translatesAutoresizingMaskIntoConstraints="NO" id="Ko5-2p-6ca">
@@ -3996,10 +3996,10 @@
                                         <color key="separatorColor" white="0.33333333333333331" alpha="1" colorSpace="calibratedWhite"/>
                                         <prototypes>
                                             <tableViewCell clipsSubviews="YES" contentMode="scaleToFill" selectionStyle="none" indentationWidth="10" reuseIdentifier="FollowerCell" rowHeight="50" id="ngR-Z7-TyD" customClass="FollowerCell" customModule="infobomb" customModuleProvider="target">
-                                                <rect key="frame" x="0.0" y="28" width="600" height="50"/>
+                                                <rect key="frame" x="0.0" y="28" width="1000" height="50"/>
                                                 <autoresizingMask key="autoresizingMask"/>
                                                 <tableViewCellContentView key="contentView" opaque="NO" clipsSubviews="YES" multipleTouchEnabled="YES" contentMode="center" ambiguous="YES" tableViewCell="ngR-Z7-TyD" id="VqG-3N-JBe">
-                                                    <frame key="frameInset" width="600" height="50"/>
+                                                    <frame key="frameInset" width="1000" height="50"/>
                                                     <autoresizingMask key="autoresizingMask"/>
                                                     <subviews>
                                                         <imageView userInteractionEnabled="NO" contentMode="scaleToFill" horizontalHuggingPriority="251" verticalHuggingPriority="251" ambiguous="YES" image="user" translatesAutoresizingMaskIntoConstraints="NO" id="iXa-66-w9y">

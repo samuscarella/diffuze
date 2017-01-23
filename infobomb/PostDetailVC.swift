@@ -143,7 +143,7 @@ class PostDetailVC: UIViewController, AVAudioPlayerDelegate {
             }
         }
         
-        var miles = post.distance * 0.000621371
+        let miles = Double(post.distance) * 0.000621371
         
         var finalDistance: Double
         

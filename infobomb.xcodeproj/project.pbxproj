@@ -39,7 +39,6 @@
 		9340CA9D1D7E2BC200AE1231 /* GoogleService-Info.plist in Resources */ = {isa = PBXBuildFile; fileRef = 9340CA9C1D7E2BC200AE1231 /* GoogleService-Info.plist */; };
 		9340CA9F1D7E2E4700AE1231 /* UserService.swift in Sources */ = {isa = PBXBuildFile; fileRef = 9340CA9E1D7E2E4700AE1231 /* UserService.swift */; };
 		9341CDBF1DCF85EB006861D9 /* VideoUploadOptionVC.swift in Sources */ = {isa = PBXBuildFile; fileRef = 9341CDBE1DCF85EB006861D9 /* VideoUploadOptionVC.swift */; };
-		9353497A1E2C17A9002B3F00 /* QuoteLabel.swift in Sources */ = {isa = PBXBuildFile; fileRef = 935349791E2C17A9002B3F00 /* QuoteLabel.swift */; };
 		935C20F91D7F36C200C41A47 /* LeftNavVC.swift in Sources */ = {isa = PBXBuildFile; fileRef = 935C20F81D7F36C200C41A47 /* LeftNavVC.swift */; };
 		935C20FE1D7F8AC300C41A47 /* NotoSans-Bold.ttf in Resources */ = {isa = PBXBuildFile; fileRef = 935C20FA1D7F8AC300C41A47 /* NotoSans-Bold.ttf */; };
 		935C20FF1D7F8AC300C41A47 /* NotoSans-BoldItalic.ttf in Resources */ = {isa = PBXBuildFile; fileRef = 935C20FB1D7F8AC300C41A47 /* NotoSans-BoldItalic.ttf */; };
@@ -146,7 +145,6 @@
 		9340CA9C1D7E2BC200AE1231 /* GoogleService-Info.plist */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = text.plist.xml; path = "GoogleService-Info.plist"; sourceTree = "<group>"; };
 		9340CA9E1D7E2E4700AE1231 /* UserService.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = UserService.swift; sourceTree = "<group>"; };
 		9341CDBE1DCF85EB006861D9 /* VideoUploadOptionVC.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = VideoUploadOptionVC.swift; sourceTree = "<group>"; };
-		935349791E2C17A9002B3F00 /* QuoteLabel.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = QuoteLabel.swift; sourceTree = "<group>"; };
 		935C20F81D7F36C200C41A47 /* LeftNavVC.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = LeftNavVC.swift; sourceTree = "<group>"; };
 		935C20FA1D7F8AC300C41A47 /* NotoSans-Bold.ttf */ = {isa = PBXFileReference; lastKnownFileType = file; path = "NotoSans-Bold.ttf"; sourceTree = "<group>"; };
 		935C20FB1D7F8AC300C41A47 /* NotoSans-BoldItalic.ttf */ = {isa = PBXFileReference; lastKnownFileType = file; path = "NotoSans-BoldItalic.ttf"; sourceTree = "<group>"; };
@@ -283,7 +281,6 @@
 				937E5AED1E08D9170085424C /* Enum */,
 				938D027B1DFCA2B80019D5B9 /* Struct */,
 				937131F41DACD905006CC35E /* Extensions */,
-				935349781E2C1788002B3F00 /* Label */,
 				932E92871D7ED829003D9D4A /* MySideMenu */,
 				9340CA8B1D7DB45A00AE1231 /* Services */,
 				9340CA8A1D7DB44F00AE1231 /* Resources */,
@@ -431,15 +428,6 @@
 				9335BF4B1E21D4510047EEE7 /* NotificationService.swift */,
 			);
 			name = Services;
-			sourceTree = "<group>";
-		};
-		935349781E2C1788002B3F00 /* Label */ = {
-			isa = PBXGroup;
-			children = (
-				935349791E2C17A9002B3F00 /* QuoteLabel.swift */,
-			);
-			name = Label;
-			path = ..;
 			sourceTree = "<group>";
 		};
 		937131F41DACD905006CC35E /* Extensions */ = {
@@ -692,7 +680,6 @@
 				93C893041D81811E008B792D /* CategoryService.swift in Sources */,
 				938A20DD1DF83FAA00BF0A6C /* SignUpThreeVC.swift in Sources */,
 				937E3AEB1D85F64B00BB7C01 /* CategoryVC.swift in Sources */,
-				9353497A1E2C17A9002B3F00 /* QuoteLabel.swift in Sources */,
 				93BD5E301DF73B6D0022483A /* LoginVC.swift in Sources */,
 				93A21BB41E0F3A8C0092C340 /* SignUpFourVC.swift in Sources */,
 				93770C401DAA718C00A2A134 /* AudioPostVC.swift in Sources */,

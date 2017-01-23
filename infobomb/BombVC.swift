@@ -129,20 +129,6 @@ class BombVC: UIViewController {
             
                     self.getAllSubscribedUsersFromRadius() { uniqueSubscribers, distanceTraveled in
                         
-                        print("Subscribers Count: \(self.subscribedUsers.count)")
-                        print("All Subscribers: \(self.subscribedUsers)")
-                        print(distanceTraveled)
-                        
-                        self.distanceTraveled = distanceTraveled
-                        self.createPost()
-                    }
-                } else if self.uncheckedUsersInRadius.count >= 100 {
-                    
-                    self.getAllSubscribedUsersFromRadius() { uniqueSubscribers, distanceTraveled in
-                        
-                        print("Subscribers Count: \(self.subscribedUsers.count)")
-                        print("All Subscribers: \(self.subscribedUsers)")
-                        
                         self.distanceTraveled = distanceTraveled
                         self.createPost()
                     }
@@ -261,8 +247,10 @@ class BombVC: UIViewController {
             "distance": self.distanceTraveled as AnyObject,
             "newReceivers": self.subscribedUsers.count as AnyObject,
             "receivers": self.subscribedUsers as AnyObject,
+            "init": true as AnyObject,
+            "last_interaction": FIRServerValue.timestamp() as AnyObject,
             "created_at": FIRServerValue.timestamp() as AnyObject,
-            "last_detonation": FIRServerValue.timestamp() as AnyObject
+            "detonated_at": FIRServerValue.timestamp() as AnyObject
         ]
         
         self.activityLbl.text = "Sending Post..."

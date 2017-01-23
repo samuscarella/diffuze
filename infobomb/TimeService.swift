@@ -12,7 +12,11 @@ struct TimeService {
         
     func getTimeStampFromMilliSeconds(millis: Double) -> String {
         
-        let seconds = Int((millis / 1000).rounded())
+        let date = NSDate()
+        let millisecondsDateOfNow = date.timeIntervalSince1970 * 1000
+        let milliseconds = millisecondsDateOfNow - Double(millis)
+        
+        let seconds = Int((milliseconds / 1000).rounded())
         if seconds < 60 {
             return "A second ago"
         }
@@ -43,4 +47,13 @@ struct TimeService {
         return ""
     }
     
+    func getSecondsBetweenNowAndPast(millis: Double) -> Int {
+        
+        let date = NSDate()
+        let millisecondsDateOfNow = date.timeIntervalSince1970 * 1000
+        let milliseconds = millisecondsDateOfNow - Double(millis)
+        let seconds = Int((milliseconds / 1000).rounded())
+        
+        return seconds
+    }
 }

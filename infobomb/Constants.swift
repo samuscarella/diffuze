@@ -100,6 +100,7 @@ let USER_NOT_FOUND = 17011
 let PASSWORD_NOT_FOUND = 17009
 let MAX_DISTANCE: Double = 6318
 let TARGET_SUBS: Int = 100
+let SECONDS_IN_DAY = 86400
 
 //Colors
 let FILTER_BLUE: UIColor = UIColor(red: 32.0 / 255.0, green: 129.0 / 255.0, blue: 195.0 / 255.0, alpha: 1.0)
