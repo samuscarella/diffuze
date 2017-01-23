@@ -71,6 +71,7 @@ class PostCell: UITableViewCell {
     let currentUserID = UserDefaults.standard.object(forKey: KEY_UID) as! String
     let currentUserUsername = UserDefaults.standard.object(forKey: KEY_USERNAME) as! String
     let geofireRef = URL_BASE.child("user-locations")
+    let timeService = TimeService()
 
     //Variables
     var post: Post!
@@ -103,6 +104,8 @@ class PostCell: UITableViewCell {
     var postType: String!
     var filterType: String?
     var postObjRef: [String:Bool]!
+    var currentInteractions: Int!
+    var participationRate: Double!
     
     required init(coder aDecoder: NSCoder) {
         super.init(coder: aDecoder)!
@@ -262,12 +265,7 @@ class PostCell: UITableViewCell {
         }
         self.postScoreLbl.text = "\(abs(score))"
         
-        let date = NSDate()
-        let millisecondsDateOfPost = post.timestamp
-        let millisecondsDateOfNow = date.timeIntervalSince1970 * 1000
-        let millis = millisecondsDateOfNow - Double(millisecondsDateOfPost)
-        let timeService = TimeService()
-        self.timestamp.text = timeService.getTimeStampFromMilliSeconds(millis: millis)
+        self.timestamp.text = timeService.getTimeStampFromMilliSeconds(millis: post.timestamp)
         
         let geoFire = GeoFire(firebaseRef: geofireRef)!
         
@@ -817,6 +815,7 @@ class PostCell: UITableViewCell {
                 post["user-dislikes"] = dislikesDict as AnyObject?
                 post["rating"] = rating as AnyObject?
                 post["score"] = score as AnyObject?
+                post["last_interaction"] = FIRServerValue.timestamp() as AnyObject?
                 
                 currentData.value = post
                 
@@ -859,8 +858,8 @@ class PostCell: UITableViewCell {
                 var likesDict: Dictionary<String,Bool>
                 var dislikesDict: Dictionary<String,Bool>
                 
-                likesDict = post["user-likes"] as? [String : Bool] ?? [:]
-                dislikesDict = post["user-dislikes"] as? [String : Bool] ?? [:]
+                likesDict = post["user-likes"] as? [String:Bool] ?? [:]
+                dislikesDict = post["user-dislikes"] as? [String:Bool] ?? [:]
                 
                 var likeCount = post["likes"] as? Int ?? 0
                 var dislikeCount = post["dislikes"] as? Int ?? 0
@@ -887,6 +886,7 @@ class PostCell: UITableViewCell {
                 post["user-dislikes"] = dislikesDict as AnyObject?
                 post["rating"] = rating as AnyObject?
                 post["score"] = score as AnyObject?
+                post["last_interaction"] = FIRServerValue.timestamp() as AnyObject?
                 
                 currentData.value = post
                 
@@ -904,6 +904,7 @@ class PostCell: UITableViewCell {
                 let post = Post(postKey: key, dictionary: postDict)
                 let score = post.likes - post.dislikes
                 
+                self.postInteractionCheck(post: postDict)
                 self.activityDelegate?.updatePostInArray(post: post)
 
                 if score == 0 {
@@ -920,23 +921,64 @@ class PostCell: UITableViewCell {
     
     func postInteractionCheck(post: Dictionary<String,AnyObject>) {
         
-        let likes = post["likes"] as! Int
-        let dislikes = post["dislikes"] as! Int
-        let interactions = likes + dislikes
-        let totalReceivers = post["receivers"] as! [Int:String]
-        let newReceivers = post["newReceivers"] as! Int
-        let recentInteractions = post["recentInteractions"] as! Int
-        let currentInteractions = interactions - recentInteractions
-        let rate = currentInteractions / newReceivers
-        let url = "http://localhost:9000/postInteraction"
-
-        if totalReceivers.count < 100 {
+        if self.post.active {
             
-            Alamofire.request(url, method: .post, parameters: post, encoding: JSONEncoding.default).responseJSON { response in
-                
-                print(response.result.value)
+            let initial = self.post.initial
+            let likes = self.post.likes
+            let dislikes = self.post.dislikes
+            let interactions = likes + dislikes
+            let totalReceivers = self.post.receivers
+            let newReceivers = self.post.newReceivers
+            let rating = self.post.rating
+            let recentInteractions = self.post.recentInteractions
+//            let timeOfLastDetonation = timeService.getSecondsBetweenNowAndPast(millis: self.post.detonated_at)
+            let timeOfLastInteraction = timeService.getSecondsBetweenNowAndPast(millis: self.post.lastInteraction)
+            
+            if !initial {
+                currentInteractions = interactions - recentInteractions
+            } else {
+                currentInteractions = interactions
             }
-        } else if totalReceivers.count > 100 && rate
+            
+            participationRate = Double(currentInteractions) / Double(newReceivers)
+            
+            if interactions > 100 && rating < 0.5 && participationRate > 0.5 {
+                
+                print("Post is Dead. :(")
+                
+            } else if interactions > 100 && rating > 0.5 && participationRate > 0.5 {
+                
+                explode(post: post)
+                
+            } else if interactions > 100 && participationRate < 0.5 && timeOfLastInteraction > SECONDS_IN_DAY {
+                
+                explode(post: post)
+                
+            } else if interactions < 100 && timeOfLastInteraction > SECONDS_IN_DAY {
+                
+                explode(post: post)
+                
+            } else if interactions < 100 && rating > 0.5 && participationRate > 0.5 {
+                
+                explode(post: post)
+                
+            } else if totalReceivers.count < 100 {
+                
+                explode(post: post)
+
+            } else {
+                print("No Updates At This Time :|")
+            }
+        }
+    }
+    
+    func explode(post: Dictionary<String,AnyObject>) {
+        
+        let url = "http://localhost:9000/explode"
+        Alamofire.request(url, method: .post, parameters: post, encoding: JSONEncoding.default).responseJSON { response in
+            
+            print(response.result.value)
+        }
     }
     
     override func gestureRecognizerShouldBegin(_ gestureRecognizer: UIGestureRecognizer) -> Bool {

@@ -38,6 +38,7 @@ class Post {
     fileprivate var _url: String?
     fileprivate var _active: Bool!
     fileprivate var _timestamp: Double!
+    fileprivate var _detonated_at: Double!
     fileprivate var _extension: String?
     fileprivate var _download: String?
     fileprivate var _usersInRadius: Int!
@@ -46,6 +47,9 @@ class Post {
     fileprivate var _score: Int!
     fileprivate var _newReceivers: Int!
     fileprivate var _recentInteractions: Int!
+    fileprivate var _receivers: NSMutableArray!
+    fileprivate var _initial: Bool!
+    fileprivate var _lastInteraction: Double!
     
     var message: String? {
         return _message
@@ -71,6 +75,10 @@ class Post {
         return _download
     }
     
+    var initial: Bool {
+        return _initial
+    }
+    
     var audio: String? {
         return _audio
     }
@@ -91,6 +99,10 @@ class Post {
         return _rating
     }
     
+    var lastInteraction: Double {
+        return _lastInteraction
+    }
+    
     var usersInRadius: Int {
         return _usersInRadius
     }
@@ -99,10 +111,14 @@ class Post {
         return _newReceivers
     }
     
+    var receivers: NSMutableArray {
+        return _receivers
+    }
+    
     var recentInteractions: Int {
         return _recentInteractions
     }
-    
+        
     var distance: Int {
         return _distance
     }
@@ -169,6 +185,10 @@ class Post {
         return _timestamp
     }
     
+    var detonated_at: Double {
+        return _detonated_at
+    }
+    
     var title: String? {
         return _title
     }
@@ -228,8 +248,17 @@ class Post {
         if let newReceivers = dictionary["newReceivers"] as? Int {
             self._newReceivers = newReceivers
         }
+        if let receivers = dictionary["receivers"] as? NSMutableArray {
+            self._receivers = receivers
+        }
         if let recentInteractions = dictionary["recentInteractions"] as? Int {
             self._recentInteractions = recentInteractions
+        }
+        if let lastInteraction = dictionary["last_interaction"] as? Double {
+            self._lastInteraction = lastInteraction
+        }
+        if let initial = dictionary["init"] as? Bool {
+            self._initial = initial
         }
         if let distance = dictionary["distance"] as? Int {
             self._distance = distance
@@ -266,6 +295,9 @@ class Post {
         }
         if let timestamp = dictionary["created_at"] as? Double {
             self._timestamp = timestamp
+        }
+        if let detonated_at = dictionary["detonated_at"] as? Double {
+            self._detonated_at = detonated_at
         }
         if let quoteType = dictionary["quoteType"] as? String {
             self._quoteType = quoteType
