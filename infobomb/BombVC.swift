@@ -110,6 +110,7 @@ class BombVC: UIViewController {
     
     func startGeoFireQuery() {
         
+        print("OMG: \(meters)")
         meters += 1.0
         query = geoFire?.query(at: center, withRadius: Double(meters))
 
