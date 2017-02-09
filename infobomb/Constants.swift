@@ -98,7 +98,7 @@ let CATEGORY_IMAGE_ARRAY = ["all","art","business","career","do-it-yourself","ec
 //Status Codes
 let USER_NOT_FOUND = 17011
 let PASSWORD_NOT_FOUND = 17009
-let MAX_DISTANCE: Double = 6318
+let MAX_DISTANCE: Double = 6100
 let TARGET_SUBS: Int = 100
 let SECONDS_IN_DAY = 86400
 
