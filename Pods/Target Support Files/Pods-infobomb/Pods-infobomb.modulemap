@@ -1,6 +1,0 @@
-framework module Pods_infobomb {
-  umbrella header "Pods-infobomb-umbrella.h"
-
-  export *
-  module * { export * }
-}
