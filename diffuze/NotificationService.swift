@@ -41,7 +41,7 @@ class NotificationService: NSObject {
                         }
                     } else {
                         notification = NotificationCustom(notifier: notif.key, dictionary: notificationDict)
-                        if notification.status! {
+                        if notification.status != nil {
                             self.notifications.append(notification)
                         }
                     }

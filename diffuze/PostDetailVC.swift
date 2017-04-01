@@ -112,6 +112,70 @@ class PostDetailVC: UIViewController, AVAudioPlayerDelegate {
         visitSiteBtn.isHidden = true
         hideAudioControls()
         
+        likesDotView.frame = CGRect(x: 0, y: 0, width: 12, height: 12)
+        likesDotView.layer.cornerRadius = likesDotView.frame.size.height / 2
+        dislikesDotView.frame = CGRect(x: 0, y: 0, width: 12, height: 12)
+        dislikesDotView.layer.cornerRadius = dislikesDotView.frame.size.height / 2
+        interactionDotView.frame = CGRect(x: 0, y: 0, width: 12, height: 12)
+        interactionDotView.layer.cornerRadius = interactionDotView.frame.size.height / 2
+        distanceDotView.frame = CGRect(x: 0, y: 0, width: 12, height: 12)
+        distanceDotView.layer.cornerRadius = distanceDotView.frame.size.height / 2
+        
+        categoryImageViewOne.frame = CGRect(x: 0, y: 0, width: 36, height: 36)
+        categoryImageViewTwo.frame = CGRect(x: 0, y: 0, width: 36, height: 36)
+
+        categoryImageViewOne.layer.cornerRadius = categoryImageViewOne.frame.size.height / 2
+        categoryImageViewOne.clipsToBounds = true
+        
+        categoryImageViewTwo.layer.cornerRadius = categoryImageViewTwo.frame.size.height / 2
+        categoryImageViewTwo.clipsToBounds = true
+
+        let customView = UIView()
+        customView.frame = CGRect(x: 0, y: 0, width: 36, height: 36)
+        customView.backgroundColor = UIColor.clear
+        let logo = UIImage(named: "detail.png")
+        let imageView = UIImageView(image: logo)
+        imageView.frame = CGRect(x: 0, y: 0, width: 27, height: 27)
+        imageView.contentMode = UIViewContentMode.scaleAspectFit
+        customView.addSubview(imageView)
+        
+        imageView.center = (imageView.superview?.center)!
+        self.navigationItem.titleView = customView
+
+        UserDefaults.standard.setValue(false, forKey: "_UIConstraintBasedLayoutLogUnsatisfiable")
+        
+        NotificationCenter.default.addObserver(self, selector: #selector(PostDetailVC.updateViews), name: NSNotification.Name(rawValue: "messageHeightUpdated"), object: nil)
+        
+        dot = UIView(frame: CGRect(x: 14, y: 16, width: 12, height: 12))
+        dot.backgroundColor = UIColor.red
+        dot.layer.cornerRadius = dot.frame.size.height / 2
+        dot.isHidden = true
+        dot.isUserInteractionEnabled = false
+        dot.isExclusiveTouch = false
+        dot.isHidden = true
+        
+        let button: UIButton = UIButton(type: UIButtonType.custom)
+        button.setImage(UIImage(named: "notification.png"), for: UIControlState())
+        button.addTarget(self, action: #selector(self.notificationBtnPressed), for: UIControlEvents.touchUpInside)
+        button.frame = CGRect(x: 0, y: 0, width: 27, height: 27)
+        button.addSubview(dot)
+        let rightBarButton = UIBarButtonItem(customView: button)
+        self.navigationItem.rightBarButtonItem = rightBarButton
+        
+        notificationService = NotificationService()
+        notificationService.getNotifications()
+        notificationService.watchRadar()
+        
+        NotificationCenter.default.addObserver(self, selector: #selector(self.updateNotifications), name: NSNotification.Name(rawValue: "newFollowersNotification"), object: nil)
+    }
+    
+    func popoverDismissed() {
+        
+        notificationService.getNotifications()
+    }
+    
+    override func viewWillAppear(_ animated: Bool) {
+        
         URL_BASE.child("posts").child(post.postKey).runTransactionBlock({ (currentData: FIRMutableData) -> FIRTransactionResult in
             
             if var post = currentData.value as? [String : AnyObject], let uid = FIRAuth.auth()?.currentUser?.uid {
@@ -153,7 +217,7 @@ class PostDetailVC: UIViewController, AVAudioPlayerDelegate {
             finalDistance = round(miles)
         }
         let intFinalDistance = Int(finalDistance)
-
+        
         usernameLbl.text = post.username
         followersLbl.text = followers
         likesLbl.text = String(post.likes) + " Likes"
@@ -230,7 +294,7 @@ class PostDetailVC: UIViewController, AVAudioPlayerDelegate {
             
             backgroundImageView.image = UIImage(named: "image-bg")
             playVideoBtn.isHidden = true
-
+            
             if mediaImage != nil {
                 mediaImageView.image = mediaImage
                 mediaImageView.clipsToBounds = true
@@ -258,7 +322,7 @@ class PostDetailVC: UIViewController, AVAudioPlayerDelegate {
             let player = AVPlayer(url: url)
             avPlayerViewController = AVPlayerViewController()
             avPlayerViewController.player = player
-
+            
         } else if post.type == "audio" {
             
             backgroundImageView.image = UIImage(named: "audio-bg-2")
@@ -275,25 +339,25 @@ class PostDetailVC: UIViewController, AVAudioPlayerDelegate {
                 URLSession.shared.dataTask(with: linkUrl as URL, completionHandler: { (data, response, error) -> Void in
                     
                     DispatchQueue.main.async {
-
-                        if let data = data {
                         
+                        if let data = data {
+                            
                             do {
-                               try self.audioPlayer = AVAudioPlayer(data: data)
+                                try self.audioPlayer = AVAudioPlayer(data: data)
                                 
-                                    self.audioPlayer?.prepareToPlay()
-                                    self.updateSliderWithAudio()
-                                    self.audioPlayer?.delegate = self
-                                    let dFormat = "%02d"
-                                    let min: Int = Int((Double((self.audioPlayer?.duration)!) - (self.audioPlayer?.currentTime)!) / 60)
-                                    let sec: Int = Int((Double((self.audioPlayer?.duration)!) - (self.audioPlayer?.currentTime)!).truncatingRemainder(dividingBy: 60.0))
-                                    let string = "\(String(format: dFormat, min)):\(String(format: dFormat, sec))"
-                                    self.audioTimeLbl.text = string
-                                    
-                                } catch let err as NSError {
-                                    print(err.debugDescription)
-                                }
-
+                                self.audioPlayer?.prepareToPlay()
+                                self.updateSliderWithAudio()
+                                self.audioPlayer?.delegate = self
+                                let dFormat = "%02d"
+                                let min: Int = Int((Double((self.audioPlayer?.duration)!) - (self.audioPlayer?.currentTime)!) / 60)
+                                let sec: Int = Int((Double((self.audioPlayer?.duration)!) - (self.audioPlayer?.currentTime)!).truncatingRemainder(dividingBy: 60.0))
+                                let string = "\(String(format: dFormat, min)):\(String(format: dFormat, sec))"
+                                self.audioTimeLbl.text = string
+                                
+                            } catch let err as NSError {
+                                print(err.debugDescription)
+                            }
+                            
                             // there is data. do this
                         } else if error != nil {
                             print(error)
@@ -309,7 +373,7 @@ class PostDetailVC: UIViewController, AVAudioPlayerDelegate {
             backgroundImageView.image = UIImage(named: "quote-bg")
             playVideoBtn.isHidden = true
             if post.quoteType == "image" {
-             
+                
                 if mediaImage != nil {
                     mediaImageView.image = mediaImage
                     mediaImageView.clipsToBounds = true
@@ -346,67 +410,6 @@ class PostDetailVC: UIViewController, AVAudioPlayerDelegate {
             self.categoryImageViewTwo.image = UIImage(named: categoryImages[0])
             self.categoryImageViewOne.image = UIImage(named: categoryImages[1])
         }
-        
-        likesDotView.frame = CGRect(x: 0, y: 0, width: 12, height: 12)
-        likesDotView.layer.cornerRadius = likesDotView.frame.size.height / 2
-        dislikesDotView.frame = CGRect(x: 0, y: 0, width: 12, height: 12)
-        dislikesDotView.layer.cornerRadius = dislikesDotView.frame.size.height / 2
-        interactionDotView.frame = CGRect(x: 0, y: 0, width: 12, height: 12)
-        interactionDotView.layer.cornerRadius = interactionDotView.frame.size.height / 2
-        distanceDotView.frame = CGRect(x: 0, y: 0, width: 12, height: 12)
-        distanceDotView.layer.cornerRadius = distanceDotView.frame.size.height / 2
-        
-        categoryImageViewOne.frame = CGRect(x: 0, y: 0, width: 36, height: 36)
-        categoryImageViewTwo.frame = CGRect(x: 0, y: 0, width: 36, height: 36)
-
-        categoryImageViewOne.layer.cornerRadius = categoryImageViewOne.frame.size.height / 2
-        categoryImageViewOne.clipsToBounds = true
-        
-        categoryImageViewTwo.layer.cornerRadius = categoryImageViewTwo.frame.size.height / 2
-        categoryImageViewTwo.clipsToBounds = true
-
-        let customView = UIView()
-        customView.frame = CGRect(x: 0, y: 0, width: 36, height: 36)
-        customView.backgroundColor = UIColor.clear
-        let logo = UIImage(named: "detail.png")
-        let imageView = UIImageView(image: logo)
-        imageView.frame = CGRect(x: 0, y: 0, width: 27, height: 27)
-        imageView.contentMode = UIViewContentMode.scaleAspectFit
-        customView.addSubview(imageView)
-        
-        imageView.center = (imageView.superview?.center)!
-        self.navigationItem.titleView = customView
-
-        UserDefaults.standard.setValue(false, forKey: "_UIConstraintBasedLayoutLogUnsatisfiable")
-        
-        NotificationCenter.default.addObserver(self, selector: #selector(PostDetailVC.updateViews), name: NSNotification.Name(rawValue: "messageHeightUpdated"), object: nil)
-        
-        dot = UIView(frame: CGRect(x: 14, y: 16, width: 12, height: 12))
-        dot.backgroundColor = UIColor.red
-        dot.layer.cornerRadius = dot.frame.size.height / 2
-        dot.isHidden = true
-        dot.isUserInteractionEnabled = false
-        dot.isExclusiveTouch = false
-        dot.isHidden = true
-        
-        let button: UIButton = UIButton(type: UIButtonType.custom)
-        button.setImage(UIImage(named: "notification.png"), for: UIControlState())
-        button.addTarget(self, action: #selector(self.notificationBtnPressed), for: UIControlEvents.touchUpInside)
-        button.frame = CGRect(x: 0, y: 0, width: 27, height: 27)
-        button.addSubview(dot)
-        let rightBarButton = UIBarButtonItem(customView: button)
-        self.navigationItem.rightBarButtonItem = rightBarButton
-        
-        notificationService = NotificationService()
-        notificationService.getNotifications()
-        notificationService.watchRadar()
-        
-        NotificationCenter.default.addObserver(self, selector: #selector(self.updateNotifications), name: NSNotification.Name(rawValue: "newFollowersNotification"), object: nil)
-    }
-    
-    func popoverDismissed() {
-        
-        notificationService.getNotifications()
     }
     
     func updateNotifications(notification: NSNotification) {

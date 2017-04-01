@@ -116,7 +116,7 @@ class ActivityVC: UIViewController, CLLocationManagerDelegate, UITableViewDelega
 
         let button: UIButton = UIButton(type: UIButtonType.custom)
         button.setImage(UIImage(named: "notification.png"), for: UIControlState())
-        button.addTarget(self, action: #selector(ActivityVC.notificationBtnPressed), for: UIControlEvents.touchUpInside)
+        button.addTarget(self, action: #selector(self.notificationBtnPressed), for: UIControlEvents.touchUpInside)
         button.frame = CGRect(x: 0, y: 0, width: 27, height: 27)
         button.addSubview(dot)
         let rightBarButton = UIBarButtonItem(customView: button)
@@ -153,8 +153,9 @@ class ActivityVC: UIViewController, CLLocationManagerDelegate, UITableViewDelega
         self.pulsator.radius = 300.0
         self.pulsator.backgroundColor = UIColor(red: 255.0, green: 0, blue: 0, alpha: 1).cgColor
         self.pulsator.animationDuration = 4
-        self.pulsator.numPulse = 6
-        self.pulsator.pulseInterval = 2
+        self.pulsator.numPulse = 1
+        self.pulsator.pulseInterval = 1
+        
         self.pulseImg.layer.superlayer?.insertSublayer(self.pulsator, below: self.pulseImg.layer)
         self.pulsator.start()
         
@@ -205,8 +206,6 @@ class ActivityVC: UIViewController, CLLocationManagerDelegate, UITableViewDelega
             }
         })
         
-        getRadarPosts()
-        
         URL_BASE.child("users").child(currentUserID).child("following").observe(FIRDataEventType.value, with: { (snapshot) in
             
             let followingUsers = snapshot.children.allObjects as? [FIRDataSnapshot] ?? []
@@ -233,7 +232,6 @@ class ActivityVC: UIViewController, CLLocationManagerDelegate, UITableViewDelega
             }
     
         })
-        
         if revealViewController() != nil {
             
             menuButton.addTarget(revealViewController(), action: #selector(SWRevealViewController.revealToggle(_:)), for: UIControlEvents.touchUpInside)
@@ -261,7 +259,6 @@ class ActivityVC: UIViewController, CLLocationManagerDelegate, UITableViewDelega
         if !newNotifications {
             dot.isHidden = true
         }
-        print("Updated Notifications From Followers: \(self.notifications)")
     }
     
     func notificationBtnPressed() {
@@ -293,8 +290,9 @@ class ActivityVC: UIViewController, CLLocationManagerDelegate, UITableViewDelega
         }
     }
     
-    override func viewDidAppear(_ animated: Bool) {
-    
+    override func viewWillAppear(_ animated: Bool) {
+        getRadarPosts()
+        shake()
     }
     
     override func viewDidLayoutSubviews() {

@@ -82,8 +82,6 @@ class NewPostVC: UIViewController, CLLocationManagerDelegate {
         imageView.center = (imageView.superview?.center)!
         self.navigationItem.titleView = customView
         
-        premiumBtn.layer.cornerRadius = 2
-
         geoFire = GeoFire(firebaseRef: geofireRef)
         
         notificationService = NotificationService()
