@@ -14,7 +14,7 @@
             buildForArchiving = "YES">
             <BuildableReference
                BuildableIdentifier = 'primary'
-               BlueprintIdentifier = '31418D425B97E292FFAFC566D79FC144'
+               BlueprintIdentifier = 'DDBCFDE490CDFDABF6F16A26F346932D'
                BlueprintName = 'FacebookCore'
                ReferencedContainer = 'container:Pods.xcodeproj'
                BuildableName = 'FacebookCore.framework'>

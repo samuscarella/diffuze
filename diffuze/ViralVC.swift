@@ -31,7 +31,6 @@ class ViralVC: UIViewController, UITableViewDelegate, UITableViewDataSource, Act
     let postTypeDataSource = ["All","Text","Link","Image","Video","Audio","Quote"]
     let iD = UserService.ds.currentUserID
     let geofireRef = UserService.ds.REF_USER_LOCATIONS
-    
     var categories = [Category]()
     var locationService: LocationService!
     var currentLocation: [String:AnyObject] = [:]
@@ -69,6 +68,7 @@ class ViralVC: UIViewController, UITableViewDelegate, UITableViewDataSource, Act
         self.navigationController?.navigationBar.setBackgroundImage(UIImage(), for: .default)
         self.navigationController?.navigationBar.shadowImage = UIImage()
         self.navigationController?.navigationBar.isTranslucent = true
+        UserDefaults.standard.setValue(false, forKey: "_UIConstraintBasedLayoutLogUnsatisfiable")
         
         ModalTransitionMediator.instance.setListener(listener: self)
         
@@ -502,7 +502,7 @@ class ViralVC: UIViewController, UITableViewDelegate, UITableViewDataSource, Act
                     self.filterPostFeedType()
                     self.filterPostFeedCategories()
                     self.tableView.isHidden = false
-                    self.posts = self.posts.sorted(by: { $0.timestamp > $1.timestamp })
+                    self.posts = self.posts.sorted(by: { $0.score > $1.score })
                 } else {
                     self.noPostsLbl.text = "You have not liked any posts"
                     self.noPostsImageView.image = UIImage(named: "plus-white")

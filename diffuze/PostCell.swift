@@ -73,7 +73,6 @@ class PostCell: UITableViewCell {
     let geofireRef = URL_BASE.child("user-locations")
     let timeService = TimeService()
 
-    //Variables
     var post: Post!
     var request: Request?
     var followingUsers: FIRDatabaseReference!
@@ -531,6 +530,7 @@ class PostCell: UITableViewCell {
             self.message.textColor = UIColor.black
             self.message.text = trimmedMessage
             self.message.font = UIFont(name: "Ubuntu-Bold", size: 14)
+//            poss change to heightForView instead
             let height = heightToFit(label: self.message)
             self.messageHeight.constant = height
             self.message.textAlignment = .center
@@ -622,9 +622,9 @@ class PostCell: UITableViewCell {
         
         let maxHeight : CGFloat = 10000
         let labelSize = CGSize(width: self.frame.size.width, height: maxHeight)
-        let rect = label.attributedText?.boundingRect(with: labelSize, options: .usesLineFragmentOrigin, context: nil)
-        
         label.lineBreakMode = NSLineBreakMode.byWordWrapping
+        
+        let rect = label.attributedText?.boundingRect(with: labelSize, options: .usesLineFragmentOrigin, context: nil)
         
         return rect!.size.height
     }
@@ -672,7 +672,6 @@ class PostCell: UITableViewCell {
     
     
     func showUnfollowUserPostView() {
-        //observe user object and save suppressed posts in key and have tableview update and refresh each time a post is suppressed. By adding a key to the postDict that will notify post cell to change view to suppressed view
         
         for view in postCellView.subviews {
             view.isHidden = true
@@ -797,6 +796,7 @@ class PostCell: UITableViewCell {
                     URL_BASE.child("users").child(self.currentUserID).child("likes").updateChildValues(self.postObjRef)
                     likeCount += 1
                     likesDict[uid] = true
+                    print("User did not like post")
                 }
                 
                 if dislikesDict[uid] != nil {
@@ -807,7 +807,9 @@ class PostCell: UITableViewCell {
                 
                 let interactions = likeCount + dislikeCount
                 let rating = Double(likeCount) / Double(interactions)
-                let score = abs(likeCount - dislikeCount)
+                let score = likeCount - dislikeCount
+                
+                print(score)
                 
                 post["likes"] = likeCount as AnyObject?
                 post["user-likes"] = likesDict as AnyObject?
@@ -878,7 +880,9 @@ class PostCell: UITableViewCell {
                 
                 let interactions = likeCount + dislikeCount
                 let rating = Double(likeCount) / Double(interactions)
-                let score = abs(likeCount - dislikeCount)
+                let score = likeCount - dislikeCount
+                
+                print(score)
                 
                 post["likes"] = likeCount as AnyObject?
                 post["dislikes"] = dislikeCount as AnyObject?

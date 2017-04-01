@@ -146,9 +146,7 @@ class SignUpThreeVC: UIViewController {
         
         let alertView = SCLAlertView()
 
-        if passwordField.text != "" && confirmPasswordField.text != "" && passwordField.text == confirmPasswordField.text {
-            return true
-        } else if (passwordField.text?.characters.count)! == 0 {
+        if (passwordField.text?.characters.count)! == 0 {
             
             alertView.showError("Validation Error", subTitle: "\nPassword cannot be blank.", closeButtonTitle: "Ok", duration: 0.0, colorStyle: 0xff0000, colorTextButton: 0xffffff, circleIconImage: UIImage(named: "error-white"), animationStyle: .topToBottom)
             alertView.view.frame.origin.y -= 90

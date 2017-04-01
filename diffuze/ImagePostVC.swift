@@ -444,7 +444,6 @@ class ImagePostVC: UIViewController, UINavigationControllerDelegate, UITextViewD
                 if self.fileExtension != nil {
                     categoryView.fileExtension = self.fileExtension
                 }
-                
             }
         }
         
